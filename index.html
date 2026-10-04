@@ -56,24 +56,19 @@
 
   <!-- Manpower Database Client Cache & Controller -->
   <script src="manpower_cache.js?v=20261003_v4"></script>
-  <script src="replacement_master_cache.js?v=20261003_v4"></script>
-  <script src="inter_section_transfers_cache.js?v=20261003_v4"></script>
-  <script src="hrm_manpower.js?v=20261003_v4" defer></script>
-  <script src="hrm_increment.js?v=20261003_v4" defer></script>
-  <script src="hrm_transfer.js?v=20261003_v4" defer></script>
+  <script src="replacement_master_cache.js?v=20261004_v5"></script>
+  <script src="hrm_manpower.js?v=20261004_v5" defer></script>
   <!-- Styled Excel & jsPDF AutoTable Engines (Full Cell Borders) -->
   <script src="xlsx.bundle.js"></script>
   <script src="jspdf.umd.min.js"></script>
   <script src="jspdf.plugin.autotable.min.js"></script>
   <!-- Employee Data Entry & Replacement Management Controller -->
-  <script src="hrm_employee_entry.js?v=20261004_v2" defer></script>
+  <script src="hrm_employee_entry.js?v=20261004_v5" defer></script>
   <!-- Manpower Summary Matrix Controller -->
   <script src="hrm_manpower_summary.js" defer></script>
-  <!-- Section Wise Monthly Salary 8H & OT Controller -->
-  <script src="hrm_section_salary.js?v=20261004_v1"></script>
   <script src="mep_edit_control.js"></script>
   <!-- Firebase Realtime Cloud Synchronization Engine (v12.19.0) -->
-  <script type="module" src="hrm_firebase_sync.js?v=20261004_v1"></script>
+  <script type="module" src="hrm_firebase_sync.js?v=20261004_v5"></script>
 
 
   <!-- Immediate Authentication & Theme Guard -->
@@ -220,21 +215,6 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     }
 
-    /* Sticky header and frozen footer for Yearly Increment table */
-    #yearly-increment-table-card {
-      max-height: 68vh;
-      overflow: auto;
-    }
-    #yearly-increment-table-card thead th {
-      position: sticky;
-      top: 0;
-      z-index: 25;
-    }
-    #yearly-increment-table-card tfoot td {
-      position: sticky;
-      bottom: 0;
-      z-index: 25;
-    }
   
 
 /* ========================================================================= */
@@ -665,25 +645,6 @@ a:hover .ph-arrow-up-right,
             </button>
           </div>
 
-          <!-- 0.1 SECTION WISE MONTHLY SALARY 8H (সেকশনভিত্তিক মাসিক বেতন ও ওটি) -->
-          <div class="space-y-1" id="menu-group-section-wise-salary">
-            <button 
-              type="button" 
-              onclick="switchHRMTab('section-wise-salary')" 
-              id="nav-btn-section-wise-salary" 
-              class="sidebar-nav-btn w-full p-2.5 rounded-xl bg-slate-100/80 dark:bg-dark-800/80 hover:bg-emerald-600 hover:text-white text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-between shadow-2xs transition-all cursor-pointer group" 
-              title="Section Wise Monthly Salary 8H (8H Base & 3H Overtime Analytics)"
-            >
-              <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 group-hover:bg-white/20 group-hover:text-white flex items-center justify-center text-sm shrink-0 transition-colors">
-                  <i class="ph-bold ph-wallet"></i>
-                </div>
-                <span class="truncate font-black tracking-tight sidebar-text">Section Wise Monthly Salary 8H</span>
-              </div>
-              <span id="sidebar-salary-badge" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 group-hover:bg-white/20 group-hover:text-white sidebar-badge shrink-0">8H+OT</span>
-            </button>
-          </div>
-
           <!-- 1. MANPOWER LIST (কর্মীবাহিনী তালিকা) -->
           <div class="space-y-1" id="menu-group-manpower">
             <button 
@@ -772,36 +733,6 @@ a:hover .ph-arrow-up-right,
                   <span>Hold Staff</span>
                 </span>
                 <span id="sidebar-sub-hold-count" class="font-mono text-[10px] text-amber-600 dark:text-amber-400 font-extrabold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">7</span>
-              </button>
-
-              <!-- SL 5. Yearly Increment -->
-              <button 
-                type="button" 
-                onclick="switchHRMTab('yearly-increment')" 
-                id="sidebar-sub-yearly-increment"
-                class="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-between transition-all cursor-pointer border border-transparent hover:border-emerald-500/20 group"
-                title="Year-Wise Employee Increments (2021–2026)"
-              >
-                <span class="flex items-center gap-2">
-                  <i class="ph-bold ph-chart-line-up text-emerald-500 text-xs group-hover:scale-110 transition-transform"></i>
-                  <span>Yearly Increment</span>
-                </span>
-                <span id="sidebar-sub-increment-badge" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">2021-26</span>
-              </button>
-
-              <!-- SL 6. Inter Section Transfer -->
-              <button 
-                type="button" 
-                onclick="switchHRMTab('inter-section-transfer')" 
-                id="sidebar-sub-inter-section-transfer"
-                class="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-between transition-all cursor-pointer border border-transparent hover:border-indigo-500/20 group"
-                title="Inter Section Transfer (এক সেকশন থেকে অন্য সেকশনে কর্মী বদলি)"
-              >
-                <span class="flex items-center gap-2">
-                  <i class="ph-bold ph-arrows-left-right text-indigo-500 text-xs group-hover:scale-110 transition-transform"></i>
-                  <span>Inter Section Transfer</span>
-                </span>
-                <span id="sidebar-sub-transfer-count" class="font-mono text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">0</span>
               </button>
             </div>
           </div>
@@ -1146,170 +1077,6 @@ a:hover .ph-arrow-up-right,
           </thead>
           <tbody id="manpower-summary-table-body" class="font-mono text-xs bg-white dark:bg-dark-850">
             <!-- Dynamically populated by window.HRMManpowerSummary.render() -->
-          </tbody>
-        </table>
-      </div>
-
-    </section>
-
-    <!-- ================= SECTION WISE MONTHLY SALARY 8H (সেকশনভিত্তিক মাসিক বেতন ও ওটি) ================= -->
-    <section id="section-wise-salary-section" class="liquid-glass-card p-4 sm:p-6 space-y-6 hidden">
-      
-      <!-- Top Title & Action Cluster -->
-      <div class="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-emerald-100 dark:border-slate-800">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-base font-black shadow-xs">
-              <i class="ph-bold ph-wallet"></i>
-            </div>
-            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-              <span>Section Wise Monthly Salary 8H & OT</span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">8H Base + 3H OT</span>
-            </h3>
-          </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            সেকশনভিত্তিক ৮ ঘণ্টার মূল বেতন, ৩ ঘণ্টার দৈনিক ওভারটাইম (৭৮ ঘণ্টা) এবং সর্বমোট মাসিক সম্ভাব্য প্রদেয় পে-রোল হিসাব।
-          </p>
-        </div>
-
-        <!-- Quick Action & Export Buttons -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <button 
-            type="button" 
-            onclick="window.HRMSectionSalary && window.HRMSectionSalary.render()" 
-            class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Recalculate & Refresh"
-          >
-            <i class="ph-bold ph-arrows-clockwise text-sm"></i>
-            <span>Refresh</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="window.HRMSectionSalary && window.HRMSectionSalary.exportExcel()" 
-            class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Download Section Wise Salary in Formatted Excel (.xlsx)"
-          >
-            <i class="ph-bold ph-file-xls text-sm"></i>
-            <span>Export Excel</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="window.HRMSectionSalary && window.HRMSectionSalary.exportCSV()" 
-            class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Download CSV"
-          >
-            <i class="ph-bold ph-file-csv text-sm"></i>
-            <span>Export CSV</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="window.HRMSectionSalary && window.HRMSectionSalary.printSheet()" 
-            class="px-3 py-1.5 rounded-xl bg-white dark:bg-dark-800 hover:bg-slate-50 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Print Section Wise Salary Sheet"
-          >
-            <i class="ph-bold ph-printer text-emerald-600 dark:text-emerald-400 text-sm"></i>
-            <span>Print Sheet</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- OT Calculation Parameters Bar -->
-      <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-850/60 border border-slate-200/90 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-black">
-            <i class="ph-bold ph-sliders"></i>
-          </div>
-          <span class="text-xs font-black text-slate-800 dark:text-slate-200">Calculation Standard:</span>
-          <span class="text-[11px] text-slate-500 dark:text-slate-400">Bangladesh Labor Act 2006 (Section 108: Double of Basic Rate)</span>
-        </div>
-        <div class="flex items-center gap-3.5 flex-wrap">
-          <div class="flex items-center gap-2">
-            <label for="sec-salary-working-days" class="text-xs font-bold text-slate-600 dark:text-slate-400">Working Days:</label>
-            <input 
-              type="number" 
-              id="sec-salary-working-days" 
-              value="26" 
-              min="1" 
-              max="31" 
-              onchange="window.HRMSectionSalary && window.HRMSectionSalary.updateParams()" 
-              class="w-16 px-2 py-1 rounded-lg bg-white dark:bg-dark-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-center text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
-            />
-            <span class="text-xs text-slate-500">Days</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <label for="sec-salary-ot-hours" class="text-xs font-bold text-slate-600 dark:text-slate-400">Daily OT:</label>
-            <input 
-              type="number" 
-              id="sec-salary-ot-hours" 
-              value="3" 
-              min="0" 
-              max="12" 
-              step="0.5" 
-              onchange="window.HRMSectionSalary && window.HRMSectionSalary.updateParams()" 
-              class="w-16 px-2 py-1 rounded-lg bg-white dark:bg-dark-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-center text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
-            />
-            <span class="text-xs text-slate-500">Hours/day</span>
-          </div>
-          <div class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-mono font-black border border-emerald-500/20">
-            Total Monthly OT: <span id="sec-salary-param-total-hrs">78</span> Hours / Person
-          </div>
-        </div>
-      </div>
-
-      <!-- 4 Top KPI Metric Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <div class="p-3.5 rounded-2xl bg-indigo-500/10 dark:bg-indigo-950/40 border border-indigo-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">8 Hour as Salary</span>
-            <i class="ph-bold ph-calendar-blank text-indigo-500 text-base"></i>
-          </div>
-          <div id="salary-kpi-gross-total" class="text-2xl font-black text-slate-900 dark:text-white mt-1 font-mono">৳ 0</div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400">মাসিক ৮ ঘণ্টার মোট মূল বেতন</span>
-        </div>
-        <div class="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-amber-700 dark:text-amber-300">3 Hour OT Total</span>
-            <i class="ph-bold ph-clock-countdown text-amber-500 text-base"></i>
-          </div>
-          <div id="salary-kpi-ot-total" class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 font-mono">৳ 0</div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400">মাসিক ৩ ঘণ্টার মোট ওভারটাইম</span>
-        </div>
-        <div class="p-3.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">Total Salary & OT</span>
-            <i class="ph-bold ph-currency-circle-dollar text-emerald-500 text-base"></i>
-          </div>
-          <div id="salary-kpi-grand-total" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 font-mono">৳ 0</div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400">সর্বমোট প্রদেয় পে-রোল (বেতন + ওটি)</span>
-        </div>
-        <div class="p-3.5 rounded-2xl bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-purple-700 dark:text-purple-300">Active Headcount</span>
-            <i class="ph-bold ph-users-three text-purple-500 text-base"></i>
-          </div>
-          <div id="salary-kpi-staff-total" class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1 font-mono">0 Staff</div>
-          <span id="salary-kpi-subtext" class="text-[10px] text-slate-500 dark:text-slate-400">11 Factory Sections</span>
-        </div>
-      </div>
-
-      <!-- Main Formatted Analytics Table -->
-      <div class="overflow-x-auto rounded-2xl border-2 border-slate-400 dark:border-slate-700 shadow-md custom-scrollbar bg-white dark:bg-dark-900">
-        <table class="w-full text-center border-collapse text-xs select-text min-w-[960px]" id="section-wise-salary-table">
-          <thead>
-            <tr class="bg-[#F8D7DA] dark:bg-pink-950/80 text-slate-950 dark:text-pink-100 font-black text-xs border-b-2 border-slate-500 dark:border-slate-600">
-              <th class="py-2.5 px-2 w-12 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-center">SL No</th>
-              <th class="py-2.5 px-3 min-w-[200px] border border-slate-400 dark:border-slate-600 text-left font-black">Section Name</th>
-              <th class="py-2.5 px-2 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-center font-black">Total Staff</th>
-              <th class="py-2.5 px-3 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-right font-black text-indigo-950 dark:text-indigo-200 bg-indigo-50/60 dark:bg-indigo-950/40">8 Hour as Salary</th>
-              <th class="py-2.5 px-3 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-right font-black text-amber-950 dark:text-amber-200 bg-amber-50/60 dark:bg-amber-950/40">3 Hour OT</th>
-              <th class="py-2.5 px-3 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-right font-black text-emerald-950 dark:text-emerald-200 bg-emerald-100/70 dark:bg-emerald-950/50">Total Salary & OT</th>
-              <th class="py-2.5 px-2.5 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-right font-black text-slate-700 dark:text-slate-300">Avg Cost / Head</th>
-              <th class="py-2.5 px-2 w-20 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-center font-black">% Share</th>
-              <th class="py-2.5 px-2 w-24 border border-slate-400 dark:border-slate-600 whitespace-nowrap text-center font-black">Action</th>
-            </tr>
-          </thead>
-          <tbody id="section-wise-salary-table-body" class="font-mono text-xs bg-white dark:bg-dark-850">
-            <!-- Dynamically populated by window.HRMSectionSalary.render() -->
           </tbody>
         </table>
       </div>
@@ -1977,246 +1744,6 @@ a:hover .ph-arrow-up-right,
           Showing 1–25 of 1,227 employees
         </span>
         <div id="manpower-pagination-controls">
-          <!-- Pagination Buttons -->
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ================= YEARLY INCREMENT COCKPIT (২০২১–২০২৬ বাৎসরিক ইনক্রিমেন্ট) ================= -->
-    <section id="yearly-increment-section" class="liquid-glass-card p-4 sm:p-6 space-y-4 hidden">
-
-      <!-- Top Title & Action Cluster -->
-      <div class="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-emerald-100 dark:border-slate-800">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-base font-black shadow-xs">
-              <i class="ph-bold ph-chart-line-up"></i>
-            </div>
-            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-              <span>Workforce Yearly Increment Intelligence (2021–2026)</span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">Annual Growth Register</span>
-            </h3>
-          </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Multi-year audited employee increment register, annual salary revisions, and division-wide increment disbursement.
-          </p>
-        </div>
-
-        <!-- Action Buttons Cluster (Including Bordered Download Excel) -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <button 
-            type="button" 
-            id="btn-export-increment-excel"
-            onclick="window.HRMIncrement.exportExcel()" 
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 border-emerald-500/80 text-emerald-700 dark:text-emerald-300 bg-emerald-50/80 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:border-emerald-600 shadow-2xs transition-all cursor-pointer"
-            title="Download formatted Excel (.xlsx) with 100% cell borders"
-          >
-            <i class="ph-bold ph-file-xls text-emerald-600 dark:text-emerald-400 text-sm"></i>
-            <span>Download Excel</span>
-            <span id="inc-excel-count-badge" class="px-1.5 py-0.2 rounded-md bg-emerald-600 text-white text-[10px] font-mono font-bold">254</span>
-          </button>
-
-          <button 
-            type="button" 
-            id="btn-export-increment-pdf"
-            onclick="window.HRMIncrement.exportPDF()" 
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 border-purple-500/80 text-purple-700 dark:text-purple-300 bg-purple-50/80 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 hover:border-purple-600 shadow-2xs transition-all cursor-pointer"
-            title="Download formatted PDF (.pdf) with 100% cell borders"
-          >
-            <i class="ph-bold ph-file-pdf text-purple-600 dark:text-purple-400 text-sm"></i>
-            <span>Download PDF</span>
-          </button>
-
-          <button 
-            type="button" 
-            onclick="window.HRMIncrement.exportCSV()" 
-            class="px-3 py-1.5 rounded-xl bg-white dark:bg-dark-800 hover:bg-slate-50 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Export CSV"
-          >
-            <i class="ph-bold ph-file-csv text-emerald-600 dark:text-emerald-400 text-sm"></i>
-            <span>Export CSV</span>
-          </button>
-
-          <button 
-            type="button" 
-            onclick="window.print()" 
-            class="px-3 py-1.5 rounded-xl bg-white dark:bg-dark-800 hover:bg-slate-50 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Print Increment Register"
-          >
-            <i class="ph-bold ph-printer text-purple-600 dark:text-purple-400 text-sm"></i>
-            <span>Print</span>
-          </button>
-
-          <button 
-            type="button" 
-            onclick="window.HRMIncrement.resetFilters()" 
-            class="w-8 h-8 rounded-xl bg-white dark:bg-dark-800 hover:bg-slate-50 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
-            title="Reset Filters"
-          >
-            <i class="ph-bold ph-arrows-clockwise text-sm"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- 4 Top KPI Summary Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <!-- Total Disbursed -->
-        <div class="p-3.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono font-extrabold text-emerald-700 dark:text-emerald-300 uppercase">Total Increment Disbursed</span>
-            <i class="ph-bold ph-money text-emerald-600 dark:text-emerald-400"></i>
-          </div>
-          <p id="inc-kpi-total-disbursed" class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-tabular">৳ 6,06,975</p>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Cumulative Across 2021–2026</span>
-        </div>
-
-        <!-- Total Beneficiaries -->
-        <div class="p-3.5 rounded-2xl bg-purple-500/10 dark:bg-purple-500/15 border border-purple-500/30 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono font-extrabold text-purple-700 dark:text-purple-300 uppercase">Beneficiary Workforce</span>
-            <i class="ph-bold ph-users-three text-purple-600 dark:text-purple-400"></i>
-          </div>
-          <p id="inc-kpi-total-beneficiaries" class="text-xl font-black text-purple-600 dark:text-purple-400 font-tabular">254 Personnel</p>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Staff with At Least 1 Increment</span>
-        </div>
-
-        <!-- 2026 Increment Pool -->
-        <div class="p-3.5 rounded-2xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/30 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono font-extrabold text-blue-700 dark:text-blue-300 uppercase">2026 Increment Pool</span>
-            <i class="ph-bold ph-trend-up text-blue-600 dark:text-blue-400"></i>
-          </div>
-          <p id="inc-kpi-2026-pool" class="text-xl font-black text-blue-600 dark:text-blue-400 font-tabular">৳ 1,35,966</p>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Current Operating Fiscal Year</span>
-        </div>
-
-        <!-- 2025 Increment Pool -->
-        <div class="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono font-extrabold text-amber-700 dark:text-amber-300 uppercase">2025 Increment Pool</span>
-            <i class="ph-bold ph-calendar text-amber-600 dark:text-amber-400"></i>
-          </div>
-          <p id="inc-kpi-2025-pool" class="text-xl font-black text-amber-600 dark:text-amber-400 font-tabular">৳ 1,44,150</p>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Prior Financial Year Record</span>
-        </div>
-      </div>
-
-      <!-- Year Selection Dropdown Menu & Dynamic Year Breakdown Strip -->
-      <div id="inc-year-tabs-container" class="w-full">
-        <!-- Rendered dynamically by window.HRMIncrement with dropdown menu and year-specific breakdown -->
-      </div>
-
-      <!-- Search & Filters Strip -->
-      <div class="p-3.5 rounded-2xl bg-white/70 dark:bg-dark-800/70 border border-slate-200/80 dark:border-slate-800 space-y-3">
-        <div class="flex flex-col md:flex-row items-stretch md:items-center gap-2.5">
-          <!-- Search Box -->
-          <div class="relative flex-1">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <i class="ph-bold ph-magnifying-glass text-sm"></i>
-            </div>
-            <input 
-              type="text" 
-              id="inc-search-input"
-              oninput="window.HRMIncrement.onSearchInput(this.value)"
-              placeholder="Search by Employee Name, Staff ID, Designation, Section, Phone..."
-              class="w-full pl-9 pr-4 py-1.5 rounded-xl text-xs font-medium bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-2xs"
-            >
-          </div>
-
-          <!-- Section Filter -->
-          <div class="w-full md:w-56">
-            <select 
-              id="inc-filter-section" 
-              onchange="window.HRMIncrement.onSectionChange(this.value)"
-              class="w-full px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer shadow-2xs"
-            >
-              <option value="ALL">All Sections</option>
-            </select>
-          </div>
-
-          <!-- Status Filter -->
-          <div class="w-full md:w-36">
-            <select 
-              id="inc-filter-status" 
-              onchange="window.HRMIncrement.onStatusChange(this.value)"
-              class="w-full px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer shadow-2xs"
-            >
-              <option value="ALL">All Status</option>
-              <option value="Active">Active Only</option>
-              <option value="Hold">Hold Only</option>
-              <option value="Inactive">Inactive Only</option>
-            </select>
-          </div>
-
-          <!-- Beneficiaries Only Toggle -->
-          <label class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 cursor-pointer select-none text-xs font-bold text-slate-700 dark:text-slate-300">
-            <input 
-              type="checkbox" 
-              id="inc-filter-beneficiary-toggle"
-              checked 
-              onchange="window.HRMIncrement.toggleBeneficiariesOnly(this.checked)"
-              class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
-            >
-            <span>Increment Staff Only</span>
-          </label>
-        </div>
-
-        <!-- Row 2: Sort By & Rows per page -->
-        <div class="flex items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-slate-700/50 flex-wrap">
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] font-mono font-extrabold uppercase text-slate-400">Sort By:</span>
-            <select 
-              id="inc-sort-by" 
-              onchange="window.HRMIncrement.onSortChange(this.value)"
-              class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer"
-            >
-              <option value="total_increment">Total Increment (High → Low)</option>
-              <option value="increment_selected">Selected Year Inc (High → Low)</option>
-              <option value="gross_salary">Gross Salary (High → Low)</option>
-              <option value="staff_id">Staff ID (Ascending)</option>
-              <option value="name">Name (A → Z)</option>
-              <option value="doj">Date of Joining (Seniority)</option>
-            </select>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] font-mono font-extrabold uppercase text-slate-400">Rows:</span>
-            <select 
-              id="inc-per-page" 
-              onchange="window.HRMIncrement.setPerPage(this.value)"
-              class="px-2 py-1 rounded-lg text-xs font-bold bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer"
-            >
-              <option value="25">25 per page</option>
-              <option value="50">50 per page</option>
-              <option value="100">100 per page</option>
-              <option value="ALL">All Rows</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Year-Wise Increment Responsive Data Table Card (Sticky Header & Freeze Down Totals Row) -->
-      <div id="yearly-increment-table-card" class="overflow-auto max-h-[68vh] rounded-2xl border border-slate-200/80 dark:border-slate-800/90 shadow-2xs custom-scrollbar relative">
-        <table class="w-full min-w-[1300px] text-left border-collapse select-text">
-          <thead id="inc-table-head" class="sticky top-0 z-25">
-            <!-- Rendered dynamically -->
-          </thead>
-          <tbody id="inc-table-body" class="bg-white/60 dark:bg-dark-800/60 divide-y divide-slate-200/60 dark:divide-slate-800/80 font-sans text-xs">
-            <!-- Populated dynamically by HRMIncrement -->
-          </tbody>
-          <tfoot id="inc-table-foot" class="sticky bottom-0 z-25">
-            <!-- Sticky Summary Total Row -->
-          </tfoot>
-        </table>
-      </div>
-
-      <!-- Pagination Controls Strip -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-        <span id="inc-pagination-info" class="text-xs font-mono text-slate-500 dark:text-slate-400">
-          Showing 1–25 of 254 employees
-        </span>
-        <div id="inc-pagination-controls">
           <!-- Pagination Buttons -->
         </div>
       </div>
@@ -2896,333 +2423,6 @@ a:hover .ph-arrow-up-right,
 
     </section>
 
-    <!-- ================= 6. INTER SECTION TRANSFER (আন্তঃ সেকশন কর্মী বদলি ও পুনর্বণ্টন) ================= -->
-    <section id="inter-section-transfer-section" class="liquid-glass-card p-4 sm:p-6 space-y-6 hidden">
-      <!-- Section Header -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
-        <div>
-          <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-black uppercase tracking-wider">
-            <i class="ph-bold ph-arrows-left-right text-base"></i>
-            <span>Inter Section Personnel Reallocation</span>
-          </div>
-          <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
-            Inter Section Transfer (আন্তঃ সেকশন কর্মী বদলি)
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            কারখানার এক সেকশন থেকে অন্য সেকশনে কর্মীদের তাৎক্ষণিক বদলি, লাইন ব্যালেন্সিং ও অডিট লগ রেজিস্টার।
-          </p>
-        </div>
-
-        <!-- Action Tools & Export -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <button 
-            type="button" 
-            onclick="window.HRMTransfer && window.HRMTransfer.exportExcel()" 
-            class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1.5 transition cursor-pointer"
-          >
-            <i class="ph-bold ph-file-xls text-sm"></i>
-            <span>Export Excel</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="window.HRMTransfer && window.HRMTransfer.exportCSV()" 
-            class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 transition cursor-pointer"
-          >
-            <i class="ph-bold ph-file-csv text-sm"></i>
-            <span>CSV</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="window.HRMTransfer && window.HRMTransfer.printRegister()" 
-            class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 transition cursor-pointer"
-          >
-            <i class="ph-bold ph-printer text-sm"></i>
-            <span>Print</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- KPI Summary Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <div class="p-3.5 rounded-2xl bg-indigo-500/10 dark:bg-indigo-950/40 border border-indigo-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Total Transfers</span>
-            <i class="ph-bold ph-arrows-left-right text-indigo-500 text-base"></i>
-          </div>
-          <div id="transfer-kpi-total" class="text-2xl font-black text-slate-900 dark:text-white mt-1 font-mono">0</div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400">সর্বমোট বদলিকৃত কর্মী</span>
-        </div>
-        <div class="p-3.5 rounded-2xl bg-sky-500/10 dark:bg-sky-950/40 border border-sky-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-sky-700 dark:text-sky-300">Recent (This Month)</span>
-            <i class="ph-bold ph-calendar-check text-sky-500 text-base"></i>
-          </div>
-          <div id="transfer-kpi-month" class="text-2xl font-black text-slate-900 dark:text-white mt-1 font-mono">0</div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400">চলতি মাসের বদলি আদেশ</span>
-        </div>
-        <div class="p-3.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">Active Sections</span>
-            <i class="ph-bold ph-factory text-emerald-500 text-base"></i>
-          </div>
-          <div id="transfer-kpi-sections" class="text-2xl font-black text-slate-900 dark:text-white mt-1 font-mono">11</div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400">উৎপাদন লাইনসমূহ</span>
-        </div>
-        <div class="p-3.5 rounded-2xl bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-purple-700 dark:text-purple-300">Target Line Sync</span>
-            <i class="ph-bold ph-check-circle text-purple-500 text-base"></i>
-          </div>
-          <div class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1 font-mono">100%</div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400">লাইভ ডাটাবেজ সিঙ্ক</span>
-        </div>
-      </div>
-
-      <!-- Main Layout: 2 Columns (Left: Transfer Execution Form, Right: Register Audit Table) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        <!-- Left: Transfer Execution Card (5 cols) -->
-        <div class="lg:col-span-5 bg-white/60 dark:bg-dark-900/60 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm font-black">
-                <i class="ph-bold ph-user-switch"></i>
-              </div>
-              <div>
-                <h3 class="font-black text-sm text-slate-900 dark:text-white">Execute Transfer (বদলি সম্পাদন)</h3>
-                <p class="text-[11px] text-slate-500">কর্মী সিলেক্ট করে নতুন সেকশনে পাঠান</p>
-              </div>
-            </div>
-            <button 
-              type="button" 
-              onclick="window.HRMTransfer && window.HRMTransfer.resetForm()" 
-              class="text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition cursor-pointer"
-            >
-              Reset
-            </button>
-          </div>
-
-          <!-- Step 1: Employee Search Input with Auto-complete -->
-          <div class="space-y-1.5 relative">
-            <label class="block text-xs font-black text-slate-700 dark:text-slate-300 flex items-center justify-between">
-              <span>Step 1: Search Employee (কর্মী খুঁজুন) *</span>
-              <span class="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-bold">Staff ID / Name</span>
-            </label>
-            <div class="relative">
-              <input 
-                type="text" 
-                id="transfer-emp-search" 
-                oninput="window.HRMTransfer && window.HRMTransfer.onSearchInput(this.value)" 
-                onfocus="window.HRMTransfer && window.HRMTransfer.showSuggestions()"
-                placeholder="Type ID (e.g. 18290) or Name..." 
-                autocomplete="off"
-                class="w-full pl-9 pr-9 py-2.5 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-              />
-              <i class="ph-bold ph-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
-              <button 
-                type="button" 
-                id="transfer-search-clear-btn" 
-                onclick="window.HRMTransfer && window.HRMTransfer.clearSearch()" 
-                class="hidden absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <i class="ph-bold ph-x-circle text-base"></i>
-              </button>
-            </div>
-
-            <!-- Auto-suggestions Dropdown Container -->
-            <div 
-              id="transfer-suggestions-box" 
-              class="hidden absolute left-0 right-0 top-full mt-1.5 max-h-60 overflow-y-auto bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl z-30 custom-scrollbar"
-            >
-              <!-- Dynamic suggestion items injected here -->
-            </div>
-          </div>
-
-          <!-- Selected Employee Preview Card -->
-          <div id="transfer-emp-card" class="hidden p-3.5 rounded-xl bg-indigo-500/10 dark:bg-indigo-950/40 border border-indigo-500/30 space-y-2.5 transition-all">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <div id="transfer-preview-avatar" class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-mono font-black flex items-center justify-center text-sm shadow-xs shrink-0">
-                  EMP
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <span id="transfer-preview-id" class="px-1.5 py-0.5 rounded text-[11px] font-mono font-black bg-indigo-600 text-white">#18290</span>
-                    <h4 id="transfer-preview-name" class="font-black text-xs text-slate-900 dark:text-white truncate">Sima Akter</h4>
-                  </div>
-                  <p id="transfer-preview-desig" class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">Helper • Worker</p>
-                </div>
-              </div>
-              <span id="transfer-preview-status" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0">Active</span>
-            </div>
-
-            <div class="pt-2 border-t border-indigo-500/20 grid grid-cols-2 gap-2 text-[11px]">
-              <div>
-                <span class="text-slate-500 text-[10px] block">Current Section:</span>
-                <span id="transfer-preview-current-sec" class="font-extrabold text-indigo-700 dark:text-indigo-300">Fan Sada Shapla</span>
-              </div>
-              <div>
-                <span class="text-slate-500 text-[10px] block">Joining Date:</span>
-                <span id="transfer-preview-doj" class="font-mono font-bold text-slate-700 dark:text-slate-300">21-Jun-2026</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Hidden input fields -->
-          <input type="hidden" id="transfer-hidden-staff-id" value="" />
-          <input type="hidden" id="transfer-hidden-from-sec" value="" />
-
-          <!-- Step 2: Target Destination & Details Form -->
-          <form id="transfer-execution-form" onsubmit="event.preventDefault(); window.HRMTransfer && window.HRMTransfer.submitTransfer();" class="space-y-3.5 pt-2 border-t border-slate-200 dark:border-slate-800">
-            <div class="space-y-1">
-              <label class="block text-xs font-black text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                <span>Step 2: Transfer To Section (গন্তব্য সেকশন) *</span>
-                <span class="text-[10px] text-indigo-600 font-bold">New Section</span>
-              </label>
-              <select 
-                id="transfer-target-section" 
-                required 
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition cursor-pointer"
-              >
-                <option value="">-- Select Target Destination Section --</option>
-                <option value="Fan Assemble Line">Fan Assemble Line</option>
-                <option value="Fan Auto Powder Coating">Fan Auto Powder Coating</option>
-                <option value="Fan Armature Winding">Fan Armature Winding</option>
-                <option value="Fan Lathe">Fan Lathe</option>
-                <option value="Fan Power Press &amp; Stamping">Fan Power Press &amp; Stamping</option>
-                <option value="Fan Dhalai &amp; Die Casting">Fan Dhalai &amp; Die Casting</option>
-                <option value="Fan Blade &amp; Dimmer">Fan Blade &amp; Dimmer</option>
-                <option value="Fan Sada Shapla">Fan Sada Shapla</option>
-                <option value="Fan Rojonigondha">Fan Rojonigondha</option>
-                <option value="Fan Replace">Fan Replace</option>
-                <option value="Fan Admin">Fan Admin</option>
-              </select>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="space-y-1">
-                <label class="block text-xs font-black text-slate-700 dark:text-slate-300">
-                  Effective Date (তারিখ) *
-                </label>
-                <input 
-                  type="date" 
-                  id="transfer-date" 
-                  required
-                  class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-xs font-black text-slate-700 dark:text-slate-300">
-                  Office Memo / Order No.
-                </label>
-                <input 
-                  type="text" 
-                  id="transfer-memo-no" 
-                  placeholder="e.g. TR-2026-05" 
-                  class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div class="space-y-1">
-              <label class="block text-xs font-black text-slate-700 dark:text-slate-300">
-                Transfer Reason (বদলির কারণ) *
-              </label>
-              <select 
-                id="transfer-reason" 
-                required 
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition cursor-pointer"
-              >
-                <option value="Line Balancing / Production Support">Line Balancing / Production Support (উৎপাদন লাইন সাপোর্ট)</option>
-                <option value="Manpower Reallocation">Manpower Reallocation (জনবল পুনর্বণ্টন)</option>
-                <option value="Skill &amp; Machine Efficiency">Skill &amp; Machine Efficiency (দক্ষতা ও মেশিন ব্যবহার)</option>
-                <option value="Personal / Mutual Transfer Request">Personal / Mutual Request (ব্যক্তিগত / আবেদনক্রমে)</option>
-                <option value="Section Replacement">Section Replacement (সেকশন রিপ্লেসমেন্ট)</option>
-                <option value="Administrative Order">Administrative Order (প্রশাসনিক আদেশ)</option>
-                <option value="Temporary Duty">Temporary Duty (অস্থায়ী ডিউটি)</option>
-                <option value="Other">Other Reason (অন্যান্য)</option>
-              </select>
-            </div>
-
-            <div class="space-y-1">
-              <label class="block text-xs font-black text-slate-700 dark:text-slate-300">
-                Remarks / Instructions (মন্তব্য)
-              </label>
-              <input 
-                type="text" 
-                id="transfer-remarks" 
-                placeholder="Optional notes or instructions..." 
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            <div class="pt-2">
-              <button 
-                type="submit" 
-                id="transfer-submit-btn" 
-                class="w-full py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white shadow-md shadow-indigo-500/25 flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
-              >
-                <i class="ph-bold ph-arrows-left-right text-base"></i>
-                <span>Confirm &amp; Execute Transfer (বদলি নিশ্চিত করুন)</span>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Right: Transfer Register Audit Log Table (7 cols) -->
-        <div class="lg:col-span-7 bg-white/60 dark:bg-dark-900/60 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-4">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
-            <div>
-              <h3 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                <span>Transfer Register Log (বদলি রেজিস্টার ও অডিট হিস্টোরি)</span>
-                <span id="transfer-table-count" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300">0 Transfers</span>
-              </h3>
-              <p class="text-[11px] text-slate-500">সকল সফল বদলির তারিখ, রুট এবং অডিট রেকর্ড</p>
-            </div>
-
-            <!-- Table Quick Search -->
-            <div class="w-full sm:w-56">
-              <input 
-                type="text" 
-                id="transfer-log-search" 
-                oninput="window.HRMTransfer && window.HRMTransfer.onTableSearch(this.value)" 
-                placeholder="Filter transfers..." 
-                class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-dark-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <!-- Scrollable Table -->
-          <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700/80 custom-scrollbar">
-            <table class="w-full text-left text-xs border-collapse select-text min-w-[580px]">
-              <thead class="bg-slate-100/90 dark:bg-dark-800/90 text-slate-700 dark:text-slate-300 font-black text-[11px] border-b border-slate-200 dark:border-slate-700">
-                <tr>
-                  <th class="py-2.5 px-3 w-10 text-center">#</th>
-                  <th class="py-2.5 px-3">Date</th>
-                  <th class="py-2.5 px-3">Staff / Employee</th>
-                  <th class="py-2.5 px-3 text-center">Transfer Route (From &rarr; To)</th>
-                  <th class="py-2.5 px-3">Reason / Memo</th>
-                  <th class="py-2.5 px-3 text-center w-16">Action</th>
-                </tr>
-              </thead>
-              <tbody id="transfer-table-tbody" class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                <!-- Rendered by HRMTransfer -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination / Bottom Status -->
-          <div class="flex items-center justify-between pt-2 text-xs text-slate-500">
-            <span id="transfer-pagination-info">Showing 0 of 0 records</span>
-            <div id="transfer-pagination-btns" class="flex items-center gap-1">
-              <!-- Pagination buttons -->
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
   </main>
 
   </div>
@@ -3289,13 +2489,7 @@ a:hover .ph-arrow-up-right,
       var btns = [
         'nav-btn-manpower-summary',
         'nav-btn-manpower-list',
-        'nav-btn-authorized-manpower',
-        'nav-btn-section-wise-salary',
-        'nav-btn-attendance',
-        'nav-btn-cockpit',
-        'nav-btn-salary',
-        'nav-btn-sections',
-        'nav-btn-export'
+        'nav-btn-authorized-manpower'
       ];
       btns.forEach(function(id) {
         var el = document.getElementById(id);
@@ -3315,38 +2509,24 @@ a:hover .ph-arrow-up-right,
       var dialSec = document.getElementById('daily-attendance-yield-dial');
       var authSec = document.getElementById('authorized-manpower-section');
       var dbSec = document.getElementById('manpower-database-section');
-      var incSec = document.getElementById('yearly-increment-section');
       var entrySec = document.getElementById('employee-data-entry-section');
       var summarySec = document.getElementById('manpower-summary-section');
-      var transferSec = document.getElementById('inter-section-transfer-section');
-      var salarySec = document.getElementById('section-wise-salary-section');
 
       var btnSummary = document.getElementById('nav-btn-manpower-summary');
-      var btnSalaryNav = document.getElementById('nav-btn-section-wise-salary');
       var btnManpower = document.getElementById('nav-btn-manpower-list');
       var btnAuth = document.getElementById('nav-btn-authorized-manpower');
-      var btnIncSub = document.getElementById('sidebar-sub-yearly-increment');
-      var btnTransferSub = document.getElementById('sidebar-sub-inter-section-transfer');
 
       var subEntry = document.getElementById('sidebar-sub-new-entry');
       var subRep = document.getElementById('sidebar-sub-replacement-report');
       if (subEntry) subEntry.classList.remove('bg-purple-500/20', 'font-black', 'text-purple-600', 'dark:text-purple-400');
       if (subRep) subRep.classList.remove('bg-purple-500/20', 'font-black', 'text-purple-600', 'dark:text-purple-400');
-      if (btnTransferSub) btnTransferSub.classList.remove('bg-indigo-500/20', 'font-black', 'text-indigo-600', 'dark:text-indigo-400', 'border-indigo-500/40');
-      if (btnSalaryNav) {
-        btnSalaryNav.classList.remove('bg-emerald-600', 'text-white', 'shadow-xs');
-        btnSalaryNav.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-      }
 
       if (tabName === 'manpower-summary') {
         if (kpiSec) kpiSec.classList.add('hidden');
         if (dialSec) dialSec.classList.add('hidden');
         if (dbSec) dbSec.classList.add('hidden');
         if (authSec) authSec.classList.add('hidden');
-        if (incSec) incSec.classList.add('hidden');
         if (entrySec) entrySec.classList.add('hidden');
-        if (transferSec) transferSec.classList.add('hidden');
-        if (salarySec) salarySec.classList.add('hidden');
         if (summarySec) summarySec.classList.remove('hidden');
 
         if (btnSummary) {
@@ -3361,71 +2541,18 @@ a:hover .ph-arrow-up-right,
           btnAuth.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
           btnAuth.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
         }
-        if (btnIncSub) {
-          btnIncSub.classList.remove('bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-300', 'font-black', 'border-emerald-500/40');
-        }
 
         if (window.HRMManpowerSummary && window.HRMManpowerSummary.render) {
           window.HRMManpowerSummary.render();
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (tabName === 'section-wise-salary') {
-        if (kpiSec) kpiSec.classList.add('hidden');
-        if (dialSec) dialSec.classList.add('hidden');
-        if (dbSec) dbSec.classList.add('hidden');
-        if (authSec) authSec.classList.add('hidden');
-        if (incSec) incSec.classList.add('hidden');
-        if (entrySec) entrySec.classList.add('hidden');
-        if (summarySec) summarySec.classList.add('hidden');
-        if (transferSec) transferSec.classList.add('hidden');
-        if (salarySec) salarySec.classList.remove('hidden');
-
-        if (btnSummary) {
-          btnSummary.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
-          btnSummary.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnManpower) {
-          btnManpower.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
-          btnManpower.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnAuth) {
-          btnAuth.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
-          btnAuth.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnIncSub) {
-          btnIncSub.classList.remove('bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-300', 'font-black', 'border-emerald-500/40');
-        }
-        if (btnSalaryNav) {
-          btnSalaryNav.classList.remove('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-          btnSalaryNav.classList.add('bg-emerald-600', 'text-white', 'shadow-xs');
-        }
-
-        if (window.HRMSectionSalary && window.HRMSectionSalary.render) {
-          window.HRMSectionSalary.render();
-        } else {
-          var retryCount = 0;
-          var retryInterval = setInterval(function() {
-            retryCount++;
-            if (window.HRMSectionSalary && window.HRMSectionSalary.render) {
-              window.HRMSectionSalary.render();
-              clearInterval(retryInterval);
-            } else if (retryCount > 25) {
-              clearInterval(retryInterval);
-            }
-          }, 80);
-        }
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (tabName === 'employee-data-entry') {
-        if (salarySec) salarySec.classList.add('hidden');
         if (kpiSec) kpiSec.classList.add('hidden');
         if (dialSec) dialSec.classList.add('hidden');
         if (dbSec) dbSec.classList.add('hidden');
         if (authSec) authSec.classList.add('hidden');
-        if (incSec) incSec.classList.add('hidden');
         if (summarySec) summarySec.classList.add('hidden');
-        if (transferSec) transferSec.classList.add('hidden');
         if (entrySec) entrySec.classList.remove('hidden');
 
         if (btnSummary) {
@@ -3439,9 +2566,6 @@ a:hover .ph-arrow-up-right,
         if (btnAuth) {
           btnAuth.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
           btnAuth.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnIncSub) {
-          btnIncSub.classList.remove('bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-300', 'font-black', 'border-emerald-500/40');
         }
 
         var subEntry = document.getElementById('sidebar-sub-new-entry');
@@ -3463,83 +2587,13 @@ a:hover .ph-arrow-up-right,
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (tabName === 'yearly-increment') {
-        if (kpiSec) kpiSec.classList.add('hidden');
-        if (dialSec) dialSec.classList.add('hidden');
-        if (dbSec) dbSec.classList.add('hidden');
-        if (authSec) authSec.classList.add('hidden');
-        if (entrySec) entrySec.classList.add('hidden');
-        if (summarySec) summarySec.classList.add('hidden');
-        if (transferSec) transferSec.classList.add('hidden');
-        if (salarySec) salarySec.classList.add('hidden');
-        if (incSec) incSec.classList.remove('hidden');
-
-        if (btnSummary) {
-          btnSummary.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
-          btnSummary.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnManpower) {
-          btnManpower.classList.remove('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-          btnManpower.classList.add('bg-purple-600', 'text-white', 'shadow-xs');
-        }
-        if (btnAuth) {
-          btnAuth.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
-          btnAuth.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnIncSub) {
-          btnIncSub.classList.add('bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-300', 'font-black', 'border-emerald-500/40');
-        }
-
-        if (window.HRMIncrement && window.HRMIncrement.render) {
-          window.HRMIncrement.render();
-        }
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (tabName === 'inter-section-transfer') {
-        if (kpiSec) kpiSec.classList.add('hidden');
-        if (dialSec) dialSec.classList.add('hidden');
-        if (dbSec) dbSec.classList.add('hidden');
-        if (authSec) authSec.classList.add('hidden');
-        if (incSec) incSec.classList.add('hidden');
-        if (entrySec) entrySec.classList.add('hidden');
-        if (summarySec) summarySec.classList.add('hidden');
-        if (salarySec) salarySec.classList.add('hidden');
-        if (transferSec) transferSec.classList.remove('hidden');
-
-        if (btnSummary) {
-          btnSummary.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
-          btnSummary.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnManpower) {
-          btnManpower.classList.remove('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-          btnManpower.classList.add('bg-purple-600', 'text-white', 'shadow-xs');
-        }
-        if (btnAuth) {
-          btnAuth.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
-          btnAuth.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnIncSub) {
-          btnIncSub.classList.remove('bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-300', 'font-black', 'border-emerald-500/40');
-        }
-        if (btnTransferSub) {
-          btnTransferSub.classList.add('bg-indigo-500/20', 'font-black', 'text-indigo-600', 'dark:text-indigo-400', 'border-indigo-500/40');
-        }
-
-        if (window.HRMTransfer && window.HRMTransfer.render) {
-          window.HRMTransfer.render();
-        }
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (tabName === 'authorized-manpower') {
         if (kpiSec) kpiSec.classList.add('hidden');
         if (dialSec) dialSec.classList.add('hidden');
         if (dbSec) dbSec.classList.add('hidden');
         if (authSec) authSec.classList.remove('hidden');
-        if (incSec) incSec.classList.add('hidden');
         if (entrySec) entrySec.classList.add('hidden');
         if (summarySec) summarySec.classList.add('hidden');
-        if (transferSec) transferSec.classList.add('hidden');
-        if (salarySec) salarySec.classList.add('hidden');
 
         if (btnSummary) {
           btnSummary.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
@@ -3552,9 +2606,6 @@ a:hover .ph-arrow-up-right,
         if (btnManpower) {
           btnManpower.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
           btnManpower.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnIncSub) {
-          btnIncSub.classList.remove('bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-300', 'font-black', 'border-emerald-500/40');
         }
 
         if (groupTarget) {
@@ -3577,11 +2628,8 @@ a:hover .ph-arrow-up-right,
         if (dialSec) dialSec.classList.remove('hidden');
         if (dbSec) dbSec.classList.remove('hidden');
         if (authSec) authSec.classList.add('hidden');
-        if (incSec) incSec.classList.add('hidden');
         if (entrySec) entrySec.classList.add('hidden');
         if (summarySec) summarySec.classList.add('hidden');
-        if (transferSec) transferSec.classList.add('hidden');
-        if (salarySec) salarySec.classList.add('hidden');
 
         if (btnSummary) {
           btnSummary.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
@@ -3594,9 +2642,6 @@ a:hover .ph-arrow-up-right,
         if (btnAuth) {
           btnAuth.classList.remove('bg-purple-600', 'text-white', 'shadow-xs');
           btnAuth.classList.add('bg-slate-100/80', 'dark:bg-dark-800/80', 'text-slate-700', 'dark:text-slate-200');
-        }
-        if (btnIncSub) {
-          btnIncSub.classList.remove('bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-300', 'font-black', 'border-emerald-500/40');
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3737,14 +2782,8 @@ a:hover .ph-arrow-up-right,
       var initialTab = 'manpower-list';
       if (window.location.hash === '#authorized-manpower') {
         initialTab = 'authorized-manpower';
-      } else if (window.location.hash.indexOf('section-wise-salary') !== -1 || window.location.hash.indexOf('salary-8h') !== -1 || window.location.hash === '#section-wise-salary') {
-        initialTab = 'section-wise-salary';
       } else if (window.location.hash.indexOf('summary') !== -1) {
         initialTab = 'manpower-summary';
-      } else if (window.location.hash.indexOf('transfer') !== -1) {
-        initialTab = 'inter-section-transfer';
-      } else if (window.location.hash.indexOf('increment') !== -1) {
-        initialTab = 'yearly-increment';
       } else if (window.location.hash.indexOf('employee-entry') !== -1 || window.location.hash.indexOf('replacement') !== -1 || window.location.hash.indexOf('data-entry') !== -1) {
         initialTab = 'employee-data-entry';
       } else {
@@ -3760,14 +2799,8 @@ a:hover .ph-arrow-up-right,
       var h = window.location.hash;
       if (h === '#authorized-manpower') {
         switchHRMTab('authorized-manpower');
-      } else if (h.indexOf('section-wise-salary') !== -1 || h.indexOf('salary-8h') !== -1 || h === '#section-wise-salary') {
-        switchHRMTab('section-wise-salary');
       } else if (h.indexOf('summary') !== -1) {
         switchHRMTab('manpower-summary');
-      } else if (h.indexOf('transfer') !== -1) {
-        switchHRMTab('inter-section-transfer');
-      } else if (h.indexOf('increment') !== -1) {
-        switchHRMTab('yearly-increment');
       } else if (h.indexOf('employee-entry') !== -1 || h.indexOf('replacement') !== -1 || h.indexOf('data-entry') !== -1) {
         switchHRMTab('employee-data-entry');
       } else if (h === '#manpower-list') {
@@ -4260,84 +3293,6 @@ a:hover .ph-arrow-up-right,
           </div>
         </div>
       </form>
-    </div>
-  </div>
-
-  <!-- ================= SECTION STAFF ROSTER MODAL ================= -->
-  <div id="section-salary-staff-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 hidden">
-    <div class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-      
-      <!-- Modal Header -->
-      <div class="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-dark-850">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-black shadow-xs">
-            <i class="ph-bold ph-users-three"></i>
-          </div>
-          <div>
-            <h4 id="salary-modal-section-title" class="font-black text-sm sm:text-base text-slate-900 dark:text-white">Section Staff Roster</h4>
-            <p id="salary-modal-section-sub" class="text-[11px] text-slate-500 font-medium">Active personnel salary and overtime breakdown</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button 
-            type="button" 
-            onclick="window.HRMSectionSalary && window.HRMSectionSalary.exportModalCSV()" 
-            class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-all"
-            title="Download Section Staff List to CSV"
-          >
-            <i class="ph-bold ph-download-simple text-sm"></i>
-            <span>Export CSV</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="window.HRMSectionSalary && window.HRMSectionSalary.closeModal()" 
-            class="w-8 h-8 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
-            title="Close Modal"
-          >
-            <i class="ph-bold ph-x text-base"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Modal Body: Table of Section Active Staff -->
-      <div class="p-4 sm:p-5 overflow-y-auto flex-1 custom-scrollbar">
-        <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead class="bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 font-black border-b border-slate-300 dark:border-slate-700 font-mono text-[11px]">
-              <tr>
-                <th class="py-2.5 px-3 text-center w-12 border-r border-slate-200 dark:border-slate-700">SL</th>
-                <th class="py-2.5 px-3 text-center w-20 border-r border-slate-200 dark:border-slate-700">Staff ID</th>
-                <th class="py-2.5 px-3.5 border-r border-slate-200 dark:border-slate-700">Employee Name</th>
-                <th class="py-2.5 px-3.5 border-r border-slate-200 dark:border-slate-700">Designation</th>
-                <th class="py-2.5 px-3.5 text-right border-r border-slate-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 bg-indigo-50/30 dark:bg-indigo-950/20">8H Gross</th>
-                <th class="py-2.5 px-3 text-right border-r border-slate-200 dark:border-slate-700">Basic</th>
-                <th class="py-2.5 px-3.5 text-right border-r border-slate-200 dark:border-slate-700 text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-950/20">3H OT (78h)</th>
-                <th class="py-2.5 px-3.5 text-right border-r border-slate-200 dark:border-slate-700 font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50/40 dark:bg-emerald-950/30">Total Salary+OT</th>
-                <th class="py-2.5 px-3 text-center">Join Date</th>
-              </tr>
-            </thead>
-            <tbody id="salary-modal-staff-tbody" class="font-mono text-xs divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-dark-900">
-              <!-- Dynamically populated by openModal -->
-            </tbody>
-            <tfoot id="salary-modal-staff-tfoot" class="font-mono text-xs bg-slate-100 dark:bg-dark-800 font-black border-t-2 border-slate-300 dark:border-slate-700">
-              <!-- Dynamically populated by openModal -->
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
-      <!-- Modal Footer -->
-      <div class="p-3.5 sm:p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-dark-850">
-        <span class="text-xs text-slate-500 font-medium">Click on any staff record to view full personnel details</span>
-        <button 
-          type="button" 
-          onclick="window.HRMSectionSalary && window.HRMSectionSalary.closeModal()" 
-          class="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer transition-colors"
-        >
-          Close
-        </button>
-      </div>
-
     </div>
   </div>
 

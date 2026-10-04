@@ -1,4 +1,4 @@
-window.MEP_REPLACEMENT_MASTER = [
+[
   {
     "sl": 1,
     "replace_id": "18972",
@@ -3449,4 +3449,4 @@ window.MEP_REPLACEMENT_MASTER = [
     "new_doj": "04-Oct-2026",
     "remarks": "Resigned / ইস্তফা"
   }
-];
+]

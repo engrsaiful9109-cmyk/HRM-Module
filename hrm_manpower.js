@@ -190,7 +190,7 @@
       });
   }
 
-  function loadDataIntoState(dbData) {
+  function loadDataIntoState(dbData, preservePage) {
     var raw = dbData.employees || [];
     // Strict filter: exclude hidden records and Fan QC section completely
     state.allEmployees = raw.filter(function (e) {
@@ -207,7 +207,7 @@
 
     updateTopKPIs();
     populateFilterDropdowns();
-    applyFilters();
+    applyFilters(preservePage);
   }
 
   function computeClientMetadata(employees) {
@@ -473,7 +473,7 @@
   // -------------------------------------------------------------
   // Filtering & Sorting Logic
   // -------------------------------------------------------------
-  function applyFilters() {
+  function applyFilters(preservePage) {
     var f = state.filters;
     var q = (f.search || '').trim().toLowerCase();
 
@@ -560,7 +560,12 @@
     });
 
     state.filteredEmployees = result;
-    state.filters.page = 1; // Reset to page 1 on filter change
+    if (!preservePage) {
+      state.filters.page = 1; // Reset to page 1 on filter change
+    } else {
+      var maxPage = Math.max(1, Math.ceil(result.length / (state.filters.pageSize || 25)));
+      if (state.filters.page > maxPage) state.filters.page = maxPage;
+    }
     renderTable();
     updateFilterSummaryBar();
   }
@@ -1839,6 +1844,13 @@
     else newStatus = 'Active';
     emp.status = newStatus;
 
+    // Send update to Firebase RTDB Cloud
+    if (window.HRMFirebase && typeof window.HRMFirebase.saveEmployee === 'function') {
+      window.HRMFirebase.saveEmployee(emp).catch(function (e) {
+        console.warn('[HRM_FIREBASE] Status cloud sync error:', e);
+      });
+    }
+
     // Send update to server
     fetch('/api/hrm/employee/save', {
       method: 'POST',
@@ -1863,7 +1875,7 @@
 
     state.metadata = computeClientMetadata(state.allEmployees);
     updateTopKPIs();
-    applyFilters();
+    applyFilters(true);
     if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.renderHoldCandidatesShelf === 'function') {
       window.HRMEmployeeEntry.renderHoldCandidatesShelf();
     }
@@ -1887,6 +1899,13 @@
     if (!emp) return;
 
     emp.gender = newGender;
+
+    // Send update to Firebase RTDB Cloud
+    if (window.HRMFirebase && typeof window.HRMFirebase.saveEmployee === 'function') {
+      window.HRMFirebase.saveEmployee(emp).catch(function (e) {
+        console.warn('[HRM_FIREBASE] Gender cloud sync error:', e);
+      });
+    }
 
     // Send update to server
     fetch('/api/hrm/employee/save', {
@@ -2149,6 +2168,12 @@
     state: state,
     resetFilters: resetFilters,
     getAllEmployees: function () { return state.allEmployees; },
+    setAllEmployees: function (newEmps) {
+      if (Array.isArray(newEmps)) {
+        loadDataIntoState({ employees: newEmps }, true);
+      }
+    },
+    loadDataIntoState: loadDataIntoState,
     updateTopKPIs: updateTopKPIs,
     renderTable: renderTable,
     applyFilters: applyFilters,

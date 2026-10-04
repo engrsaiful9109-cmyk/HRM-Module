@@ -57,13 +57,13 @@ function cleanStaffId(id) {
 }
 
 // Convert Firebase RTDB dictionary or array to standard clean Array
-function toArray(val) {
+function toArray(val, filterFn) {
   if (!val) return [];
+  var list = [];
   if (Array.isArray(val)) {
-    return val.filter(Boolean);
-  }
-  if (typeof val === 'object') {
-    return Object.keys(val).map(k => {
+    list = val.filter(Boolean);
+  } else if (typeof val === 'object') {
+    list = Object.keys(val).map(k => {
       const item = val[k];
       if (item && typeof item === 'object') {
         if (!item._fb_key) item._fb_key = k;
@@ -71,7 +71,10 @@ function toArray(val) {
       return item;
     }).filter(Boolean);
   }
-  return [];
+  if (typeof filterFn === 'function') {
+    return list.filter(filterFn);
+  }
+  return list;
 }
 
 // Update Header Telemetry Status Pill
@@ -118,7 +121,7 @@ onValue(employeesRef, (snapshot) => {
     return;
   }
 
-  const emps = toArray(rawData);
+  const emps = toArray(rawData, e => e && (e.staff_id || e.sl_no));
   if (!emps || emps.length === 0) return;
 
   // Sort employees predictably by sl_no
@@ -141,12 +144,18 @@ onValue(employeesRef, (snapshot) => {
     window.HRM_MANPOWER_CACHE.employees = emps;
 
     // Trigger HRM Manpower Controller
-    if (window.HRMManpower && typeof window.HRMManpower.setAllEmployees === 'function') {
-      window.HRMManpower.setAllEmployees(emps);
-    } else if (window.HRMManpower && typeof window.HRMManpower.renderTable === 'function') {
-      if (typeof window.HRMManpower.renderStats === 'function') window.HRMManpower.renderStats();
-      if (typeof window.HRMManpower.renderStatusCounts === 'function') window.HRMManpower.renderStatusCounts();
-      window.HRMManpower.renderTable();
+    if (window.HRMManpower) {
+      if (typeof window.HRMManpower.setAllEmployees === 'function') {
+        window.HRMManpower.setAllEmployees(emps);
+      } else if (typeof window.HRMManpower.loadDataIntoState === 'function') {
+        window.HRMManpower.loadDataIntoState({ employees: emps }, true);
+      } else if (typeof window.HRMManpower.refreshAll === 'function') {
+        window.HRMManpower.refreshAll();
+      } else if (typeof window.HRMManpower.renderTable === 'function') {
+        if (typeof window.HRMManpower.renderStats === 'function') window.HRMManpower.renderStats();
+        if (typeof window.HRMManpower.renderStatusCounts === 'function') window.HRMManpower.renderStatusCounts();
+        window.HRMManpower.renderTable();
+      }
     }
 
     // Trigger Section Wise Monthly Salary Controller
@@ -166,9 +175,14 @@ onValue(employeesRef, (snapshot) => {
       }
     }
 
-    // Trigger Datalist and Autocomplete Refresh in Employee Entry
-    if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.populateDatalist === 'function') {
-      window.HRMEmployeeEntry.populateDatalist();
+    // Trigger Hold Candidates Shelf & Datalist Refresh in Employee Entry
+    if (window.HRMEmployeeEntry) {
+      if (typeof window.HRMEmployeeEntry.renderHoldCandidatesShelf === 'function') {
+        window.HRMEmployeeEntry.renderHoldCandidatesShelf();
+      }
+      if (typeof window.HRMEmployeeEntry.populateDatalist === 'function') {
+        window.HRMEmployeeEntry.populateDatalist();
+      }
     }
 
     // Dispatch global event for custom hooks
@@ -189,25 +203,26 @@ onValue(replacementsRef, (snapshot) => {
   const rawData = snapshot.val();
   if (!rawData) return;
 
-  const reps = toArray(rawData);
+  const reps = toArray(rawData, e => e && (e.replace_id || e.new_id || e.sl));
   reps.sort((a, b) => (Number(a.sl || 0) - Number(b.sl || 0)));
 
   window.MEP_REPLACEMENT_MASTER = reps;
   console.log(`[HRM_FIREBASE] Received ${reps.length} replacements from cloud.`);
 
-  // Update replacement report if active
+  // Update replacement report if active (false uses in-memory window.MEP_REPLACEMENT_MASTER without server re-fetch)
   if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.buildReplacementList === 'function') {
-    window.HRMEmployeeEntry.buildReplacementList(true);
-    if (typeof window.HRMEmployeeEntry.renderReplacements === 'function') {
-      window.HRMEmployeeEntry.renderReplacements();
-    }
+    window.HRMEmployeeEntry.buildReplacementList(false);
   }
 
-  // Update sidebar replacement count badge
-  const repBadge = document.getElementById('sidebar-count-replacements');
-  if (repBadge) {
-    repBadge.textContent = reps.length;
-  }
+  // Update sidebar replacement count badges
+  const repBadge = document.getElementById('sidebar-replacement-badge');
+  if (repBadge) repBadge.textContent = reps.length + ' Repl';
+  const subRepBadge = document.getElementById('sidebar-sub-replacement-count');
+  if (subRepBadge) subRepBadge.textContent = reps.length;
+  const tabBadge = document.getElementById('entry-tab-report-badge');
+  if (tabBadge) tabBadge.textContent = reps.length;
+  const allOpt = document.getElementById('rep-per-page-all-opt');
+  if (allOpt) allOpt.textContent = 'All (' + reps.length + ')';
 });
 
 // 4. Inter-Section Transfers Realtime Listener
@@ -216,7 +231,7 @@ onValue(transfersRef, (snapshot) => {
   const rawData = snapshot.val();
   if (!rawData) return;
 
-  const trans = toArray(rawData);
+  const trans = toArray(rawData, e => e && (e.staff_id || e.id));
   window.MEP_INTER_SECTION_TRANSFERS = trans;
   console.log(`[HRM_FIREBASE] Received ${trans.length} transfers from cloud.`);
 
@@ -254,11 +269,16 @@ async function saveEmployee(payload) {
   const key = `emp_${sid}`;
   payload.staff_id = sid; // ensure clean formatting
 
+  // Retrieve current in-memory employee list
+  const allEmployeesList = (window.MEP_MANPOWER_DATABASE && window.MEP_MANPOWER_DATABASE.employees) ||
+                          (window.HRM_MANPOWER_CACHE && window.HRM_MANPOWER_CACHE.employees) ||
+                          (window.HRMManpower && typeof window.HRMManpower.getAllEmployees === 'function' ? window.HRMManpower.getAllEmployees() : []) ||
+                          [];
+
   // Calculate sl_no if missing
   if (!payload.sl_no) {
-    const all = window.MEP_MANPOWER_DATABASE?.employees || [];
-    const maxSl = all.reduce((max, e) => Math.max(max, Number(e.sl_no || 0)), 0);
-    payload.sl_no = maxSl + 1;
+    const maxSl = allEmployeesList.reduce((max, e) => Math.max(max, Number(e.sl_no || 0)), 0);
+    payload.sl_no = (maxSl > 0 ? maxSl : 1295) + 1;
   }
 
   console.log(`[HRM_FIREBASE] 🚀 Saving employee #${sid} (${payload.name}) to Cloud RTDB...`);
@@ -271,11 +291,22 @@ async function saveEmployee(payload) {
   const cleanRepId = cleanStaffId(payload.replace_id);
   if (cleanRepId && (payload.hiring_type === 'Replacement' || payload.replace_id)) {
     try {
-      const replacedEmpRef = ref(db, `mep_hrm/employees/emp_${cleanRepId}/status`);
-      await set(replacedEmpRef, "Inactive");
-      
-      const remarksRef = ref(db, `mep_hrm/employees/emp_${cleanRepId}/remarks`);
-      await set(remarksRef, `Replaced by #${sid} (${payload.name}) on ${payload.replace_date || payload.doj || ''}`);
+      const repEmp = allEmployeesList.find(e => cleanStaffId(e.staff_id) === cleanRepId);
+      const replacedEmpRef = ref(db, `mep_hrm/employees/emp_${cleanRepId}`);
+      if (repEmp) {
+        const updatedRepEmp = Object.assign({}, repEmp, {
+          status: "Inactive",
+          remarks: `Replaced by #${sid} (${payload.name}) on ${payload.replace_date || payload.doj || ''}`
+        });
+        await set(replacedEmpRef, updatedRepEmp);
+      } else {
+        await update(replacedEmpRef, {
+          staff_id: cleanRepId,
+          name: payload.replace_name || `Former Staff #${cleanRepId}`,
+          status: "Inactive",
+          remarks: `Replaced by #${sid} (${payload.name}) on ${payload.replace_date || payload.doj || ''}`
+        });
+      }
 
       // Also create replacement entry in mep_hrm/replacements
       const repMaster = window.MEP_REPLACEMENT_MASTER || [];
@@ -283,9 +314,9 @@ async function saveEmployee(payload) {
       const repObj = {
         sl: newSl,
         replace_id: cleanRepId,
-        replace_name: payload.replace_name || "",
-        replace_designation: payload.designation || "Helper",
-        replace_section: payload.section || "Fan Assemble Line",
+        replace_name: payload.replace_name || (repEmp ? repEmp.name : ""),
+        replace_designation: payload.designation || (repEmp ? repEmp.designation : "Helper"),
+        replace_section: payload.section || (repEmp ? repEmp.section : "Fan Assemble Line"),
         replace_doj: payload.replace_date || payload.doj || "",
         new_sl: String(newSl),
         new_id: sid,

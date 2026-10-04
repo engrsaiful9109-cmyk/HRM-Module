@@ -139,38 +139,48 @@
       renderReplacementTable();
       updateBadges(state.replacementList.length);
       populateReplacementSectionDropdown();
-    } else {
-      fetch('/api/hrm/replacement-master?_t=' + Date.now())
-        .then(function (res) { return res.json(); })
-        .then(function (res) {
-          var repList = Array.isArray(res) ? res : (res && (res.data || res.records));
-          if (repList && Array.isArray(repList)) {
-            window.MEP_REPLACEMENT_MASTER = repList;
-            state.replacementList = repList.slice();
-            applyReplacementFilters();
-            renderReplacementKPIs();
-            renderReplacementTable();
-            updateBadges(state.replacementList.length);
-            populateReplacementSectionDropdown();
-          }
-        })
-        .catch(function () {
-          fetch('data/replacement_master_420.json?_t=' + Date.now())
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-              var repList = Array.isArray(data) ? data : (data && (data.records || data.data));
-              if (repList && Array.isArray(repList)) {
-                window.MEP_REPLACEMENT_MASTER = repList;
-                state.replacementList = repList.slice();
-                applyReplacementFilters();
-                renderReplacementKPIs();
-                renderReplacementTable();
-                updateBadges(state.replacementList.length);
-                populateReplacementSectionDropdown();
-              }
-            });
-        });
+      return;
     }
+
+    var isFlat = window.location.pathname.indexOf('FLAT') !== -1 || window.location.href.indexOf('FLAT') !== -1;
+    var flatOrNested = isFlat ? 'replacement_master_420.json' : 'data/replacement_master_420.json';
+
+    fetch('/api/hrm/replacement-master?_t=' + Date.now())
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        var repList = Array.isArray(res) ? res : (res && (res.data || res.records));
+        if (repList && Array.isArray(repList)) {
+          if (window.MEP_REPLACEMENT_MASTER && window.MEP_REPLACEMENT_MASTER.length > repList.length) {
+            repList = window.MEP_REPLACEMENT_MASTER;
+          }
+          window.MEP_REPLACEMENT_MASTER = repList;
+          state.replacementList = repList.slice();
+          applyReplacementFilters();
+          renderReplacementKPIs();
+          renderReplacementTable();
+          updateBadges(state.replacementList.length);
+          populateReplacementSectionDropdown();
+        }
+      })
+      .catch(function () {
+        fetch(flatOrNested + '?_t=' + Date.now())
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var repList = Array.isArray(data) ? data : (data && (data.records || data.data));
+            if (repList && Array.isArray(repList)) {
+              if (window.MEP_REPLACEMENT_MASTER && window.MEP_REPLACEMENT_MASTER.length > repList.length) {
+                repList = window.MEP_REPLACEMENT_MASTER;
+              }
+              window.MEP_REPLACEMENT_MASTER = repList;
+              state.replacementList = repList.slice();
+              applyReplacementFilters();
+              renderReplacementKPIs();
+              renderReplacementTable();
+              updateBadges(state.replacementList.length);
+              populateReplacementSectionDropdown();
+            }
+          });
+      });
   }
 
   function populateReplacementSectionDropdown() {
@@ -976,9 +986,9 @@
       console.warn('Error rendering hold shelf:', e3);
     }
 
-    // 4. Force Rebuild replacement list from fresh server data
+    // 4. Update replacement list from fresh state
     try {
-      buildReplacementList(true);
+      buildReplacementList(false);
     } catch (e4) {
       console.warn('Error rebuilding replacement list:', e4);
     }
