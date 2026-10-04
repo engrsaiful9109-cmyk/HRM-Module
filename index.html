@@ -74,15 +74,24 @@
   <!-- Immediate Authentication & Theme Guard -->
   <script>
     (function() {
-      // Standalone Online HRM Edition: Auto-authenticate session
+      // Standalone Online HRM Edition: Check authentication state
+      var isAuth = false;
       try {
+        var token = localStorage.getItem('mep_auth_token') || sessionStorage.getItem('mep_auth_token');
+        var user = localStorage.getItem('mep_auth_user') || sessionStorage.getItem('mep_auth_user');
+        var loggedIn = localStorage.getItem('mep_hrm_online_logged_in') === 'true' || 
+                       localStorage.getItem('mep_user_logged_in') === 'true' ||
+                       sessionStorage.getItem('mep_hrm_online_logged_in') === 'true' || 
+                       sessionStorage.getItem('mep_user_logged_in') === 'true';
         var expectedToken = 'bdfb1c1cc93dde30257dba06de9e84e30e69e73f0016817f5197a76c2ab2e473';
-        localStorage.setItem('mep_auth_token', expectedToken);
-        sessionStorage.setItem('mep_auth_token', expectedToken);
-        localStorage.setItem('mep_auth_user', 'engr.saiful9109@gmail.com');
-        sessionStorage.setItem('mep_auth_user', 'engr.saiful9109@gmail.com');
-        localStorage.setItem('mep_user_logged_in', '1');
+        if (token === expectedToken && user && loggedIn) {
+          isAuth = true;
+        }
       } catch (e) {}
+      window.__HRM_ONLINE_AUTH__ = isAuth;
+      if (!isAuth) {
+        document.documentElement.classList.add('hrm-auth-locked');
+      }
 
       // Theme initialization
       try {
@@ -116,6 +125,25 @@
     html:not(.dark) body {
       background-color: #F8FAFC !important;
       color: #0F172A !important;
+    }
+
+    html.hrm-auth-locked,
+    html.hrm-auth-locked body {
+      overflow: hidden !important;
+      height: 100vh !important;
+    }
+
+    html.hrm-auth-locked #hrm-login-overlay {
+      display: flex !important;
+    }
+
+    @keyframes cardShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .hrm-shake {
+      animation: cardShake 0.4s ease-in-out;
     }
 
     body {
@@ -466,17 +494,388 @@ a:hover .ph-arrow-up-right,
     window.navigateToRejection = function() {
       if (window.showHRToast) window.showHRToast('💡 এটি স্বতন্ত্র HRM ক্লাউড মডিউল। সকল এইচআর কার্যক্রম এই প্যানেল থেকেই পরিচালিত হবে।', 'info');
     };
-    window.handleLogout = function() {
-      if (confirm('আপনি কি লগআউট করতে চান?')) {
-        alert('HRM ক্লাউড সেশন রিসেট হয়েছে।');
-        window.location.reload();
-      }
-    };
 </script>
-</head>
 <body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col select-none">
 
-  <!-- ================= TOP HEADER BAR ================= -->
+  <!-- ================= 🔐 MEP HRM ENTERPRISE LOGIN INTERFACE ================= -->
+  <div id="hrm-login-overlay" class="fixed inset-0 z-[9999] items-center justify-center bg-slate-950 transition-all duration-500 overflow-hidden" style="display: none;">
+    
+    <!-- Background Hero Visuals -->
+    <div class="absolute inset-0 flex flex-col lg:flex-row overflow-hidden pointer-events-none">
+      
+      <!-- Left Visual Panel (Desktop) with White Pigeon on Floral Swing -->
+      <div class="relative hidden lg:block lg:w-7/12 h-full overflow-hidden bg-slate-950">
+        <picture>
+          <source srcset="white_dove_hero.webp" type="image/webp">
+          <img src="white_dove_hero.webp" alt="MEP Operations" class="w-full h-full object-cover object-center filter brightness-[0.90] contrast-[1.06] transform scale-100 hover:scale-105 transition-transform duration-[25000ms] ease-out will-change-transform" />
+        </picture>
+        
+        <!-- Premium Contrast Gradients -->
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/40 via-transparent to-slate-950"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+        <div class="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-slate-950/60 to-transparent"></div>
+        
+        <!-- Left Hero Content Cluster -->
+        <div class="absolute bottom-12 left-12 right-12 z-10 space-y-4 pointer-events-auto">
+          <!-- Glass Capsule Badge -->
+          <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-xl border border-white/15 text-white text-xs font-bold shadow-2xl">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <i class="ph-bold ph-shield-check text-emerald-400 text-sm"></i>
+            <span>Enterprise HRM Intelligence Portal</span>
+          </div>
+
+          <!-- Main Hero Headings -->
+          <div class="space-y-1">
+            <h1 class="text-3xl xl:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+              Control Every Operation<br>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">in One Place</span>
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-300/90 font-medium max-w-lg leading-relaxed pt-1 drop-shadow">
+              Live shop-floor personnel telemetry, active workforce roster, and instant replacement tracking synchronized in real-time with Google Cloud Firebase.
+            </p>
+          </div>
+
+          <!-- Feature Highlights Tags -->
+          <div class="flex items-center gap-2.5 pt-2 flex-wrap">
+            <span class="px-3 py-1 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-[11px] font-bold text-white flex items-center gap-1.5">
+              <i class="ph-bold ph-arrows-clockwise text-emerald-400"></i> Instant Cloud Sync
+            </span>
+            <span class="px-3 py-1 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-[11px] font-bold text-white flex items-center gap-1.5">
+              <i class="ph-bold ph-users-three text-cyan-400"></i> Workforce Directory
+            </span>
+            <span class="px-3 py-1 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-[11px] font-bold text-white flex items-center gap-1.5">
+              <i class="ph-bold ph-chart-line-up text-purple-400"></i> Replacement Intelligence
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Ambient Tint (Behind Card) -->
+      <div class="relative w-full lg:w-5/12 h-full bg-gradient-to-br from-slate-900 via-slate-950 to-dark-950">
+        <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-purple-500/10 blur-3xl pointer-events-none"></div>
+      </div>
+
+    </div>
+
+    <!-- Centered / Right-Aligned Interactive Authentication Card -->
+    <div class="relative z-20 w-full max-w-md mx-4 sm:mx-6 lg:mr-16 xl:mr-24 pointer-events-auto">
+      <div id="hrm-login-card" class="bg-white/95 dark:bg-dark-900/95 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] space-y-6 transition-all">
+        
+        <!-- Header: Logo & Security Badge -->
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-5">
+          <div class="h-10 px-2 py-1 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-200/80 dark:border-slate-700/80 flex items-center">
+            <picture>
+              <source srcset="logo-mep-ceiling-fan.webp" type="image/webp">
+              <img src="logo-mep-ceiling-fan.webp" alt="MEP Ceiling Fan" class="h-7 w-auto object-contain" />
+            </picture>
+          </div>
+          <div class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+            <i class="ph-bold ph-shield-check text-xs"></i>
+            <span>Secure Login</span>
+          </div>
+        </div>
+
+        <!-- Title & Subtitle -->
+        <div class="space-y-1">
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            Welcome <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">Back!</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Sign in with authorized credentials to enter the HRM Cockpit.
+          </p>
+        </div>
+
+        <!-- Form Elements -->
+        <form id="hrm-login-form" onsubmit="event.preventDefault(); submitHRMLogin();" class="space-y-4">
+          
+          <!-- User / Username Input Group -->
+          <div class="space-y-1.5 text-left">
+            <label for="hrm-login-email" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+              User / Username
+            </label>
+            <div id="hrm-email-box" class="relative flex items-center rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all overflow-hidden shadow-2xs">
+              <span class="pl-3.5 pr-2 text-slate-400 flex items-center justify-center">
+                <i class="ph-bold ph-user text-base"></i>
+              </span>
+              <input 
+                type="text" 
+                id="hrm-login-email" 
+                value="LuckyFan" 
+                required 
+                placeholder="LuckyFan" 
+                autocomplete="username"
+                class="w-full py-3 pr-3.5 text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none bg-transparent"
+              />
+            </div>
+          </div>
+
+          <!-- Password Input Group -->
+          <div class="space-y-1.5 text-left">
+            <div class="flex items-center justify-between">
+              <label for="hrm-login-password" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Password
+              </label>
+              <!-- 1-Click Fill Helper Button -->
+              <button 
+                type="button" 
+                onclick="fillManagerDemo()" 
+                class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 hover:underline cursor-pointer flex items-center gap-1"
+                title="Auto-fill LuckyFan login credentials"
+              >
+                <i class="ph-bold ph-key text-xs"></i>
+                <span>Fill Login Key</span>
+              </button>
+            </div>
+            <div id="hrm-password-box" class="relative flex items-center rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all overflow-hidden shadow-2xs">
+              <span class="pl-3.5 pr-2 text-slate-400 flex items-center justify-center">
+                <i class="ph-bold ph-lock-key text-base"></i>
+              </span>
+              <input 
+                type="password" 
+                id="hrm-login-password" 
+                required 
+                placeholder="Enter password (e.g. 15998)" 
+                autocomplete="current-password"
+                class="w-full py-3 pr-10 text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none bg-transparent"
+              />
+              <button 
+                type="button" 
+                id="hrm-toggle-password-btn" 
+                onclick="togglePasswordVisibility()" 
+                class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                title="Toggle password view"
+              >
+                <i id="hrm-password-icon" class="ph-bold ph-eye text-base"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Keep me signed in row -->
+          <div class="flex items-center justify-between text-xs pt-0.5">
+            <label class="flex items-center gap-2 cursor-pointer select-none font-bold text-slate-600 dark:text-slate-400">
+              <input 
+                type="checkbox" 
+                id="hrm-remember-me" 
+                checked 
+                class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 cursor-pointer"
+              />
+              <span>Keep me signed in</span>
+            </label>
+            <span class="text-[11px] font-mono font-bold text-slate-400">MEP HRM Online</span>
+          </div>
+
+          <!-- Error Alert Banner -->
+          <div id="hrm-login-error" class="hidden p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2.5 animate-pulse">
+            <i class="ph-bold ph-warning-circle text-base shrink-0"></i>
+            <span id="hrm-login-error-text">Incorrect password. Access denied.</span>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            type="submit" 
+            id="hrm-login-btn" 
+            class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 hover:shadow-emerald-500/50 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+          >
+            <span id="hrm-login-btn-text">Sign In to HRM Cockpit</span>
+            <i id="hrm-login-btn-icon" class="ph-bold ph-arrow-right text-base"></i>
+          </button>
+        </form>
+
+        <!-- Footer Notice -->
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 text-center space-y-1">
+          <p class="text-[11px] font-medium text-slate-400">
+            MEP GROUP • Human Resource Management System
+          </p>
+          <span class="text-[10px] font-mono text-slate-400/80 block">
+            Author: Md. Saiful Islam (Senior Manager)
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= 🔐 MEP HRM AUTHENTICATION CONTROLLER ================= -->
+  <script>
+    window.togglePasswordVisibility = function() {
+      var passInput = document.getElementById('hrm-login-password');
+      var icon = document.getElementById('hrm-password-icon');
+      if (!passInput) return;
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        if (icon) icon.className = 'ph-bold ph-eye-slash text-base';
+      } else {
+        passInput.type = 'password';
+        if (icon) icon.className = 'ph-bold ph-eye text-base';
+      }
+    };
+
+    window.fillManagerDemo = function() {
+      var emailInput = document.getElementById('hrm-login-email');
+      var passInput = document.getElementById('hrm-login-password');
+      if (emailInput) emailInput.value = 'LuckyFan';
+      if (passInput) {
+        passInput.value = '15998';
+        passInput.type = 'text';
+        var icon = document.getElementById('hrm-password-icon');
+        if (icon) icon.className = 'ph-bold ph-eye-slash text-base';
+      }
+      var errorBox = document.getElementById('hrm-login-error');
+      if (errorBox) errorBox.classList.add('hidden');
+    };
+
+    window.submitHRMLogin = function() {
+      var emailInput = document.getElementById('hrm-login-email');
+      var passInput = document.getElementById('hrm-login-password');
+      var rememberCheckbox = document.getElementById('hrm-remember-me');
+      var errorBox = document.getElementById('hrm-login-error');
+      var errorText = document.getElementById('hrm-login-error-text');
+      var loginBtn = document.getElementById('hrm-login-btn');
+      var loginBtnText = document.getElementById('hrm-login-btn-text');
+      var loginBtnIcon = document.getElementById('hrm-login-btn-icon');
+      var card = document.getElementById('hrm-login-card');
+
+      var userInput = (emailInput ? emailInput.value : '').trim();
+      var pass = passInput ? passInput.value : '';
+      var rememberMe = rememberCheckbox ? rememberCheckbox.checked : true;
+
+      if (errorBox) errorBox.classList.add('hidden');
+
+      // Valid Credentials Check:
+      // Primary authorized: User LuckyFan, Password 15998
+      var isLuckyFan = (userInput.toLowerCase() === 'luckyfan' && pass === '15998');
+      var isManager = (userInput.toLowerCase() === 'engr.saiful9109@gmail.com' && pass === 'Saiful@3746');
+      var authToken = 'bdfb1c1cc93dde30257dba06de9e84e30e69e73f0016817f5197a76c2ab2e473';
+
+      if (loginBtn) loginBtn.disabled = true;
+      if (loginBtnText) loginBtnText.textContent = 'Verifying credentials...';
+      if (loginBtnIcon) loginBtnIcon.className = 'ph-bold ph-spinner animate-spin text-base';
+
+      setTimeout(function() {
+        var isAuthorized = isLuckyFan || isManager;
+
+        if (isAuthorized) {
+          var userObj = {
+            name: isLuckyFan ? 'LuckyFan' : 'Md. Saiful Islam',
+            username: isLuckyFan ? 'LuckyFan' : 'Saiful',
+            email: isLuckyFan ? 'luckyfan@mepgroup.com' : 'engr.saiful9109@gmail.com',
+            role: isLuckyFan ? 'Authorized User' : 'Senior Manager',
+            designation: isLuckyFan ? 'LuckyFan HRM Operator' : 'Head of Operations & HRM',
+            token: authToken,
+            loginTime: new Date().toISOString()
+          };
+
+          var targetStorage = rememberMe ? localStorage : sessionStorage;
+          try {
+            targetStorage.setItem('mep_auth_token', authToken);
+            targetStorage.setItem('mep_auth_user', JSON.stringify(userObj));
+            targetStorage.setItem('mep_hrm_online_logged_in', 'true');
+            targetStorage.setItem('mep_user_logged_in', 'true');
+            document.cookie = 'mep_session=' + encodeURIComponent(authToken) + '; Path=/; Max-Age=2592000; SameSite=Lax';
+          } catch (e) {}
+
+          // Also trigger server-side auth if local server is listening
+          try {
+            fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userInput, password: pass })
+            }).catch(function() {});
+          } catch (e) {}
+
+          if (loginBtnText) loginBtnText.textContent = 'Access Granted!';
+          if (loginBtnIcon) loginBtnIcon.className = 'ph-bold ph-check-circle text-base';
+
+          document.documentElement.classList.remove('hrm-auth-locked');
+          window.__HRM_ONLINE_AUTH__ = true;
+
+          var overlay = document.getElementById('hrm-login-overlay');
+          if (overlay) {
+            overlay.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)';
+            overlay.style.opacity = '0';
+            overlay.style.transform = 'scale(1.03)';
+            overlay.style.pointerEvents = 'none';
+            setTimeout(function() {
+              overlay.style.display = 'none';
+              var welcomeMsg = isLuckyFan 
+                ? 'স্বাগতম LuckyFan! HRM অনলাইন ককপিট সফলভাবে আনলক হয়েছে।' 
+                : 'স্বাগতম মো. সাইফুল ইসলাম! HRM অনলাইন ককপিট আনলক হয়েছে।';
+              if (window.showHRToast) {
+                window.showHRToast(welcomeMsg);
+              }
+            }, 450);
+          }
+        } else {
+          if (loginBtn) loginBtn.disabled = false;
+          if (loginBtnText) loginBtnText.textContent = 'Sign In to HRM Cockpit';
+          if (loginBtnIcon) loginBtnIcon.className = 'ph-bold ph-arrow-right text-base';
+
+          if (errorBox) {
+            errorBox.classList.remove('hidden');
+            if (errorText) errorText.textContent = 'ভুল ইউজার বা পাসওয়ার্ড। সঠিক তথ্য প্রদান করুন।';
+          }
+          if (card) {
+            card.classList.remove('hrm-shake');
+            void card.offsetWidth;
+            card.classList.add('hrm-shake');
+            setTimeout(function() { card.classList.remove('hrm-shake'); }, 600);
+          }
+          if (passInput) passInput.focus();
+        }
+      }, 400);
+    };
+
+    window.handleLogout = function(skipConfirm) {
+      if (skipConfirm || confirm('আপনি কি HRM মডিউল থেকে লগআউট করতে চান?')) {
+        try {
+          fetch('/api/auth/logout', { method: 'POST' }).catch(function(){});
+        } catch (e) {}
+        try {
+          localStorage.removeItem('mep_auth_token');
+          localStorage.removeItem('mep_auth_user');
+          localStorage.removeItem('mep_user_logged_in');
+          localStorage.removeItem('mep_hrm_online_logged_in');
+          sessionStorage.removeItem('mep_auth_token');
+          sessionStorage.removeItem('mep_auth_user');
+          sessionStorage.removeItem('mep_user_logged_in');
+          sessionStorage.removeItem('mep_hrm_online_logged_in');
+          document.cookie = 'mep_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
+        } catch (e) {}
+
+        document.documentElement.classList.add('hrm-auth-locked');
+        window.__HRM_ONLINE_AUTH__ = false;
+
+        var overlay = document.getElementById('hrm-login-overlay');
+        var passInput = document.getElementById('hrm-login-password');
+        var loginBtn = document.getElementById('hrm-login-btn');
+        var loginBtnText = document.getElementById('hrm-login-btn-text');
+        var loginBtnIcon = document.getElementById('hrm-login-btn-icon');
+        var errorBox = document.getElementById('hrm-login-error');
+
+        var emailInput = document.getElementById('hrm-login-email');
+        if (passInput) passInput.value = '';
+        if (emailInput && !emailInput.value) emailInput.value = 'LuckyFan';
+        if (errorBox) errorBox.classList.add('hidden');
+        if (loginBtn) loginBtn.disabled = false;
+        if (loginBtnText) loginBtnText.textContent = 'Sign In to HRM Cockpit';
+        if (loginBtnIcon) loginBtnIcon.className = 'ph-bold ph-arrow-right text-base';
+
+        if (overlay) {
+          overlay.style.display = 'flex';
+          overlay.style.pointerEvents = 'auto';
+          overlay.style.transform = 'scale(1)';
+          overlay.style.opacity = '0';
+          void overlay.offsetWidth;
+          overlay.style.transition = 'opacity 0.35s ease';
+          overlay.style.opacity = '1';
+        } else {
+          window.location.reload();
+        }
+      }
+    };
+  </script>
   <header class="sticky top-0 z-30 glass-header shrink-0">
     <div class="w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
       
@@ -2882,23 +3281,7 @@ a:hover .ph-arrow-up-right,
       }
     }
 
-    function handleLogout() {
-      if (confirm('Sign out from MEP HRM Module?')) {
-        try {
-          fetch('/api/auth/logout', { method: 'POST' }).catch(function(){});
-        } catch (e) {}
-        try {
-          localStorage.removeItem('mep_auth_token');
-          localStorage.removeItem('mep_auth_user');
-          localStorage.removeItem('mep_user_logged_in');
-          sessionStorage.removeItem('mep_auth_token');
-          sessionStorage.removeItem('mep_auth_user');
-          sessionStorage.removeItem('mep_user_logged_in');
-          document.cookie = 'mep_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
-        } catch (e) {}
-        window.location.replace('index.html?logged_out=1');
-      }
-    }
+
 
     (function() {
       var currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
