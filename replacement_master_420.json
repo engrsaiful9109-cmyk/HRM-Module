@@ -3616,6 +3616,7 @@
     "_fb_key": "rep_226"
   },
   {
+    "_fb_key": "rep_227",
     "new_designation": "Helper",
     "new_doj": "03-Oct-2026",
     "new_id": "19093",
@@ -3628,8 +3629,7 @@
     "replace_id": "18838",
     "replace_name": "Md.Saidul Islam",
     "replace_section": "Fan Sada Shapla",
-    "sl": 227,
-    "_fb_key": "rep_227"
+    "sl": 227
   },
   {
     "new_designation": "Helper",
@@ -3744,20 +3744,20 @@
     "_fb_key": "rep_234"
   },
   {
+    "_fb_key": "rep_235",
     "new_designation": "Helper",
     "new_doj": "07-Oct-2026",
     "new_id": "19134",
     "new_name": "Sanjida Islam shami",
-    "new_section": "Fan Armature Winding",
+    "new_section": "Fan Assemble Line",
     "new_sl": "235",
     "remarks": "Resigned / ইস্তফা",
     "replace_designation": "Helper",
     "replace_doj": "07-Oct-2026",
     "replace_id": "18213",
     "replace_name": "Fatema Akter",
-    "replace_section": "Fan Armature Winding",
-    "sl": 235,
-    "_fb_key": "rep_235"
+    "replace_section": "Fan Assemble Line",
+    "sl": 235
   },
   {
     "new_designation": "Helper",

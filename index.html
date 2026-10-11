@@ -6,6 +6,63 @@
   <title>MEP GROUP • Human Resource Management (HRM) Module</title>
   <link rel="icon" type="image/png" href="favicon.png">
 
+  <!-- Immediate Authentication & Theme Guard (Instant 0ms Execution Before Any Assets) -->
+  <script>
+    (function() {
+      // Theme initialization
+      try {
+        var theme = localStorage.getItem('mep_theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+
+      // Check session authentication for Lucky-Fan with URL token handoff
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var urlToken = params.get('token');
+        var expectedSecret = 'Lucky-Fan-Auth-Token';
+        var expectedToken = 'bdfb1c1cc93dde30257dba06de9e84e30e69e73f0016817f5197a76c2ab2e473';
+
+        // Accept token passed directly in URL (solves file:/// cross-origin storage partition in Opera/Chrome)
+        if (urlToken === expectedSecret || urlToken === expectedToken) {
+          try {
+            sessionStorage.setItem('mep_flat_session', expectedSecret);
+            localStorage.setItem('mep_flat_session', expectedSecret);
+            localStorage.setItem('mep_auth_token', expectedToken);
+            localStorage.setItem('mep_auth_user', 'Lucky-Fan');
+            localStorage.setItem('mep_user_logged_in', 'true');
+            localStorage.setItem('mep_hrm_online_logged_in', 'true');
+            if (window.history && window.history.replaceState) {
+              var cleanUrl = window.location.pathname + (window.location.hash || '');
+              window.history.replaceState({}, document.title, cleanUrl);
+            }
+          } catch(err) {}
+          return; // Authorized!
+        }
+
+        var sessionAuth = sessionStorage.getItem('mep_flat_session') || localStorage.getItem('mep_flat_session');
+        if (sessionAuth === expectedSecret) {
+          localStorage.setItem('mep_auth_token', expectedToken);
+          localStorage.setItem('mep_auth_user', 'Lucky-Fan');
+          localStorage.setItem('mep_user_logged_in', 'true');
+          localStorage.setItem('mep_hrm_online_logged_in', 'true');
+        } else {
+          localStorage.removeItem('mep_auth_token');
+          sessionStorage.removeItem('mep_flat_session');
+          localStorage.removeItem('mep_flat_session');
+          window.location.replace('login.html?unauth=1');
+          return;
+        }
+      } catch (e) {
+        window.location.replace('login.html?unauth=1');
+        return;
+      }
+    })();
+  </script>
+
   <!-- Preload Essential Fonts -->
   <!-- Preload Essential Fonts -->
   <link rel="preload" href="inter_var.woff2" as="font" type="font/woff2" crossorigin>
@@ -14,7 +71,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
 
   <!-- Local Tailwind Engine with CDN Fallback -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="tailwind.min.js" onerror="this.onerror=null;this.src='https://cdn.tailwindcss.com';"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -102,35 +159,7 @@
   <script type="module" src="hrm_firebase_sync.js?v=20261011_v1"></script>
 
 
-  <!-- Immediate Authentication & Theme Guard -->
-  <script>
-    (function() {
-      // Theme initialization
-      try {
-        var theme = localStorage.getItem('mep_theme') || 'light';
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      } catch (e) {}
 
-      // Check session authentication for Lucky-Fan
-      try {
-        var sessionAuth = sessionStorage.getItem('mep_flat_session') || localStorage.getItem('mep_flat_session');
-        if (sessionAuth === 'Lucky-Fan-Auth-Token') {
-          var expectedToken = 'bdfb1c1cc93dde30257dba06de9e84e30e69e73f0016817f5197a76c2ab2e473';
-          localStorage.setItem('mep_auth_token', expectedToken);
-          localStorage.setItem('mep_auth_user', 'Lucky-Fan');
-          localStorage.setItem('mep_user_logged_in', 'true');
-          localStorage.setItem('mep_hrm_online_logged_in', 'true');
-        } else {
-          localStorage.removeItem('mep_auth_token');
-          sessionStorage.removeItem('mep_flat_session');
-        }
-      } catch (e) {}
-    })();
-  </script>
 
   <style>
     @font-face {
@@ -225,23 +254,21 @@
 
     /* ========================================================================= */
     /* 🚀 HIGH-PERFORMANCE 60FPS SMOOTH SCROLL & LIGHTNING-FAST UI ENGINE        */
-    /* Enforces GPU hardware acceleration, non-blocking reflows, instant modals  */
+    /* Enforces non-blocking scrolling, instant modals, and pure responsiveness  */
     /* ========================================================================= */
     
-    /* 1. Global Viewport & Hardware Accelerated Smooth Scrolling */
-    html {
-      scroll-behavior: smooth;
+    /* 1. Global Viewport & Pure 60FPS Hardware Native Layout */
+    html, body {
+      height: 100% !important;
+      width: 100% !important;
+      overflow: hidden !important;
+      scroll-behavior: auto !important;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
     }
-    
-    body {
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-    }
 
-    /* 2. GPU Compositor Layers on All Scroll Containers */
+    /* 2. Seamless Scroll Propagation on All Containers & Tables (NO WHEEL TRAP) */
     .overflow-x-auto,
     .overflow-y-auto,
     .overflow-auto,
@@ -253,20 +280,12 @@
     #permanent-employees-table-card,
     #yearly-increment-table-card,
     #inter-section-transfer-section,
-    #authorized-manpower-section {
-      transform: translateZ(0);
+    #authorized-manpower-section,
+    main {
       -webkit-overflow-scrolling: touch !important;
-      overscroll-behavior: contain !important;
-      will-change: scroll-position;
-      contain: paint;
-    }
-
-    /* 3. High-Speed Scrolling De-Jank Engine (Pointer-Events Throttling) */
-    /* While the user scrolls, hover recalculations and reflows are paused */
-    body.is-scrolling *,
-    body.is-table-scrolling * {
-      pointer-events: none !important;
-      user-select: none !important;
+      overscroll-behavior-x: auto !important;
+      overscroll-behavior-y: auto !important;
+      overscroll-behavior: auto !important;
     }
 
     /* 4. Table Row Render Isolation & Fast Repaint */
@@ -1234,21 +1253,91 @@ a:hover .ph-arrow-up-right,
       font-size: 1.15rem !important;
     }
 
-    /* Mobile off-canvas drawer */
-    /* Mobile off-canvas drawer */
+    /* ==============================================================
+       📱 HIGH-AGENCY MOBILE FIRST OPTIMIZATION SUITE (< 768px)
+       Desktop/PC layout remains 100% UNTOUCHED and pristine
+       ============================================================== */
     @media (max-width: 767px) {
+      /* 1. Mobile Off-Canvas Drawer with Backdrop */
       #hrm-sidebar {
         position: fixed !important;
-        top: 64px !important;
+        top: 0 !important;
         left: 0 !important;
         bottom: 0 !important;
-        height: calc(100vh - 64px) !important;
+        width: 290px !important;
+        max-width: 85vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
         transform: translateX(-100%) !important;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+        box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.75) !important;
+        z-index: 60 !important;
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
       }
       #hrm-sidebar.mobile-open {
         display: flex !important;
         transform: translateX(0) !important;
+      }
+      #hrm-sidebar-overlay {
+        z-index: 55 !important;
+      }
+
+      /* 2. Mobile Main Scroll Container & Padding */
+      #hrm-main-scroll {
+        padding: 0.75rem !important;
+        padding-bottom: 5.5rem !important; /* Space for Mobile Bottom Dock */
+      }
+
+      /* 3. Mobile Form Touch Targets & iOS Zoom Prevention */
+      input, select, textarea {
+        font-size: 16px !important; /* Prevents auto-zoom in iOS Safari */
+        min-height: 42px !important;
+      }
+
+      /* 4. Form Cards Mobile Flow */
+      #view-entry-form {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      #view-entry-form .entry-glass-card {
+        border-radius: 1.25rem !important;
+      }
+      #view-entry-form .entry-glass-header {
+        padding: 1rem !important;
+      }
+      #view-entry-form form {
+        padding: 1rem !important;
+      }
+      #view-entry-form .grid {
+        grid-template-columns: 1fr !important;
+      }
+      #view-entry-form .entry-section-glass {
+        padding: 0.875rem !important;
+      }
+      #entry-submit-btn {
+        width: 100% !important;
+        padding-top: 0.875rem !important;
+        padding-bottom: 0.875rem !important;
+        font-size: 0.875rem !important;
+        justify-content: center !important;
+      }
+
+      /* 5. Header Compactness on Mobile */
+      header.glass-header {
+        height: 3.5rem !important; /* 56px */
+      }
+      header.glass-header .h-16 {
+        height: 3.5rem !important;
+      }
+
+      /* 6. Mobile Modal Bottom Sheet Experience */
+      #employee-dossier-modal > div > div,
+      #employee-edit-modal > div > div,
+      #section-salary-staff-modal > div > div {
+        max-height: 92vh !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        margin-top: auto !important;
+        margin-bottom: 0 !important;
       }
     }
 
@@ -2044,122 +2133,159 @@ a:hover .ph-arrow-up-right,
     }
 
     /* ------------------------------------------------------------- */
-    /* 🌟 UNIVERSAL HIGH-VISIBILITY HORIZONTAL SCROLL SLIDER SYSTEM   */
-    /* Enforces crystal clear, easily draggable horizontal sliders   */
+    /* 🌟 UNIVERSAL HIGH-VISIBILITY LIQUID GLASS SCROLLBAR SYSTEM    */
+    /* Enforces crystal clear, easily draggable sliders on all pages */
     /* ------------------------------------------------------------- */
-    .glossy-table-box,
-    #manpower-table-wrapper,
-    .custom-scrollbar,
-    .overflow-x-auto,
-    .overflow-auto,
-    .rep-glass-panel,
-    [class*="overflow-x-auto"],
-    #permanent-employees-table-card,
-    #yearly-increment-table-card {
-      scrollbar-width: auto !important;
-      scrollbar-color: rgba(147, 51, 234, 0.75) rgba(15, 23, 42, 0.08) !important;
-      -webkit-overflow-scrolling: touch !important;
-    }
-
-    .dark .glossy-table-box,
-    .dark #manpower-table-wrapper,
-    .dark .custom-scrollbar,
-    .dark .overflow-x-auto,
-    .dark .overflow-auto,
-    .dark .rep-glass-panel,
-    .dark [class*="overflow-x-auto"],
-    .dark #permanent-employees-table-card,
-    .dark #yearly-increment-table-card {
-      scrollbar-color: rgba(168, 85, 247, 0.8) rgba(255, 255, 255, 0.08) !important;
-    }
-
-    /* WebKit / Chromium (Chrome, Edge) Scrollbar Dimensions */
+    
+    /* 1. Chromium & WebKit (Chrome, Edge, Brave, Opera, Safari) */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    main::-webkit-scrollbar,
     .glossy-table-box::-webkit-scrollbar,
     #manpower-table-wrapper::-webkit-scrollbar,
     .custom-scrollbar::-webkit-scrollbar,
     .overflow-x-auto::-webkit-scrollbar,
+    .overflow-y-auto::-webkit-scrollbar,
     .overflow-auto::-webkit-scrollbar,
     .rep-glass-panel::-webkit-scrollbar,
     [class*="overflow-x-auto"]::-webkit-scrollbar,
     #permanent-employees-table-card::-webkit-scrollbar,
-    #yearly-increment-table-card::-webkit-scrollbar {
+    #yearly-increment-table-card::-webkit-scrollbar,
+    #inter-section-transfer-section::-webkit-scrollbar,
+    #authorized-manpower-section::-webkit-scrollbar {
       display: block !important;
+      width: 11px !important;
       height: 12px !important;
-      width: 10px !important;
     }
 
     /* Slider Track */
+    html::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track,
+    main::-webkit-scrollbar-track,
     .glossy-table-box::-webkit-scrollbar-track,
     #manpower-table-wrapper::-webkit-scrollbar-track,
     .custom-scrollbar::-webkit-scrollbar-track,
     .overflow-x-auto::-webkit-scrollbar-track,
+    .overflow-y-auto::-webkit-scrollbar-track,
     .overflow-auto::-webkit-scrollbar-track,
     .rep-glass-panel::-webkit-scrollbar-track,
     [class*="overflow-x-auto"]::-webkit-scrollbar-track,
     #permanent-employees-table-card::-webkit-scrollbar-track,
-    #yearly-increment-table-card::-webkit-scrollbar-track {
+    #yearly-increment-table-card::-webkit-scrollbar-track,
+    #inter-section-transfer-section::-webkit-scrollbar-track,
+    #authorized-manpower-section::-webkit-scrollbar-track {
       display: block !important;
-      background: rgba(15, 23, 42, 0.06) !important;
+      background: rgba(15, 23, 42, 0.05) !important;
       border-radius: 9999px !important;
-      margin: 2px 6px !important;
-      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      margin: 2px 4px !important;
+      border: 1px solid rgba(0, 0, 0, 0.06) !important;
     }
 
+    .dark html::-webkit-scrollbar-track,
+    .dark body::-webkit-scrollbar-track,
+    .dark main::-webkit-scrollbar-track,
     .dark .glossy-table-box::-webkit-scrollbar-track,
     .dark #manpower-table-wrapper::-webkit-scrollbar-track,
     .dark .custom-scrollbar::-webkit-scrollbar-track,
     .dark .overflow-x-auto::-webkit-scrollbar-track,
+    .dark .overflow-y-auto::-webkit-scrollbar-track,
     .dark .overflow-auto::-webkit-scrollbar-track,
     .dark .rep-glass-panel::-webkit-scrollbar-track,
     .dark [class*="overflow-x-auto"]::-webkit-scrollbar-track,
     .dark #permanent-employees-table-card::-webkit-scrollbar-track,
-    .dark #yearly-increment-table-card::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.08) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    .dark #yearly-increment-table-card::-webkit-scrollbar-track,
+    .dark #inter-section-transfer-section::-webkit-scrollbar-track,
+    .dark #authorized-manpower-section::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
-    /* Default / Master Slider Button Thumb */
+    /* Master Slider Button Thumb (High-Visibility Liquid Glass) */
+    html::-webkit-scrollbar-thumb,
+    body::-webkit-scrollbar-thumb,
+    main::-webkit-scrollbar-thumb,
     .glossy-table-box::-webkit-scrollbar-thumb,
     #manpower-table-wrapper::-webkit-scrollbar-thumb,
     .custom-scrollbar::-webkit-scrollbar-thumb,
     .overflow-x-auto::-webkit-scrollbar-thumb,
+    .overflow-y-auto::-webkit-scrollbar-thumb,
     .overflow-auto::-webkit-scrollbar-thumb,
     .rep-glass-panel::-webkit-scrollbar-thumb,
     [class*="overflow-x-auto"]::-webkit-scrollbar-thumb,
     #permanent-employees-table-card::-webkit-scrollbar-thumb,
-    #yearly-increment-table-card::-webkit-scrollbar-thumb {
+    #yearly-increment-table-card::-webkit-scrollbar-thumb,
+    #inter-section-transfer-section::-webkit-scrollbar-thumb,
+    #authorized-manpower-section::-webkit-scrollbar-thumb {
       display: block !important;
-      background: linear-gradient(90deg, rgba(147, 51, 234, 0.75), rgba(126, 34, 206, 0.9)) !important;
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.85) 0%, rgba(126, 34, 206, 0.95) 100%) !important;
       border-radius: 9999px !important;
       border: 2px solid transparent !important;
       background-clip: padding-box !important;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+      box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.65), 0 2px 6px rgba(126, 34, 206, 0.35) !important;
       cursor: grab !important;
-      transition: background 0.2s ease !important;
+      min-height: 36px !important;
+      min-width: 36px !important;
+      transition: background 0.2s ease, box-shadow 0.2s ease !important;
     }
 
+    /* Slider Button Hover Glow State */
+    html::-webkit-scrollbar-thumb:hover,
+    body::-webkit-scrollbar-thumb:hover,
+    main::-webkit-scrollbar-thumb:hover,
     .glossy-table-box::-webkit-scrollbar-thumb:hover,
     #manpower-table-wrapper::-webkit-scrollbar-thumb:hover,
     .custom-scrollbar::-webkit-scrollbar-thumb:hover,
     .overflow-x-auto::-webkit-scrollbar-thumb:hover,
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover,
     .overflow-auto::-webkit-scrollbar-thumb:hover,
     .rep-glass-panel::-webkit-scrollbar-thumb:hover,
     [class*="overflow-x-auto"]::-webkit-scrollbar-thumb:hover,
     #permanent-employees-table-card::-webkit-scrollbar-thumb:hover,
-    #yearly-increment-table-card::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(90deg, rgba(126, 34, 206, 0.95), rgba(107, 33, 168, 1)) !important;
+    #yearly-increment-table-card::-webkit-scrollbar-thumb:hover,
+    #inter-section-transfer-section::-webkit-scrollbar-thumb:hover,
+    #authorized-manpower-section::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 1) 0%, rgba(147, 51, 234, 1) 100%) !important;
       background-clip: padding-box !important;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 3px 8px rgba(147, 51, 234, 0.45) !important;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.85), 0 3px 10px rgba(147, 51, 234, 0.5) !important;
     }
 
+    /* Slider Button Active / Dragging State */
+    html::-webkit-scrollbar-thumb:active,
+    body::-webkit-scrollbar-thumb:active,
+    main::-webkit-scrollbar-thumb:active,
     .glossy-table-box::-webkit-scrollbar-thumb:active,
     #manpower-table-wrapper::-webkit-scrollbar-thumb:active,
     .custom-scrollbar::-webkit-scrollbar-thumb:active,
     .overflow-x-auto::-webkit-scrollbar-thumb:active,
-    .rep-glass-panel::-webkit-scrollbar-thumb:active {
+    .overflow-y-auto::-webkit-scrollbar-thumb:active,
+    .overflow-auto::-webkit-scrollbar-thumb:active,
+    .rep-glass-panel::-webkit-scrollbar-thumb:active,
+    [class*="overflow-x-auto"]::-webkit-scrollbar-thumb:active,
+    #permanent-employees-table-card::-webkit-scrollbar-thumb:active,
+    #yearly-increment-table-card::-webkit-scrollbar-thumb:active,
+    #inter-section-transfer-section::-webkit-scrollbar-thumb:active,
+    #authorized-manpower-section::-webkit-scrollbar-thumb:active {
       cursor: grabbing !important;
       background: #7e22ce !important;
       background-clip: padding-box !important;
+    }
+
+    html::-webkit-scrollbar-corner,
+    body::-webkit-scrollbar-corner,
+    main::-webkit-scrollbar-corner,
+    div::-webkit-scrollbar-corner {
+      background: transparent !important;
+    }
+
+    /* 2. Firefox Fallback Support via @supports (avoids overriding Chromium webkit styles) */
+    @supports not selector(::-webkit-scrollbar) {
+      html, body, main, .overflow-x-auto, .overflow-y-auto, .overflow-auto, .custom-scrollbar, .glossy-table-box, .rep-glass-panel {
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(147, 51, 234, 0.85) rgba(15, 23, 42, 0.08) !important;
+      }
+      .dark html, .dark body, .dark main, .dark .overflow-x-auto, .dark .overflow-y-auto, .dark .overflow-auto, .dark .custom-scrollbar, .dark .glossy-table-box, .dark .rep-glass-panel {
+        scrollbar-color: rgba(168, 85, 247, 0.85) rgba(255, 255, 255, 0.08) !important;
+      }
     }
 
     /* Top Specular Light Reflection Line */
@@ -2441,169 +2567,10 @@ a:hover .ph-arrow-up-right,
     }
   </style>
 
-
-  <!-- HRM Flat Standalone Scope Filter & Login Panel Styles -->
-  <style id="hrm-flat-scope-filter">
-    #menu-group-hrm-dashboard,
-    #menu-group-manpower-summary,
-    #menu-group-section-wise-salary,
-    #menu-group-authorized,
-    #menu-group-attendance,
-    #sidebar-sub-permanent-employee-list,
-    #sidebar-sub-yearly-increment,
-    #sidebar-sub-inter-section-transfer,
-    #hrm-dashboard-section,
-    #manpower-summary-section,
-    #section-wise-salary-section,
-    #authorized-manpower-section,
-    #permanent-employee-list-section,
-    #yearly-increment-section,
-    #inter-section-transfer-section,
-    #daily-attendance-section,
-    #monthly-attendance-section,
-    #leave-information-section,
-    #all-erp-reports-section {
-      display: none !important;
-    }
-    #submenu-manpower-information {
-      display: block !important;
-    }
-    @keyframes loginShake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-8px); }
-      40%, 80% { transform: translateX(8px); }
-    }
-    .animate-shake {
-      animation: loginShake 0.4s ease-in-out;
-    }
-    .glass-login-panel {
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1.5px solid rgba(255, 255, 255, 0.7);
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.35), inset 0 1px 1.5px rgba(255, 255, 255, 0.85);
-    }
-    .dark .glass-login-panel {
-      background: rgba(15, 23, 42, 0.92);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.12);
-    }
-  </style>
-</head>
-<body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col select-none">
-
-  <!-- ================= LIQUID GLASS LOGIN GATEWAY (Lucky-Fan) ================= -->
-  <div id="mep-flat-login-overlay" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/65 dark:bg-slate-950/80 backdrop-blur-2xl transition-all duration-300">
-    <!-- Dynamic Ambient Liquid Glow Orbs -->
-    <div class="w-96 h-96 rounded-full bg-sky-500/20 blur-3xl absolute -top-16 -left-16 pointer-events-none animate-pulse"></div>
-    <div class="w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl absolute -bottom-16 -right-16 pointer-events-none animate-pulse"></div>
-
-    <!-- Liquid Glass Login Card -->
-    <div id="mep-login-card" class="relative w-full max-w-md p-8 sm:p-10 rounded-3xl glass-login-panel transition-all duration-300">
-      
-      <!-- Brand Header -->
-      <div class="text-center mb-6">
-        <div class="inline-flex p-3 rounded-2xl bg-white/70 dark:bg-slate-800/70 border border-white/60 dark:border-white/10 shadow-xs mb-3">
-          <picture>
-            <source srcset="logo-mep-ceiling-fan.webp" type="image/webp">
-            <img src="logo-mep-ceiling-fan.png" alt="MEP Ceiling Fan" class="h-9 w-auto object-contain select-none" />
-          </picture>
-        </div>
-        <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Lucky Fan Portal</h1>
-        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">HRM & Manpower Access Gateway</p>
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/25 text-sky-600 dark:text-sky-400 text-[11px] font-mono font-bold mt-2.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping"></span>
-          <span>Protected Access Required</span>
-        </div>
-      </div>
-
-      <!-- Login Form -->
-      <form id="mep-flat-login-form" onsubmit="handleFlatLoginSubmit(event)" class="space-y-4">
-        
-        <!-- Error Alert -->
-        <div id="mep-login-error" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
-          <i class="ph-bold ph-warning-circle text-base shrink-0"></i>
-          <span id="mep-login-error-text">Invalid username or password. Please try again.</span>
-        </div>
-
-        <!-- Username Field -->
-        <div>
-          <label for="mep-flat-username" class="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-            Username
-          </label>
-          <div class="relative flex items-center">
-            <i class="ph-bold ph-user text-slate-400 dark:text-slate-500 text-base absolute left-3.5 pointer-events-none"></i>
-            <input 
-              type="text" 
-              id="mep-flat-username" 
-              autocomplete="username" 
-              placeholder="Enter username (Lucky-Fan)" 
-              value="Lucky-Fan"
-              required
-              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all"
-            />
-          </div>
-        </div>
-
-        <!-- Password Field -->
-        <div>
-          <label for="mep-flat-password" class="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-            Password
-          </label>
-          <div class="relative flex items-center">
-            <i class="ph-bold ph-lock-key text-slate-400 dark:text-slate-500 text-base absolute left-3.5 pointer-events-none"></i>
-            <input 
-              type="password" 
-              id="mep-flat-password" 
-              autocomplete="current-password" 
-              placeholder="Enter password" 
-              required
-              class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all"
-            />
-            <button 
-              type="button" 
-              onclick="toggleFlatPasswordVisibility()" 
-              class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
-              title="Toggle password view"
-            >
-              <i id="flat-pass-toggle-icon" class="ph-bold ph-eye text-base"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Remember Me Checkbox -->
-        <div class="flex items-center justify-between pt-1">
-          <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-400 select-none">
-            <input type="checkbox" id="mep-flat-remember" checked class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 cursor-pointer" />
-            <span>Remember access on this browser</span>
-          </label>
-        </div>
-
-        <!-- Submit Button -->
-        <button 
-          type="submit" 
-          id="mep-login-submit-btn" 
-          class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-sky-500/25 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 mt-2"
-        >
-          <span>Sign In</span>
-          <i class="ph-bold ph-arrow-right text-base"></i>
-        </button>
-
-      </form>
-
-      <!-- Footer Security Assurance -->
-      <div class="mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-center gap-2 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-        <i class="ph-bold ph-shield-check text-sky-500 text-sm"></i>
-        <span>Enterprise Security Protected • MEP Fan Ltd</span>
-      </div>
-
-    </div>
-  </div>
+<body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-100 h-screen h-[100dvh] flex flex-col select-none overflow-hidden">
 
   <!-- ================= TOP HEADER BAR ================= -->
-  <header class="sticky top-0 z-30 glass-header shrink-0">
+  <header class="h-16 shrink-0 z-30 glass-header border-b border-slate-200/80 dark:border-slate-800/80">
     <div class="w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
       
       <!-- Brand, Breadcrumb & Navigation -->
@@ -2675,7 +2642,7 @@ a:hover .ph-arrow-up-right,
   </header>
 
   <!-- ================= MAIN LAYOUT WRAPPER (SIDEBAR + MAIN CONTENT) ================= -->
-  <div class="flex-1 flex w-full relative">
+  <div class="flex-1 flex w-full h-[calc(100vh-64px)] min-h-0 overflow-hidden relative">
 
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div id="hrm-sidebar-overlay" onclick="toggleHRMSidebar(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-35 hidden transition-opacity duration-200 md:hidden"></div>
@@ -2683,7 +2650,7 @@ a:hover .ph-arrow-up-right,
     <!-- ================= LEFT COLLAPSIBLE HRM NAVIGATION SIDEBAR ================= -->
     <aside 
       id="hrm-sidebar" 
-      class="w-64 xl:w-72 shrink-0 bg-sky-600 text-white backdrop-blur-xl border-r border-sky-400/30 flex flex-col justify-between sticky top-16 h-[calc(100vh-64px)] z-40 transition-all duration-300 select-none overflow-hidden overflow-x-hidden"
+      class="w-64 xl:w-72 shrink-0 bg-sky-600 text-white backdrop-blur-xl border-r border-sky-400/30 flex flex-col justify-between h-full z-40 transition-all duration-300 select-none overflow-hidden overflow-x-hidden"
       style="overflow-x: hidden !important;"
     >
       <!-- Scrollable Navigation Area -->
@@ -2692,6 +2659,22 @@ a:hover .ph-arrow-up-right,
         style="overflow-x: hidden !important; scrollbar-width: none !important; -ms-overflow-style: none !important;"
       >
         
+        <!-- Mobile Drawer Close Header (Visible only on <768px) -->
+        <div class="md:hidden flex items-center justify-between pb-2 mb-2 border-b border-white/20">
+          <span class="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <i class="ph-bold ph-identification-card text-sky-200 text-sm"></i>
+            <span>HR Operations</span>
+          </span>
+          <button 
+            type="button" 
+            onclick="toggleHRMSidebar(false)" 
+            class="w-8 h-8 rounded-xl bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
+            title="Close Menu"
+          >
+            <i class="ph-bold ph-x text-base"></i>
+          </button>
+        </div>
+
         <!-- Sidebar Brand / Category Header (Liquid Glass Card) -->
         <div class="px-3 py-2.5 rounded-2xl bg-white/15 border border-white/30 shadow-2xs sidebar-module-banner mb-3">
           <div class="flex items-center justify-between">
@@ -2730,7 +2713,7 @@ a:hover .ph-arrow-up-right,
           </div>
 
           <!-- 0. MANPOWER SUMMARY -->
-          <div class="space-y-1 hidden" id="menu-group-manpower-summary" style="display: none !important;">
+          <div class="space-y-1" id="menu-group-manpower-summary">
             <button 
               type="button" 
               onclick="switchHRMTab('manpower-summary')" 
@@ -3165,7 +3148,7 @@ a:hover .ph-arrow-up-right,
     </aside>
 
     <!-- ================= MAIN CONTENT AREA ================= -->
-    <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-6 space-y-4 overflow-y-auto">
+    <main id="hrm-main-scroll" class="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-6 space-y-4 custom-scrollbar">
 
     <!-- Executive 4 Core HRM KPIs (3D Curved Liquid Cards) - Active Manpower Calculations -->
     <section id="hrm-kpi-section" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 shrink-0">
@@ -7062,6 +7045,15 @@ a:hover .ph-arrow-up-right,
     window.toggleAttendanceDropdown = toggleAttendanceDropdown;
 
     function switchHRMTab(tabName, groupTarget) {
+      // Auto-close mobile sidebar drawer on navigation
+      if (window.innerWidth < 768 && typeof toggleHRMSidebar === 'function') {
+        toggleHRMSidebar(false);
+      }
+      var mobileScroller = document.getElementById('hrm-main-scroll');
+      if (mobileScroller && window.innerWidth < 768) {
+        mobileScroller.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
       var dashSec = document.getElementById('hrm-dashboard-section');
       var kpiSec = document.getElementById('hrm-kpi-section');
       // daily-attendance-yield-dial removed (dead DOM reference)
@@ -8295,28 +8287,7 @@ a:hover .ph-arrow-up-right,
   <!-- ========================================================================= -->
   <script>
     (function initEnterprisePerformanceEngine() {
-      // 1. Silky Smooth 60FPS Scroll Optimizer (De-Jank Engine)
-      var scrollTimer = null;
-      var body = document.body;
-      var scrollingClass = 'is-scrolling';
-      
-      function handleScroll() {
-        if (!body.classList.contains(scrollingClass)) {
-          body.classList.add(scrollingClass);
-        }
-        if (scrollTimer) cancelAnimationFrame(scrollTimer);
-        scrollTimer = requestAnimationFrame(function() {
-          clearTimeout(window._scrollDebounceTimer);
-          window._scrollDebounceTimer = setTimeout(function() {
-            body.classList.remove(scrollingClass);
-          }, 85);
-        });
-      }
-
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      document.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-
-      // 2. Global Instant Dismiss on Escape Key ("দ্রুত off হয়")
+      // 1. Global Instant Dismiss on Escape Key ("দ্রুত off হয়")
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
           // Close dossier modal
@@ -8407,131 +8378,109 @@ a:hover .ph-arrow-up-right,
     })();
   </script>
 
+  <!-- ================= MOBILE LIQUID GLASS ACTION DOCK (Visible only on <768px) ================= -->
+  <nav id="mep-mobile-action-dock" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-dark-900/90 backdrop-blur-2xl border-t border-slate-200/80 dark:border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] px-2 py-1.5 flex items-center justify-around select-none" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
+    <!-- Tab 1: Manpower List -->
+    <button 
+      type="button" 
+      onclick="switchHRMTab('manpower-list'); window.scrollToTopMobile && window.scrollToTopMobile();" 
+      class="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-slate-600 dark:text-slate-300 active:scale-95 transition-all cursor-pointer"
+      title="Manpower List"
+    >
+      <i class="ph-bold ph-users-three text-lg text-purple-600 dark:text-purple-400"></i>
+      <span class="text-[9px] font-black tracking-tight">Manpower</span>
+    </button>
+
+    <!-- Tab 2: Replacement Report -->
+    <button 
+      type="button" 
+      onclick="switchHRMTab('replacement-report'); if(window.HRMEmployeeEntry) window.HRMEmployeeEntry.switchTab('replacement-report');" 
+      class="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-slate-600 dark:text-slate-300 active:scale-95 transition-all cursor-pointer"
+      title="Replacement Report"
+    >
+      <i class="ph-bold ph-arrows-clockwise text-lg text-sky-600 dark:text-sky-400"></i>
+      <span class="text-[9px] font-black tracking-tight">Replace</span>
+    </button>
+
+    <!-- Tab 3: Prominent Center + New Entry FAB -->
+    <button 
+      type="button" 
+      onclick="switchHRMTab('replacement-report'); if(window.HRMEmployeeEntry) window.HRMEmployeeEntry.switchTab('entry-form');" 
+      class="flex-none -mt-4 w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white flex flex-col items-center justify-center shadow-lg shadow-emerald-500/40 border-2 border-white/80 dark:border-emerald-300/40 active:scale-90 transition-transform cursor-pointer"
+      title="Add New Employee Entry"
+    >
+      <i class="ph-bold ph-plus text-xl font-black"></i>
+      <span class="text-[8px] font-black uppercase tracking-wider -mt-1">Entry</span>
+    </button>
+
+    <!-- Tab 4: Quick Search / Active Filters -->
+    <button 
+      type="button" 
+      onclick="focusMobileSearch();" 
+      class="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-slate-600 dark:text-slate-300 active:scale-95 transition-all cursor-pointer"
+      title="Search Database"
+    >
+      <i class="ph-bold ph-magnifying-glass text-lg text-indigo-600 dark:text-indigo-400"></i>
+      <span class="text-[9px] font-black tracking-tight">Search</span>
+    </button>
+
+    <!-- Tab 5: Sidebar Menu Drawer -->
+    <button 
+      type="button" 
+      onclick="toggleHRMSidebar();" 
+      class="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-slate-600 dark:text-slate-300 active:scale-95 transition-all cursor-pointer"
+      title="All Operations Menu"
+    >
+      <i class="ph-bold ph-list text-lg text-amber-600 dark:text-amber-400"></i>
+      <span class="text-[9px] font-black tracking-tight">Menu</span>
+    </button>
+  </nav>
+
+  <!-- Mobile Helper Scripts -->
+  <script>
+    window.focusMobileSearch = function() {
+      var activeTab = window.currentHRMTab || 'manpower-list';
+      var inp = null;
+      if (activeTab === 'replacement-report') {
+        inp = document.getElementById('rep-table-search-input');
+      } else {
+        inp = document.getElementById('manpower-search-input') || document.getElementById('manpower-global-search');
+      }
+      if (inp) {
+        inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function() { inp.focus(); }, 300);
+      }
+    };
+    window.scrollToTopMobile = function() {
+      var scroller = document.getElementById('hrm-main-scroll');
+      if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  </script>
+
 
   <script>
-    function toggleFlatPasswordVisibility() {
-      var p = document.getElementById('mep-flat-password');
-      var ico = document.getElementById('flat-pass-toggle-icon');
-      if (!p || !ico) return;
-      if (p.type === 'password') {
-        p.type = 'text';
-        ico.classList.remove('ph-eye');
-        ico.classList.add('ph-eye-slash');
-      } else {
-        p.type = 'password';
-        ico.classList.remove('ph-eye-slash');
-        ico.classList.add('ph-eye');
-      }
-    }
-
-    function handleFlatLoginSubmit(e) {
-      if (e) e.preventDefault();
-      var uInput = document.getElementById('mep-flat-username');
-      var pInput = document.getElementById('mep-flat-password');
-      var errBox = document.getElementById('mep-login-error');
-      var errTxt = document.getElementById('mep-login-error-text');
-      var btn = document.getElementById('mep-login-submit-btn');
-      var card = document.getElementById('mep-login-card');
-      var overlay = document.getElementById('mep-flat-login-overlay');
-
-      var user = (uInput ? uInput.value : '').trim();
-      var pass = (pInput ? pInput.value : '').trim();
-
-      // Validate exact credentials: username Lucky-Fan, password 15998
-      if (user.toLowerCase() === 'lucky-fan' && pass === '15998') {
-        if (errBox) errBox.classList.add('hidden');
-        if (btn) {
-          btn.innerHTML = '<i class="ph-bold ph-check-circle text-base"></i><span>Access Granted</span>';
-          btn.classList.remove('from-sky-600', 'via-sky-500', 'to-indigo-600');
-          btn.classList.add('from-emerald-600', 'to-teal-600');
-        }
-
-        var remember = document.getElementById('mep-flat-remember') ? document.getElementById('mep-flat-remember').checked : false;
-        sessionStorage.setItem('mep_flat_session', 'Lucky-Fan-Auth-Token');
-        if (remember) {
-          localStorage.setItem('mep_flat_session', 'Lucky-Fan-Auth-Token');
-        } else {
-          localStorage.removeItem('mep_flat_session');
-        }
-
-        var expectedToken = 'bdfb1c1cc93dde30257dba06de9e84e30e69e73f0016817f5197a76c2ab2e473';
-        localStorage.setItem('mep_auth_token', expectedToken);
-        localStorage.setItem('mep_auth_user', 'Lucky-Fan');
-        localStorage.setItem('mep_user_logged_in', 'true');
-        localStorage.setItem('mep_hrm_online_logged_in', 'true');
-
-        setTimeout(function() {
-          if (overlay) {
-            overlay.classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(function() { overlay.style.display = 'none'; }, 300);
-          }
-          if (window.showHRToast) window.showHRToast('Welcome, Lucky-Fan! Access granted.', 'success');
-          if (window.switchHRMTab) window.switchHRMTab('manpower-list', 'Active');
-        }, 300);
-      } else {
-        if (errBox) {
-          errBox.classList.remove('hidden');
-          if (errTxt) errTxt.textContent = 'Invalid username or password. Please try again.';
-        }
-        if (card) {
-          card.classList.add('animate-shake');
-          setTimeout(function() { card.classList.remove('animate-shake'); }, 450);
-        }
-        if (pInput) {
-          pInput.value = '';
-          pInput.focus();
-        }
-      }
-    }
-
-    // Standalone Custom Logout
+    // Standalone Custom Logout - Redirects to login.html with clean state
     window.handleLogout = function() {
       sessionStorage.removeItem('mep_flat_session');
       localStorage.removeItem('mep_flat_session');
       localStorage.removeItem('mep_auth_token');
       localStorage.removeItem('mep_user_logged_in');
-      var overlay = document.getElementById('mep-flat-login-overlay');
-      if (overlay) {
-        overlay.style.display = 'flex';
-        var btn = document.getElementById('mep-login-submit-btn');
-        if (btn) {
-          btn.innerHTML = '<span>Sign In</span><i class="ph-bold ph-arrow-right text-base"></i>';
-          btn.classList.add('from-sky-600', 'via-sky-500', 'to-indigo-600');
-          btn.classList.remove('from-emerald-600', 'to-teal-600');
-        }
-        var passEl = document.getElementById('mep-flat-password');
-        if (passEl) passEl.value = '';
-        var errEl = document.getElementById('mep-login-error');
-        if (errEl) errEl.classList.add('hidden');
-        setTimeout(function() {
-          overlay.classList.remove('opacity-0', 'pointer-events-none');
-          if (passEl) passEl.focus();
-        }, 10);
-      }
+      localStorage.removeItem('mep_hrm_online_logged_in');
       if (window.showHRToast) window.showHRToast('Signed out successfully.', 'info');
+      setTimeout(function() {
+        window.location.replace('login.html?logout=1');
+      }, 150);
     };
 
-    // Auto-check on initial load
-    (function checkInitialAuth() {
-      var sessionAuth = sessionStorage.getItem('mep_flat_session') || localStorage.getItem('mep_flat_session');
-      var overlay = document.getElementById('mep-flat-login-overlay');
-      if (sessionAuth === 'Lucky-Fan-Auth-Token') {
-        if (overlay) {
-          overlay.style.display = 'none';
-          overlay.classList.add('opacity-0', 'pointer-events-none');
-        }
-      } else {
-        if (overlay) {
-          overlay.style.display = 'flex';
-          overlay.classList.remove('opacity-0', 'pointer-events-none');
-          var passInput = document.getElementById('mep-flat-password');
-          if (passInput) setTimeout(function() { passInput.focus(); }, 150);
-        }
-      }
-
+    // Default tab setup for Flat Edition
+    (function initFlatView() {
       function ensureFlatTab() {
         var h = window.location.hash || '';
-        if (!h || h === '#hrm-dashboard' || h === '#dashboard' || h.indexOf('summary') !== -1 || h.indexOf('attendance') !== -1 || h.indexOf('salary') !== -1 || h.indexOf('authorized') !== -1 || h.indexOf('permanent') !== -1 || h.indexOf('increment') !== -1 || h.indexOf('transfer') !== -1) {
+        if (h === '#manpower-summary' || h === '#summary') {
+          if (window.switchHRMTab) {
+            window.switchHRMTab('manpower-summary');
+          }
+        } else if (!h || h === '#hrm-dashboard' || h === '#dashboard' || h.indexOf('attendance') !== -1 || h.indexOf('salary') !== -1 || h.indexOf('authorized') !== -1 || h.indexOf('permanent') !== -1 || h.indexOf('increment') !== -1 || h.indexOf('transfer') !== -1) {
           if (window.switchHRMTab) {
             window.switchHRMTab('manpower-list', 'Active');
           }
