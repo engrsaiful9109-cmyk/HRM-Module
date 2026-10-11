@@ -51,8 +51,8 @@
   }
 
   function formatMoney(num) {
-    if (num === null || num === undefined || isNaN(num)) return '৳ 0';
-    return '৳ ' + Math.round(num).toLocaleString('en-IN');
+    if (num === null || num === undefined || isNaN(num)) return 'Tk 0';
+    return 'Tk ' + Math.round(num).toLocaleString('en-IN');
   }
 
   var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -96,6 +96,102 @@
     return val;
   }
 
+  function formatCompactDOJ(val) {
+    if (!val || val === 'Blank' || val === '0-Jan-00' || val === '00-00-0000') return '—';
+    var str = String(val).trim();
+    // 1. DD-Mmm-YYYY or DD-Mmm-YY (e.g. 29-Nov-2025 -> 29-Nov-25)
+    var m1 = str.match(/^(\d{1,2})[-/ ]([A-Za-z]{3})[-/ ](\d{2,4})$/);
+    if (m1) {
+      var d = m1[1].length === 1 ? '0' + m1[1] : m1[1];
+      var mo = m1[2].charAt(0).toUpperCase() + m1[2].slice(1, 3).toLowerCase();
+      var y = m1[3].length === 4 ? m1[3].slice(-2) : m1[3];
+      return d + '-' + mo + '-' + y;
+    }
+    // 2. YYYY-MM-DD
+    var m2 = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (m2) {
+      var y2 = m2[1].slice(-2);
+      var moIdx = parseInt(m2[2], 10) - 1;
+      var mo2 = (moIdx >= 0 && moIdx < 12) ? MONTH_NAMES[moIdx] : 'Jan';
+      var d2 = m2[3].length === 1 ? '0' + m2[3] : m2[3];
+      return d2 + '-' + mo2 + '-' + y2;
+    }
+    if (str.length <= 9) return str;
+    var dObj = new Date(str);
+    if (!isNaN(dObj.getTime())) {
+      var d3 = String(dObj.getDate()).padStart(2, '0');
+      var mo3 = MONTH_NAMES[dObj.getMonth()];
+      var y3 = String(dObj.getFullYear()).slice(-2);
+      return d3 + '-' + mo3 + '-' + y3;
+    }
+    return str;
+  }
+
+  function formatGlossyRemark(rawRemarks, isNumericNewId, cleanNewId) {
+    var clean = (rawRemarks || '').toString()
+      .replace(/\s*\/\s*[\u0980-\u09FF\s]+/g, '')
+      .replace(/[\u0980-\u09FF]/g, '')
+      .trim();
+
+    if (!clean && isNumericNewId) {
+      return '<span class="rep-remark-emerald inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>Joined Active</span>' +
+             '</span>';
+    }
+
+    if (!clean && !isNumericNewId && cleanNewId && cleanNewId !== 'Blank') {
+      return '<span class="rep-remark-amber inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <i class="ph-bold ph-hourglass text-xs"></i><span>' + cleanNewId + '</span>' +
+             '</span>';
+    }
+
+    if (!clean) {
+      return '<span class="text-slate-400 text-xs">—</span>';
+    }
+
+    var lower = clean.toLowerCase();
+
+    if (lower.indexOf('resign') !== -1) {
+      return '<span class="rep-remark-amber inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <i class="ph-bold ph-sign-out text-xs"></i><span>' + clean + '</span>' +
+             '</span>';
+    }
+
+    if (lower.indexOf('notice') !== -1 || lower.indexOf('left') !== -1) {
+      return '<span class="rep-remark-rose inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <i class="ph-bold ph-warning-octagon text-xs"></i><span>' + clean + '</span>' +
+             '</span>';
+    }
+
+    if (lower.indexOf('terminat') !== -1) {
+      return '<span class="rep-remark-rose inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <i class="ph-bold ph-x-circle text-xs"></i><span>' + clean + '</span>' +
+             '</span>';
+    }
+
+    if (lower.indexOf('transfer') !== -1) {
+      return '<span class="rep-remark-sky inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <i class="ph-bold ph-arrows-left-right text-xs"></i><span>' + clean + '</span>' +
+             '</span>';
+    }
+
+    if (lower.indexOf('medic') !== -1 || lower.indexOf('health') !== -1) {
+      return '<span class="rep-remark-amber inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <i class="ph-bold ph-first-aid text-xs"></i><span>' + clean + '</span>' +
+             '</span>';
+    }
+
+    if (lower.indexOf('join') !== -1) {
+      return '<span class="rep-remark-emerald inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold shadow-2xs whitespace-nowrap">' +
+             '  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>' + clean + '</span>' +
+             '</span>';
+    }
+
+    return '<span class="rep-remark-slate inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10.5px] font-semibold shadow-2xs whitespace-nowrap">' +
+           '  <span>' + clean + '</span>' +
+           '</span>';
+  }
+
   function getAllEmployees() {
     if (window.HRMManpower && typeof window.HRMManpower.getAllEmployees === 'function') {
       return window.HRMManpower.getAllEmployees();
@@ -131,8 +227,79 @@
     renderHoldCandidatesShelf();
   }
 
+  // Deduplicate helper: Enforces that an ID can only be replaced once and can only replace once
+  function deduplicateReplacementRecords(list) {
+    if (!Array.isArray(list)) return [];
+    var seenPairs = {};
+    var seenNewIds = {};
+    var clean = [];
+    list.forEach(function (r) {
+      if (!r) return;
+      var rid = String(r.replace_id || '').replace(/^[#\s]+/, '').trim();
+      var nid = String(r.new_id || '').replace(/^[#\s]+/, '').trim();
+      if (!rid && !nid) return;
+      var pairKey = rid + '___' + nid;
+      if (seenPairs[pairKey]) return; // Discard exact duplicate pair
+      if (nid && nid !== 'Blank' && nid !== '-' && nid !== '') {
+        if (seenNewIds[nid]) return; // Discard duplicate new replacement hire
+        seenNewIds[nid] = true;
+      }
+      seenPairs[pairKey] = true;
+      clean.push(r);
+    });
+    return clean;
+  }
+
+  function getReplacedStaffRecord(staffId) {
+    if (!staffId) return null;
+    var clean = String(staffId).replace(/^[#\s]+/, '').trim();
+    var repMaster = window.MEP_REPLACEMENT_MASTER || [];
+    return repMaster.find(function (r) {
+      var rId = String(r.replace_id || '').replace(/^[#\s]+/, '').trim();
+      var nId = String(r.new_id || '').replace(/^[#\s]+/, '').trim();
+      return rId === clean && nId && nId !== 'Blank' && nId !== '-' && nId !== '';
+    }) || null;
+  }
+
+  function getAppointedReplacementRecord(staffId) {
+    if (!staffId) return null;
+    var clean = String(staffId).replace(/^[#\s]+/, '').trim();
+    var repMaster = window.MEP_REPLACEMENT_MASTER || [];
+    return repMaster.find(function (r) {
+      var nId = String(r.new_id || '').replace(/^[#\s]+/, '').trim();
+      return nId === clean;
+    }) || null;
+  }
+
+  function updateReplacementValidationWarning(repId) {
+    var warnBox = document.getElementById('replacement-duplicate-warning');
+    var warnText = document.getElementById('replacement-duplicate-warning-text');
+    var submitBtn = document.getElementById('entry-submit-btn');
+    if (!warnBox || !warnText) return;
+
+    if (!repId || state.hiringType !== 'replacement') {
+      warnBox.classList.add('hidden');
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
+
+    var clean = String(repId).replace(/^[#\s]+/, '').trim();
+    var alreadyRep = getReplacedStaffRecord(clean);
+    if (alreadyRep) {
+      var nId = String(alreadyRep.new_id || '').replace(/^[#\s]+/, '').trim();
+      var nName = alreadyRep.new_name || 'Staff';
+      warnText.innerHTML = 'Employee <b>' + clean + '</b> (' + (alreadyRep.replace_name || '') + ') has already been replaced by Employee <b>' + nId + ' (' + nName + ')</b>! <u>An ID can only be replaced once.</u>';
+      warnBox.classList.remove('hidden');
+      if (submitBtn) submitBtn.disabled = true;
+    } else {
+      warnBox.classList.add('hidden');
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  }
+
   function buildReplacementList(forceFetch) {
     if (!forceFetch && window.MEP_REPLACEMENT_MASTER && Array.isArray(window.MEP_REPLACEMENT_MASTER) && window.MEP_REPLACEMENT_MASTER.length > 0) {
+      window.MEP_REPLACEMENT_MASTER = deduplicateReplacementRecords(window.MEP_REPLACEMENT_MASTER);
       state.replacementList = window.MEP_REPLACEMENT_MASTER.slice();
       applyReplacementFilters();
       renderReplacementKPIs();
@@ -153,6 +320,7 @@
           if (window.MEP_REPLACEMENT_MASTER && window.MEP_REPLACEMENT_MASTER.length > repList.length) {
             repList = window.MEP_REPLACEMENT_MASTER;
           }
+          repList = deduplicateReplacementRecords(repList);
           window.MEP_REPLACEMENT_MASTER = repList;
           state.replacementList = repList.slice();
           applyReplacementFilters();
@@ -171,6 +339,7 @@
               if (window.MEP_REPLACEMENT_MASTER && window.MEP_REPLACEMENT_MASTER.length > repList.length) {
                 repList = window.MEP_REPLACEMENT_MASTER;
               }
+              repList = deduplicateReplacementRecords(repList);
               window.MEP_REPLACEMENT_MASTER = repList;
               state.replacementList = repList.slice();
               applyReplacementFilters();
@@ -193,7 +362,7 @@
       if (item.new_section && item.new_section !== 'Blank') sectionsSet[item.new_section] = true;
     });
     var sections = Object.keys(sectionsSet).sort();
-    var opts = '<option value="ALL">All Sections (সব সেকশন)</option>';
+    var opts = '<option value="ALL">All Sections</option>';
     sections.forEach(function (s) {
       opts += '<option value="' + s + '" ' + (currentVal === s ? 'selected' : '') + '>' + s + '</option>';
     });
@@ -225,10 +394,10 @@
       if (secForm) secForm.classList.remove('hidden');
       if (secReport) secReport.classList.add('hidden');
       if (btnForm) {
-        btnForm.className = 'px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm flex items-center gap-2 cursor-pointer transition-all';
+        btnForm.className = 'rep-btn-glass-emerald px-4 py-2 rounded-xl text-xs font-black text-white flex items-center gap-2 cursor-pointer transition-all shadow-md';
       }
       if (btnReport) {
-        btnReport.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer transition-all';
+        btnReport.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800/60 flex items-center gap-2 cursor-pointer transition-all';
       }
       suggestNextStaffId();
       renderHoldCandidatesShelf();
@@ -237,10 +406,10 @@
       if (secForm) secForm.classList.add('hidden');
       if (secReport) secReport.classList.remove('hidden');
       if (btnReport) {
-        btnReport.className = 'px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm flex items-center gap-2 cursor-pointer transition-all';
+        btnReport.className = 'rep-btn-glass-primary px-4 py-2 rounded-xl text-xs font-black text-white flex items-center gap-2 cursor-pointer transition-all shadow-md';
       }
       if (btnForm) {
-        btnForm.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer transition-all';
+        btnForm.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800/60 flex items-center gap-2 cursor-pointer transition-all';
       }
       buildReplacementList();
       renderReplacementKPIs();
@@ -260,26 +429,26 @@
 
     if (type === 'replacement') {
       if (btnRep) {
-        btnRep.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-purple-600 text-white shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer ring-2 ring-purple-400/40';
+        btnRep.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer ring-2 ring-purple-400/50 border border-white/30';
       }
       if (btnNew) {
-        btnNew.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2 transition-all cursor-pointer';
+        btnNew.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 bg-white/40 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/10 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs';
       }
       if (repBox) repBox.classList.remove('hidden');
       if (badgeType) {
-        badgeType.innerHTML = '<span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span><span class="text-purple-600 dark:text-purple-400 font-bold">Replacement Hire (পূর্বের কর্মীর প্রতিস্থাপন)</span>';
+        badgeType.innerHTML = '<span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span><span class="text-purple-700 dark:text-purple-300 font-extrabold">Replacement Hire</span>';
       }
       renderHoldCandidatesShelf();
     } else {
       if (btnNew) {
-        btnNew.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer ring-2 ring-emerald-400/40';
+        btnNew.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer ring-2 ring-emerald-400/50 border border-white/30';
       }
       if (btnRep) {
-        btnRep.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2 transition-all cursor-pointer';
+        btnRep.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 bg-white/40 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/10 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs';
       }
       if (repBox) repBox.classList.add('hidden');
       if (badgeType) {
-        badgeType.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-emerald-600 dark:text-emerald-400 font-bold">New Recruitment (নতুন সরাসরি নিয়োগ)</span>';
+        badgeType.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-emerald-700 dark:text-emerald-300 font-extrabold">New Direct Recruitment</span>';
       }
       clearReplacedEmployee();
     }
@@ -300,19 +469,20 @@
     });
 
     if (countBadge) {
-      countBadge.textContent = holdEmployees.length + ' জন অপেক্ষমাণ';
+      countBadge.textContent = holdEmployees.length + ' Pending';
     }
 
     if (holdEmployees.length === 0) {
-      listEl.innerHTML = '<span class="text-[11px] text-slate-500 dark:text-slate-400 italic">💡 বর্তমানে কোনো কর্মীর স্ট্যাটাস Hold নেই। Manpower List থেকে স্ট্যাটাস "Hold" করতে পারেন অথবা নিচে সরাসরি আইডি বা নাম দিয়ে সার্চ করুন।</span>';
+      listEl.innerHTML = '<span class="text-[11px] text-slate-500 dark:text-slate-400 italic">💡 No employees currently waiting on Hold. Set employee status to Hold from Manpower List or search by ID/name below.</span>';
       return;
     }
 
     var html = holdEmployees.map(function (e) {
+      var cleanHoldId = String(e.staff_id || '—').replace(/^[#\s]+/, '');
       return '<button type="button" onclick="window.HRMEmployeeEntry.selectReplacedEmployee(' + e.sl_no + ')" ' +
              'class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-500/40 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-left transition-all shadow-2xs cursor-pointer flex items-center gap-2 group/h" ' +
              'title="Click to select this Hold staff for replacement">' +
-             '  <span class="font-mono font-black text-xs text-amber-700 dark:text-amber-300 group-hover/h:scale-105 transition-transform">#' + (e.staff_id || '—') + '</span>' +
+             '  <span class="font-mono font-black text-xs text-amber-700 dark:text-amber-300 group-hover/h:scale-105 transition-transform">' + cleanHoldId + '</span>' +
              '  <span class="font-bold text-xs text-slate-800 dark:text-slate-200">' + (e.name || '—') + '</span>' +
              '  <span class="text-[10px] text-slate-500 dark:text-slate-400">(' + (e.section || 'General') + ')</span>' +
              '  <span class="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-black bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">Hold</span>' +
@@ -324,39 +494,54 @@
 
   function onSearchReplacedEmployee(query) {
     var raw = (query || '').trim();
+    if (!raw) {
+      clearTimeout(state.searchReplacedTimer);
+      executeSearchReplacedEmployee(query);
+    } else {
+      clearTimeout(state.searchReplacedTimer);
+      state.searchReplacedTimer = setTimeout(function () {
+        executeSearchReplacedEmployee(query);
+      }, 120);
+    }
+  }
+
+  function executeSearchReplacedEmployee(query) {
+    var raw = (query || '').trim();
     state.searchReplacedQuery = raw.toLowerCase();
 
-    // Immediately keep entry-replace-id in sync with whatever user types
     var cleanId = raw.replace(/^#/, '').split(/[\s\-•]+/)[0].trim();
     var repIdInput = document.getElementById('entry-replace-id');
     var repNameInput = document.getElementById('entry-replace-name');
-    if (repIdInput) repIdInput.value = cleanId;
 
     var resultsBox = document.getElementById('replaced-search-results');
     if (!resultsBox) return;
 
     var all = getAllEmployees();
-    var holdEmployees = all.filter(function(e) {
-      return String(e.status || '').trim().toLowerCase() === 'hold';
+    // Exclude employees that are already replaced: an ID can only be replaced once!
+    var holdEmployees = all.filter(function (e) {
+      var isHold = String(e.status || '').trim().toLowerCase() === 'hold';
+      return isHold && !getReplacedStaffRecord(e.staff_id);
     });
-    var activeEmployees = all.filter(function(e) {
-      return String(e.status || '').trim().toLowerCase() === 'active';
+    var activeEmployees = all.filter(function (e) {
+      var isActive = String(e.status || '').trim().toLowerCase() === 'active';
+      return isActive && !getReplacedStaffRecord(e.staff_id);
     });
 
     // When query is empty (e.g. user focused or clicked inside search input):
-    // Show all Hold employees immediately so the user can easily select!
+    // Show eligible Hold employees immediately so the user can easily select!
     if (!raw) {
       if (holdEmployees.length > 0) {
         var headerHtml = '<div class="p-2 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800/60 flex items-center justify-between text-[11px] font-bold text-amber-800 dark:text-amber-300">' +
-          '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 live-beacon"></span>প্রতিস্থাপনের জন্য অপেক্ষমাণ কর্মী (Hold Personnel - ' + holdEmployees.length + ' জন):</span>' +
-          '<span class="text-[10px] font-normal text-amber-700 dark:text-amber-400">ক্লিক করে নির্বাচন করুন</span>' +
+          '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 live-beacon"></span>Candidates Pending Replacement (Hold Personnel - ' + holdEmployees.length + '):</span>' +
+          '<span class="text-[10px] font-normal text-amber-700 dark:text-amber-400">Click to select</span>' +
           '</div>';
 
         var holdListHtml = holdEmployees.map(function (e) {
+          var cleanHoldEmpId = String(e.staff_id || '—').replace(/^[#\s]+/, '');
           return '<div onclick="window.HRMEmployeeEntry.selectReplacedEmployee(' + e.sl_no + ')" ' +
                  'class="p-2.5 hover:bg-amber-500/10 dark:hover:bg-amber-900/30 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors">' +
                  '  <div class="flex items-center gap-2.5 min-w-0">' +
-                 '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">#' + (e.staff_id || '—') + '</span>' +
+                 '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">' + cleanHoldEmpId + '</span>' +
                  '    <div class="truncate">' +
                  '      <p class="font-bold text-slate-900 dark:text-white text-xs truncate">' + (e.name || '—') + '</p>' +
                  '      <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">' + (e.designation || 'Helper') + ' • ' + (e.section || 'General') + '</p>' +
@@ -377,23 +562,43 @@
       return;
     }
 
-    // Eligible candidates for replacement: Hold employees and Active employees
+    // Check if the searched ID has ALREADY been replaced!
+    var alreadyRepStaff = getReplacedStaffRecord(cleanId) || (raw ? (window.MEP_REPLACEMENT_MASTER || []).find(function (r) {
+      return String(r.replace_name || '').toLowerCase().indexOf(raw) !== -1;
+    }) : null);
+
+    if (alreadyRepStaff) {
+      var rStaffId = String(alreadyRepStaff.replace_id || cleanId).replace(/^[#\s]+/, '');
+      var rStaffName = alreadyRepStaff.replace_name || '';
+      var rNewStaffId = String(alreadyRepStaff.new_id || 'Staff').replace(/^[#\s]+/, '');
+      var rNewStaffName = alreadyRepStaff.new_name || '';
+      resultsBox.innerHTML = '<div class="p-3.5 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 text-center font-bold rounded-2xl m-1 border-2 border-rose-300 dark:border-rose-800 shadow-md">' +
+        '<i class="ph-bold ph-prohibit text-xl mb-1 block"></i>' +
+        '<span>Employee ID: <b class="font-mono text-rose-700 dark:text-rose-300">' + rStaffId + '</b> (' + rStaffName + ') has already been replaced by Employee <b class="font-mono text-purple-700 dark:text-purple-300">' + rNewStaffId + '</b> (' + rNewStaffName + ')!</span>' +
+        '<p class="text-[11px] text-rose-500 mt-1.5 font-bold">❌ An ID can only be replaced once. Cannot replace again.</p>' +
+        '</div>';
+      resultsBox.classList.remove('hidden');
+      updateReplacementValidationWarning(rStaffId);
+      return;
+    }
+
+    // Eligible candidates for replacement: Hold employees and Active employees who haven't been replaced
     var eligibleEmployees = holdEmployees.concat(activeEmployees);
 
     // Check if user typed an exact staff_id match
-    var exactStaff = eligibleEmployees.find(function(e) {
+    var exactStaff = eligibleEmployees.find(function (e) {
       return String(e.staff_id).trim() === cleanId;
     });
-    if (exactStaff && repNameInput) {
-      repNameInput.value = exactStaff.name;
+    if (exactStaff) {
+      if (repIdInput) repIdInput.value = exactStaff.staff_id;
+      if (repNameInput) repNameInput.value = exactStaff.name;
     }
+    updateReplacementValidationWarning(cleanId);
 
     var q = state.searchReplacedQuery;
     var matches = eligibleEmployees.filter(function (e) {
       var id = String(e.staff_id || '').toLowerCase();
       var name = String(e.name || '').toLowerCase();
-      var sec = String(e.section || '').toLowerCase();
-      var desig = String(e.designation || '').toLowerCase();
       return id.indexOf(q) !== -1 || name.indexOf(q) !== -1;
     });
 
@@ -408,26 +613,31 @@
 
     if (sliced.length === 0) {
       // Check if user searched an Inactive employee
-      var inactiveMatch = all.find(function(e) {
+      var inactiveMatch = all.find(function (e) {
         var isInactive = String(e.status || '').toLowerCase() === 'inactive';
         return isInactive && (String(e.staff_id).trim() === cleanId || (raw && String(e.name || '').trim().toLowerCase() === raw));
       });
       if (inactiveMatch) {
+        var cleanInactiveId = String(inactiveMatch.staff_id || '').replace(/^[#\s]+/, '');
         resultsBox.innerHTML = '<div class="p-3 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 text-center font-bold rounded-xl m-1 border border-rose-200 dark:border-rose-800">' +
           '<i class="ph-bold ph-prohibit text-base mb-1 block"></i>' +
-          '<span>কর্মী ID: #' + inactiveMatch.staff_id + ' (' + inactiveMatch.name + ') ইতোমধ্যে <b>Inactive (বাতিল)</b> করা আছে। প্রতিস্থাপনের জন্য অনুগ্রহ করে <b>Hold</b> অথবা <b>Active</b> কর্মী নির্বাচন করুন।</span>' +
+          '<span>Employee ID: ' + cleanInactiveId + ' (' + inactiveMatch.name + ') is currently <b>Inactive</b>. Please select a <b>Hold</b> or <b>Active</b> employee for replacement.</span>' +
           '</div>';
         resultsBox.classList.remove('hidden');
         return;
       }
 
-      resultsBox.innerHTML = '<div class="p-2.5 text-xs text-slate-500 dark:text-slate-400 text-center font-medium">কোনো Hold বা Active কর্মী মেলেনি, তবে আইডি: <b class="font-mono text-purple-600 dark:text-purple-400">#' + cleanId + '</b> প্রতিস্থাপন হিসেবে সেট থাকবে।</div>';
+      resultsBox.innerHTML = '<div class="p-3 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 text-center font-medium rounded-xl m-1 border border-amber-300 dark:border-amber-800">' +
+        '<i class="ph-bold ph-warning text-base mb-1 block"></i>' +
+        '<span>Employee ID: <b class="font-mono">' + cleanId + '</b> not found. Please select an eligible employee from Hold or Active list.</span>' +
+        '</div>';
       resultsBox.classList.remove('hidden');
       return;
     }
 
     var html = sliced.map(function (e) {
       var isHold = String(e.status || '').toLowerCase() === 'hold';
+      var cleanItemStaffId = String(e.staff_id || '—').replace(/^[#\s]+/, '');
       var statusBadge = isHold
         ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">Hold</span>'
         : '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">Active</span>';
@@ -435,7 +645,7 @@
       return '<div onclick="window.HRMEmployeeEntry.selectReplacedEmployee(' + e.sl_no + ')" ' +
              'class="p-2.5 hover:bg-purple-500/10 dark:hover:bg-purple-900/30 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors">' +
              '  <div class="flex items-center gap-2.5 min-w-0">' +
-             '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded ' + (isHold ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30' : 'bg-purple-500/20 text-purple-700 dark:text-purple-300') + '">#' + (e.staff_id || '—') + '</span>' +
+             '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded ' + (isHold ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30' : 'bg-purple-500/20 text-purple-700 dark:text-purple-300') + '">' + cleanItemStaffId + '</span>' +
              '    <div class="truncate">' +
              '      <p class="font-bold text-slate-900 dark:text-white text-xs truncate">' + (e.name || '—') + '</p>' +
              '      <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">' + (e.designation || 'Helper') + ' • ' + (e.section || 'General') + '</p>' +
@@ -462,6 +672,19 @@
       var cleanId = clean.replace(/^#/, '').split(/[\s\-•]+/)[0].trim();
       var all = getAllEmployees();
 
+      // Check if already replaced
+      var alreadyRepStaff = getReplacedStaffRecord(cleanId);
+      if (alreadyRepStaff) {
+        clearReplacedEmployee();
+        var searchInput = document.getElementById('entry-search-replaced-input');
+        if (searchInput) searchInput.value = '';
+        updateReplacementValidationWarning(cleanId);
+        if (window.showHRToast) {
+          window.showHRToast('❌ Employee ' + cleanId + ' has already been replaced! An ID can only be replaced once.');
+        }
+        return;
+      }
+
       // Check if matches an inactive employee
       var inactiveCheck = all.find(function(e) {
         return String(e.status || '').toLowerCase() === 'inactive' &&
@@ -471,13 +694,14 @@
         clearReplacedEmployee();
         var searchInput = document.getElementById('entry-search-replaced-input');
         if (searchInput) searchInput.value = '';
-        if (window.showToast) window.showToast('⚠️ কর্মী #' + inactiveCheck.staff_id + ' ইতোমধ্যে Inactive করা আছে। শুধুমাত্র Hold বা Active কর্মী নির্বাচন করুন।', 'warning');
+        var cleanInactId = String(inactiveCheck.staff_id || '').replace(/^[#\s]+/, '');
+        if (window.showToast) window.showToast('⚠️ Employee ' + cleanInactId + ' is currently Inactive. Please select Hold or Active employee.', 'warning');
         return;
       }
 
       var eligibleEmployees = all.filter(function(e) {
         var st = String(e.status || '').toLowerCase();
-        return st === 'hold' || st === 'active';
+        return (st === 'hold' || st === 'active') && !getReplacedStaffRecord(e.staff_id);
       });
 
       var matched = eligibleEmployees.find(function(e) {
@@ -488,11 +712,14 @@
 
       if (matched) {
         selectReplacedEmployee(matched.sl_no);
-      } else if (cleanId) {
+      } else {
+        // Did not match any eligible staff: do NOT set partial or bogus replace_id!
+        clearReplacedEmployee();
         var repIdInput = document.getElementById('entry-replace-id');
-        if (repIdInput) repIdInput.value = cleanId;
+        if (repIdInput) repIdInput.value = '';
         var repNameInput = document.getElementById('entry-replace-name');
-        if (repNameInput && !repNameInput.value) repNameInput.value = 'Former Staff #' + cleanId;
+        if (repNameInput) repNameInput.value = '';
+        updateReplacementValidationWarning(cleanId);
       }
     }, 250);
   }
@@ -502,18 +729,29 @@
     var emp = all.find(function (e) { return e.sl_no === slNo || String(e.staff_id) === String(slNo); });
     if (!emp) return;
 
+    // Strict validation: An ID can only be replaced once!
+    var alreadyRep = getReplacedStaffRecord(emp.staff_id);
+    if (alreadyRep) {
+      var cleanEmpStaffId = String(emp.staff_id).replace(/^[#\s]+/, '');
+      var cleanAlreadyNewId = String(alreadyRep.new_id).replace(/^[#\s]+/, '');
+      alert('❌ Employee ' + cleanEmpStaffId + ' (' + emp.name + ') has already been replaced by Employee ' + cleanAlreadyNewId + ' (' + (alreadyRep.new_name || '') + ')!\n\nAn ID can only be replaced once.');
+      clearReplacedEmployee();
+      return;
+    }
+
     state.selectedReplacedEmp = emp;
     var resultsBox = document.getElementById('replaced-search-results');
     if (resultsBox) resultsBox.classList.add('hidden');
 
+    var cleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
     var searchInput = document.getElementById('entry-search-replaced-input');
-    if (searchInput) searchInput.value = '#' + emp.staff_id + ' - ' + emp.name;
+    if (searchInput) searchInput.value = cleanEmpId + ' - ' + emp.name;
 
     // Show Selected Card
     var card = document.getElementById('selected-replaced-card');
     if (card) {
       card.classList.remove('hidden');
-      document.getElementById('sel-rep-id').textContent = '#' + (emp.staff_id || '—');
+      document.getElementById('sel-rep-id').textContent = cleanEmpId || '—';
       document.getElementById('sel-rep-name').textContent = emp.name || '—';
       document.getElementById('sel-rep-desig').textContent = emp.designation || 'Helper';
       document.getElementById('sel-rep-section').textContent = emp.section || 'General';
@@ -528,13 +766,13 @@
         var st = String(emp.status || 'Active').toLowerCase();
         if (st === 'hold') {
           badgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40';
-          badgeEl.textContent = 'Hold (স্থগিত/প্রতিস্থাপনযোগ্য)';
+          badgeEl.textContent = 'Hold (Pending Replacement)';
         } else if (st === 'active') {
           badgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
-          badgeEl.textContent = 'Active (সক্রিয়)';
+          badgeEl.textContent = 'Active';
         } else {
           badgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600';
-          badgeEl.textContent = 'Inactive (অব্যহতি)';
+          badgeEl.textContent = 'Inactive';
         }
       }
     }
@@ -544,6 +782,7 @@
     if (repIdInput) repIdInput.value = emp.staff_id || '';
     var repNameInput = document.getElementById('entry-replace-name');
     if (repNameInput) repNameInput.value = emp.name || '';
+    updateReplacementValidationWarning('');
 
     // Auto-populate new employee defaults to match the replaced post
     var desigInput = document.getElementById('entry-designation');
@@ -599,7 +838,7 @@
     }
 
     if (window.showHRToast) {
-      window.showHRToast('পূর্বের কর্মী #' + emp.staff_id + ' (' + emp.name + ') প্রতিস্থাপনের জন্য সিলেক্ট করা হয়েছে!');
+      window.showHRToast('Predecessor Employee ' + cleanEmpId + ' (' + emp.name + ') selected for replacement!');
     }
   }
 
@@ -618,6 +857,8 @@
 
     var resultsBox = document.getElementById('replaced-search-results');
     if (resultsBox) resultsBox.classList.add('hidden');
+
+    updateReplacementValidationWarning('');
   }
 
   function onGrossSalaryChange(val) {
@@ -641,7 +882,7 @@
     });
 
     var nextId = maxId > 0 ? (maxId + 1) : 18251;
-    idInput.placeholder = 'কর্মী আইডি (যেমন: ' + nextId + ')';
+    idInput.placeholder = 'Employee ID (e.g. ' + nextId + ')';
     // User requested fields to stay completely blank initially and after refresh/save
   }
 
@@ -652,7 +893,7 @@
     if (event) event.preventDefault();
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। নতুন কর্মী ডাটা এন্ট্রি করা যাবে না।', 'warning');
+        window.showHRToast('🔒 Edit Mode is disabled. Cannot enter new employee data.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -663,7 +904,7 @@
     var name = (document.getElementById('entry-name').value || '').trim();
 
     if (!staffId || !name) {
-      alert('অনুগ্রহ করে কর্মী আইডি (Staff ID) এবং পূর্ণ নাম (Full Name) পূরণ করুন!');
+      alert('Please enter both Staff ID and Full Name!');
       return;
     }
 
@@ -673,18 +914,18 @@
     }
 
     // Check for duplicate Staff ID before submitting!
-    var cleanStaffId = staffId.replace(/^#/, '').trim();
+    var cleanStaffId = staffId.replace(/^[#\s]+/, '').trim();
     var allEmps = getAllEmployees();
     var duplicateStaff = allEmps.find(function (e) {
-      return String(e.staff_id || '').replace(/^#/, '').trim() === cleanStaffId;
+      return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanStaffId;
     });
     if (duplicateStaff) {
-      alert('❌ এই Staff ID (#' + cleanStaffId + ') ইতিমধ্যে ডাটাবেজে রয়েছে!\n\n' +
-            'কর্মীর নাম: ' + (duplicateStaff.name || 'অজ্ঞাত') + '\n' +
-            'পদবী: ' + (duplicateStaff.designation || '—') + '\n' +
-            'সেকশন: ' + (duplicateStaff.section || '—') + '\n' +
-            'বর্তমান স্ট্যাটাস: ' + (duplicateStaff.status || 'Active') + '\n\n' +
-            'একই Staff ID দিয়ে একাধিক কর্মী এন্ট্রি করা যাবে না। অনুগ্রহ করে সঠিক বা পরবর্তী Staff ID ব্যবহার করুন।');
+      alert('❌ Staff ID (' + cleanStaffId + ') already exists in the database!\n\n' +
+            'Employee Name: ' + (duplicateStaff.name || 'Unknown') + '\n' +
+            'Designation: ' + (duplicateStaff.designation || '—') + '\n' +
+            'Section: ' + (duplicateStaff.section || '—') + '\n' +
+            'Current Status: ' + (duplicateStaff.status || 'Active') + '\n\n' +
+            'Duplicate Staff IDs are not permitted. Please use a unique Staff ID.');
       var sidInput = document.getElementById('entry-staff-id');
       if (sidInput) {
         sidInput.focus();
@@ -703,10 +944,10 @@
     var entryStatus = document.getElementById('entry-status') ? document.getElementById('entry-status').value : 'Active';
     if (repRecord && (entryStatus === 'Active' || entryStatus === 'Hold')) {
       var newId = String(repRecord.new_id || '').replace(/^[#\s]+/, '').trim();
-      var newName = repRecord.new_name || 'নতুন কর্মী';
-      alert('⚠️ এই Staff ID (#' + cleanStaffId + ') ইতিমধ্যে প্রতিস্থাপিত (Replaced)!\n\n' +
-            '👉 তাঁর পরিবর্তে নতুন কর্মী #' + newId + ' (' + newName + ') যুক্ত হয়েছেন।\n\n' +
-            '❌ তাই এই আইডি Active বা Hold এ এন্ট্রি বা সংরক্ষণ করা যাবে না (শুধুমাত্র Inactive প্রযোজ্য)।');
+      var newName = repRecord.new_name || 'New Personnel';
+      alert('⚠️ Staff ID (' + cleanStaffId + ') has already been replaced!\n\n' +
+            '👉 Replacement appointee ' + newId + ' (' + newName + ') is currently registered.\n\n' +
+            'This ID cannot be added under Active or Hold status.');
       var sidInputRep = document.getElementById('entry-staff-id');
       if (sidInputRep) {
         sidInputRep.focus();
@@ -724,53 +965,82 @@
     var searchVal = searchInput ? searchInput.value.trim() : '';
 
     var replaceId = rawReplaceId;
-    if (!replaceId && searchVal) {
-      replaceId = searchVal;
-    }
-    replaceId = replaceId.replace(/^#/, '').split(/[\s\-•]+/)[0].trim();
-    if (document.getElementById('entry-replace-id')) {
-      document.getElementById('entry-replace-id').value = replaceId;
-    }
-
-    // If replaceId is empty but user typed something in search box, resolve it!
-    if (isReplacement && !replaceId && searchVal) {
-      var cleanId = searchVal.replace(/^#/, '').split(/[\s\-•]+/)[0].trim();
+    if (isReplacement) {
       var all = getAllEmployees();
-      var matched = all.find(function(e) {
-        return String(e.staff_id).trim() === cleanId || String(e.staff_id).trim() === searchVal;
-      }) || all.find(function(e) {
-        return String(e.name).trim().toLowerCase() === searchVal.toLowerCase();
-      });
+      var targetSearch = (replaceId || searchVal || '').replace(/^[#\s]+/, '').split(/[\s\-•]+/)[0].trim();
+      var matched = null;
+      if (targetSearch) {
+        matched = all.find(function (e) {
+          return String(e.staff_id).replace(/^[#\s]+/, '').trim() === targetSearch;
+        }) || all.find(function (e) {
+          return String(e.name).trim().toLowerCase() === searchVal.toLowerCase();
+        });
+      }
 
-      if (matched) {
-        replaceId = String(matched.staff_id).trim();
-        replaceName = matched.name;
+      if (!matched) {
+        alert('❌ To register a replacement, please select an existing staff member in the database.\n\nNo matching record found for "' + (targetSearch || searchVal || 'None') + '".');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          searchInput.classList.add('ring-4', 'ring-rose-500/50', 'border-rose-500');
+          setTimeout(function () {
+            searchInput.classList.remove('ring-4', 'ring-rose-500/50', 'border-rose-500');
+          }, 3000);
+        }
+        return;
+      }
+
+      // Enforce guaranteed canonical staff ID and full employee name
+      replaceId = String(matched.staff_id).replace(/^[#\s]+/, '').trim();
+      replaceName = String(matched.name).trim();
+      if (document.getElementById('entry-replace-id')) {
         document.getElementById('entry-replace-id').value = replaceId;
-        document.getElementById('entry-replace-name').value = replaceName;
-      } else if (cleanId) {
-        replaceId = cleanId;
-        replaceName = searchVal.indexOf('-') !== -1 ? searchVal.split('-').slice(1).join('-').trim() : ('Former Staff #' + cleanId);
-        document.getElementById('entry-replace-id').value = replaceId;
+      }
+      if (document.getElementById('entry-replace-name')) {
         document.getElementById('entry-replace-name').value = replaceName;
       }
     }
 
-    if (isReplacement && !replaceId) {
-      alert('❌ প্রতিস্থাপন (Replacement) হিসেবে নতুন কর্মী যোগ করতে হলে অবশ্যই পূর্বের কর্মীর Replace ID দিতে হবে!\n\nঅনুগ্রহ করে পূর্বের কর্মীর Staff ID (#17568) বা নাম বক্সে লিখুন।');
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        searchInput.classList.add('ring-4', 'ring-rose-500/50', 'border-rose-500');
-        setTimeout(function () {
-          searchInput.classList.remove('ring-4', 'ring-rose-500/50', 'border-rose-500');
-        }, 3000);
+    // Strict validation: An ID can only be replaced once, and an ID can only replace once!
+    if (isReplacement && replaceId) {
+      var cleanRep = String(replaceId).replace(/^[#\s]+/, '').trim();
+      var alreadyReplaced = getReplacedStaffRecord(cleanRep);
+      var isSameNew = alreadyReplaced && String(alreadyReplaced.new_id || '').replace(/^[#\s]+/, '').trim() === cleanStaffId;
+      if (alreadyReplaced && !isSameNew) {
+        var prevNewId = String(alreadyReplaced.new_id || '').replace(/^[#\s]+/, '').trim();
+        var prevNewName = alreadyReplaced.new_name || 'Appointed Personnel';
+        alert('❌ Staff ID ' + cleanRep + ' has already been replaced!\n\n' +
+              '👉 Replacement appointee ' + prevNewId + ' (' + prevNewName + ') is already in place.\n\n' +
+              'Each personnel ID may only be replaced once.');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+        return;
       }
-      return;
+    }
+
+    if (isReplacement && cleanStaffId) {
+      var alreadyAppointed = getAppointedReplacementRecord(cleanStaffId);
+      var isSameRep = alreadyAppointed && String(alreadyAppointed.replace_id || '').replace(/^[#\s]+/, '').trim() === replaceId;
+      if (alreadyAppointed && !isSameRep) {
+        var prevRepId = String(alreadyAppointed.replace_id || '').replace(/^[#\s]+/, '').trim();
+        var prevRepName = alreadyAppointed.replace_name || '';
+        alert('❌ New Staff ID ' + cleanStaffId + ' is already assigned as replacement for another staff member!\n\n' +
+              '👉 This ID is already replacing staff ' + prevRepId + (prevRepName ? ' (' + prevRepName + ')' : '') + '.\n\n' +
+              'A new ID cannot be assigned as a replacement for multiple staff.');
+        var sidInputApp = document.getElementById('entry-staff-id');
+        if (sidInputApp) {
+          sidInputApp.focus();
+          sidInputApp.select();
+        }
+        return;
+      }
     }
 
     var desigVal = (document.getElementById('entry-designation').value || '').trim();
     if (!desigVal) {
-      alert('অনুগ্রহ করে পদবী (Designation) নির্বাচন করুন!');
+      alert('Please select a Designation!');
       var desigEl = document.getElementById('entry-designation');
       if (desigEl) desigEl.focus();
       return;
@@ -778,7 +1048,7 @@
 
     var secVal = (document.getElementById('entry-section').value || '').trim();
     if (!secVal) {
-      alert('অনুগ্রহ করে সেকশন / ফ্যাক্টরি লাইন (Section) নির্বাচন করুন!');
+      alert('Please select a Section / Factory Line!');
       var secEl = document.getElementById('entry-section');
       if (secEl) secEl.focus();
       return;
@@ -787,7 +1057,7 @@
     var grossVal = (document.getElementById('entry-gross-salary').value || '').trim();
     var gross = parseFloat(grossVal) || 0;
     if (!grossVal || gross <= 0) {
-      alert('অনুগ্রহ করে মোট বেতন (Gross Salary) প্রদান করুন!');
+      alert('Please enter a valid Gross Salary!');
       var grossEl = document.getElementById('entry-gross-salary');
       if (grossEl) grossEl.focus();
       return;
@@ -831,7 +1101,7 @@
     if (btnSubmit) {
       btnSubmit.disabled = true;
       btnSubmit.classList.add('opacity-50', 'pointer-events-none');
-      btnSubmit.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> অনলাইনে সংরক্ষণ হচ্ছে...';
+      btnSubmit.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving online...';
     }
 
     function saveViaServerApi() {
@@ -843,7 +1113,7 @@
         .then(function (res) {
           return res.json().then(function (data) {
             if (!res.ok || (data && data.success === false)) {
-              var errMsg = (data && data.error) ? data.error : ('সার্ভার ত্রুটি: স্ট্যাটাস ' + res.status);
+              var errMsg = (data && data.error) ? data.error : ('Server error: Status ' + res.status);
               throw new Error(errMsg);
             }
             return data;
@@ -859,9 +1129,9 @@
           if (btnSubmit) {
             btnSubmit.disabled = false;
             btnSubmit.classList.remove('opacity-50', 'pointer-events-none');
-            btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk text-base"></i> <span>Save Personnel (সংরক্ষণ করুন)</span>';
+            btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk text-base"></i> <span>Save Personnel</span>';
           }
-          alert('কর্মী সংরক্ষণ করা যায়নি:\n\n' + (err.message || err));
+          alert('Could not save personnel:\n\n' + (err.message || err));
         });
     }
 
@@ -872,7 +1142,7 @@
           state.isSubmitting = false;
           handlePostSaveSuccess(savedEmp, isReplacement, { success: true, employee: savedEmp });
           if (typeof window.showHRToast === 'function') {
-            window.showHRToast('☁️ [Firebase Cloud] কর্মী #' + savedEmp.staff_id + ' সরাসরি অনলাইনে সংরক্ষিত ও ইনস্ট্যান্ট সিঙ্ক হয়েছে!', 'success');
+            window.showHRToast('☁️ [Firebase Cloud] Employee ID ' + savedEmp.staff_id + ' successfully saved and synced online!', 'success');
           }
         })
         .catch(function (fbErr) {
@@ -886,20 +1156,40 @@
 
   function handlePostSaveSuccess(savedEmp, isReplacement, responseData) {
     try {
-      // 1. Update in-memory database
+      // 1. Update in-memory database across ALL active caches
       var all = getAllEmployees();
       if (!savedEmp.sl_no) {
         var maxSl = all.reduce(function (max, e) { return Math.max(max, e.sl_no || 0); }, 0);
         savedEmp.sl_no = maxSl + 1;
       }
 
-      var idx = all.findIndex(function (e) {
-        return String(e.staff_id || '').replace(/^#/, '').trim() === String(savedEmp.staff_id || '').replace(/^#/, '').trim();
+      var allSources = [all];
+      if (window.HRMManpower && typeof window.HRMManpower.getAllEmployees === 'function') {
+        allSources.push(window.HRMManpower.getAllEmployees());
+      }
+      if (window.MEP_MANPOWER_DATABASE && Array.isArray(window.MEP_MANPOWER_DATABASE.employees)) {
+        allSources.push(window.MEP_MANPOWER_DATABASE.employees);
+      }
+      if (window.HRM_MANPOWER_CACHE && Array.isArray(window.HRM_MANPOWER_CACHE.employees)) {
+        allSources.push(window.HRM_MANPOWER_CACHE.employees);
+      }
+
+      var cleanSavedSid = String(savedEmp.staff_id || '').replace(/^[#\s]+/, '').trim();
+      allSources.forEach(function (list) {
+        if (!Array.isArray(list)) return;
+        var existingIdx = list.findIndex(function (e) {
+          return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanSavedSid;
+        });
+        if (existingIdx >= 0) {
+          list[existingIdx] = Object.assign({}, list[existingIdx], savedEmp);
+        } else {
+          list.unshift(savedEmp);
+        }
       });
-      if (idx >= 0) {
-        all[idx] = Object.assign({}, all[idx], savedEmp);
-      } else {
-        all.unshift(savedEmp);
+
+      if (responseData && responseData.metadata) {
+        if (window.MEP_MANPOWER_DATABASE) window.MEP_MANPOWER_DATABASE.metadata = responseData.metadata;
+        if (window.HRM_MANPOWER_CACHE) window.HRM_MANPOWER_CACHE.metadata = responseData.metadata;
       }
 
       // If replacement was made, also update the replaced employee to Inactive (automatically goes to Inactive list)
@@ -929,15 +1219,17 @@
           }
           if (found) {
             found.status = 'Inactive';
+            found.replace_id = String(savedEmp.staff_id || '').replace(/^#/, '').trim();
             found.remarks = 'Replaced by #' + savedEmp.staff_id + ' (' + savedEmp.name + ') on ' + (savedEmp.replace_date || savedEmp.doj || '');
           }
         });
 
-        // Add to window.MEP_REPLACEMENT_MASTER immediately
+        // Add or update window.MEP_REPLACEMENT_MASTER immediately
         if (!window.MEP_REPLACEMENT_MASTER) window.MEP_REPLACEMENT_MASTER = [];
         var alreadyInMaster = window.MEP_REPLACEMENT_MASTER.some(function (r) {
-          return String(r.replace_id || '').replace(/^#/, '').trim() === cleanRepId &&
-                 String(r.new_id || '').replace(/^#/, '').trim() === String(savedEmp.staff_id || '').replace(/^#/, '').trim();
+          var rId = String(r.replace_id || '').replace(/^[#\s]+/, '').trim();
+          var nId = String(r.new_id || '').replace(/^[#\s]+/, '').trim();
+          return (rId && rId === cleanRepId) || (nId && nId === String(savedEmp.staff_id || '').replace(/^[#\s]+/, '').trim());
         });
         if (!alreadyInMaster) {
           var repItem = {
@@ -953,10 +1245,12 @@
             new_designation: savedEmp.designation || 'Helper',
             new_section: savedEmp.section || 'Fan Assemble Line',
             new_doj: savedEmp.doj || '',
-            remarks: savedEmp.replace_reason || 'Resigned / ইস্তফা'
+            remarks: savedEmp.replace_reason || 'Replacement Appointed'
           };
           window.MEP_REPLACEMENT_MASTER.unshift(repItem);
         }
+        window.MEP_REPLACEMENT_MASTER = deduplicateReplacementRecords(window.MEP_REPLACEMENT_MASTER);
+        renderHoldCandidatesShelf();
       }
     } catch (e1) {
       console.warn('Error updating local employee state:', e1);
@@ -993,10 +1287,37 @@
       console.warn('Error rebuilding replacement list:', e4);
     }
 
-    // 5. Toast notification
-    var msg = 'কর্মচারী #' + savedEmp.staff_id + ' (' + savedEmp.name + ') সফলভাবে ডাটাবেজে অন্তর্ভুক্ত হয়েছে!';
+        // Cross-module reactive event propagation (Zero-refresh synchronization)
+    try {
+      if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+        window.HRMEventBus.emit('EMPLOYEE_MUTATED', { emp: savedEmp, isReplacement: isReplacement, type: 'new_entry' });
+      }
+      if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+        window.HRMDashboard.render();
+      }
+      if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+        window.HRMManpowerSummary.render();
+      }
+      if (window.HRMPermanentEmployees && typeof window.HRMPermanentEmployees.init === 'function') {
+        window.HRMPermanentEmployees.init();
+      }
+      if (window.HRMSectionSalary && typeof window.HRMSectionSalary.render === 'function') {
+        window.HRMSectionSalary.render();
+      }
+      if (window.HRMIncrement && typeof window.HRMIncrement.init === 'function') {
+        window.HRMIncrement.init();
+      }
+      if (window.HRMTransfer && typeof window.HRMTransfer.render === 'function') {
+        window.HRMTransfer.render();
+      }
+    } catch (eCross) {
+      console.warn('Error broadcasting cross-module updates:', eCross);
+    }
+
+// 5. Toast notification
+    var msg = 'Employee ID ' + savedEmp.staff_id + ' (' + savedEmp.name + ') successfully registered in database!';
     if (isReplacement && cleanRepId) {
-      msg = '✅ প্রতিস্থাপন সফল! নতুন কর্মী #' + savedEmp.staff_id + ' (' + savedEmp.name + ') যুক্ত হয়েছে এবং পূর্বের কর্মী #' + cleanRepId + (repName ? ' (' + repName + ')' : '') + ' স্বয়ংক্রিয়ভাবে Inactive (অব্যাহতিপ্রাপ্ত) লিস্টে স্থানান্তরিত হয়েছে।';
+      msg = '✅ Replacement successful! New staff ' + savedEmp.staff_id + ' (' + savedEmp.name + ') registered, and predecessor ' + cleanRepId + (repName ? ' (' + repName + ')' : '') + ' automatically moved to Inactive status.';
     }
     if (window.showHRToast) window.showHRToast(msg);
 
@@ -1016,7 +1337,7 @@
     if (btnSubmit) {
       btnSubmit.disabled = false;
       btnSubmit.classList.remove('opacity-50', 'pointer-events-none');
-      btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk text-base"></i> <span>Save Personnel (সংরক্ষণ করুন)</span>';
+      btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk text-base"></i> <span>Save Personnel</span>';
     }
     var form = document.getElementById('employee-entry-form');
     if (form) form.reset();
@@ -1224,10 +1545,10 @@
     if (countBadge) countBadge.textContent = totalFiltered + ' of ' + (state.replacementList ? state.replacementList.length : 0) + ' Records';
 
     if (totalFiltered === 0) {
-      tbody.innerHTML = '<tr><td colspan="13" class="py-12 text-center text-slate-400 font-medium text-xs">' +
+      tbody.innerHTML = '<tr><td colspan="14" class="py-12 text-center text-slate-400 font-medium text-xs">' +
                         '<div class="flex flex-col items-center justify-center gap-2">' +
                         '  <i class="ph-bold ph-magnifying-glass text-2xl text-slate-300"></i>' +
-                        '  <span>কোন প্রতিস্থাপন রেকর্ড মেলেনি (No replacement records match criteria)</span>' +
+                        '  <span>No replacement records match the filter criteria</span>' +
                         '</div></td></tr>';
       renderPagination(0);
       return;
@@ -1242,8 +1563,9 @@
       var slDisplay = startIdx + idx + 1;
       var newSlDisplay = startIdx + idx + 1;
 
-      // REPLACED EMPLOYEE DATA
-      var repId = (item.replace_id || '').trim();
+      // REPLACED EMPLOYEE DATA (No '#' prefix)
+      var rawRepId = (item.replace_id || '').trim();
+      var cleanRepId = rawRepId.replace(/^[#\s]+/, '').trim();
       var repName = (item.replace_name || '').trim();
       var repDesig = (item.replace_designation || '').trim();
       var repSec = (item.replace_section || '').trim();
@@ -1251,100 +1573,95 @@
 
       var repSecStyle = getSectionStyle(repSec);
 
-      var repIdHtml = (repId && repId !== 'Blank')
-        ? '<span class="font-mono font-bold text-[11px] px-2 py-0.5 rounded bg-purple-600 text-white cursor-pointer hover:bg-purple-700 transition" onclick="window.HRMEmployeeEntry.viewReplacedDossier(\'' + repId + '\')" title="Click to view staff dossier">#' + repId + '</span>'
+      var repIdHtml = (cleanRepId && cleanRepId !== 'Blank')
+        ? '<span class="rep-id-glass inline-flex items-center justify-center font-mono font-black text-[11px] px-2.5 py-1 rounded-lg text-purple-700 dark:text-purple-300 cursor-pointer shadow-2xs" onclick="window.HRMEmployeeEntry.viewReplacedDossier(\'' + cleanRepId + '\')" title="Click to view staff dossier">' + cleanRepId + '</span>'
         : '<span class="text-slate-400 font-mono text-xs">—</span>';
 
       var repNameHtml = (repName && repName !== 'Blank')
-        ? '<span class="font-bold text-xs text-slate-900 dark:text-slate-100">' + repName + '</span>'
+        ? '<span class="font-bold text-xs text-slate-900 dark:text-slate-100 truncate block max-w-[180px]" title="' + repName + '">' + repName + '</span>'
         : '<span class="text-slate-400 italic text-xs">—</span>';
 
       var repDesigHtml = (repDesig && repDesig !== 'Blank')
-        ? '<span class="font-medium text-xs text-slate-700 dark:text-slate-300">' + repDesig + '</span>'
+        ? '<span class="font-medium text-xs text-purple-900/80 dark:text-purple-200/80 truncate block max-w-[140px]" title="' + repDesig + '">' + repDesig + '</span>'
         : '<span class="text-slate-400 text-xs">—</span>';
 
       var repSecHtml = (repSec && repSec !== 'Blank')
-        ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold border ' + repSecStyle.bg + '"><i class="ph-bold ' + repSecStyle.icon + ' text-xs"></i><span>' + repSec + '</span></span>'
+        ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ' + repSecStyle.bg + ' truncate max-w-[155px]"><i class="ph-bold ' + repSecStyle.icon + ' text-xs shrink-0"></i><span class="truncate">' + repSec + '</span></span>'
         : '<span class="text-slate-400 text-xs">—</span>';
 
-      var repDojHtml = (repDoj && repDoj !== 'Blank' && repDoj !== '0-Jan-00')
-        ? '<span class="font-mono text-xs text-slate-700 dark:text-slate-300">' + repDoj + '</span>'
+      var repDojCompact = formatCompactDOJ(repDoj);
+      var repDojHtml = (repDojCompact && repDojCompact !== '—')
+        ? '<span class="rep-doj-replaced shadow-2xs" title="Joining Date: ' + repDoj + '">' + repDojCompact + '</span>'
         : '<span class="text-slate-400 text-xs font-mono">—</span>';
 
-      // NEW EMPLOYEE DATA
-      var newId = (item.new_id || '').trim();
+      // NEW EMPLOYEE DATA (No '#' prefix)
+      var rawNewId = (item.new_id || '').trim();
+      var cleanNewId = rawNewId.replace(/^[#\s]+/, '').trim();
       var newName = (item.new_name || '').trim();
       var newDesig = (item.new_designation || '').trim();
       var newSec = (item.new_section || '').trim();
       var newDoj = (item.new_doj || '').trim();
-      var remarks = (item.remarks || '').trim();
+      var rawRemarks = (item.remarks || '').trim();
 
-      var isNumericNewId = newId && !isNaN(parseInt(newId, 10)) && parseInt(newId, 10) > 0;
+      var isNumericNewId = cleanNewId && !isNaN(parseInt(cleanNewId, 10)) && parseInt(cleanNewId, 10) > 0;
       var newSecStyle = getSectionStyle(newSec);
 
       var newIdHtml = '';
       if (isNumericNewId) {
-        newIdHtml = '<span class="font-mono font-black text-xs px-2 py-0.5 rounded bg-emerald-600 text-white cursor-pointer hover:bg-emerald-700 transition" onclick="window.HRMEmployeeEntry.viewReplacedDossier(\'' + newId + '\')" title="Click to view new employee dossier">#' + newId + '</span>';
-      } else if (newId && newId !== 'Blank') {
-        newIdHtml = '<span class="px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap">' + newId + '</span>';
+        newIdHtml = '<span class="new-id-glass inline-flex items-center justify-center font-mono font-black text-[11px] px-2.5 py-1 rounded-lg text-emerald-700 dark:text-emerald-300 cursor-pointer shadow-2xs" onclick="window.HRMEmployeeEntry.viewReplacedDossier(\'' + cleanNewId + '\')" title="Click to view new employee dossier">' + cleanNewId + '</span>';
+      } else if (cleanNewId && cleanNewId !== 'Blank') {
+        newIdHtml = '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap">' + cleanNewId + '</span>';
       } else {
         newIdHtml = '<span class="text-slate-400 font-mono text-xs">—</span>';
       }
 
       var newNameHtml = '';
       if (newName && newName !== 'Blank') {
-        newNameHtml = '<span class="font-black text-xs text-slate-900 dark:text-white">' + newName + '</span>';
+        newNameHtml = '<span class="font-bold text-xs text-slate-900 dark:text-white truncate block max-w-[180px]" title="' + newName + '">' + newName + '</span>';
       } else if (isNumericNewId) {
-        newNameHtml = '<span class="text-slate-500 text-xs font-medium">New Appointee</span>';
+        newNameHtml = '<span class="text-emerald-700 dark:text-emerald-400 text-xs font-semibold">New Appointee</span>';
       } else {
-        newNameHtml = '<span class="text-slate-400 italic text-[11px]">Vacancy (অপূর্ণ)</span>';
+        newNameHtml = '<span class="text-slate-400 italic text-[11px]">Open Vacancy</span>';
       }
 
       var newDesigHtml = (newDesig && newDesig !== 'Blank')
-        ? '<span class="font-medium text-xs text-slate-700 dark:text-slate-300">' + newDesig + '</span>'
+        ? '<span class="font-medium text-xs text-emerald-900/80 dark:text-emerald-200/80 truncate block max-w-[140px]" title="' + newDesig + '">' + newDesig + '</span>'
         : '<span class="text-slate-400 text-xs">—</span>';
 
       var newSecHtml = (newSec && newSec !== 'Blank')
-        ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold border ' + newSecStyle.bg + '"><i class="ph-bold ' + newSecStyle.icon + ' text-xs"></i><span>' + newSec + '</span></span>'
+        ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ' + newSecStyle.bg + ' truncate max-w-[155px]"><i class="ph-bold ' + newSecStyle.icon + ' text-xs shrink-0"></i><span class="truncate">' + newSec + '</span></span>'
         : '<span class="text-slate-400 text-xs">—</span>';
 
-      var newDojHtml = (newDoj && newDoj !== 'Blank' && newDoj !== '0-Jan-00')
-        ? '<span class="font-mono text-xs text-slate-700 dark:text-slate-300">' + newDoj + '</span>'
+      var newDojCompact = formatCompactDOJ(newDoj);
+      var newDojHtml = (newDojCompact && newDojCompact !== '—')
+        ? '<span class="rep-doj-new shadow-2xs" title="Joining Date: ' + newDoj + '">' + newDojCompact + '</span>'
         : '<span class="text-slate-400 text-xs font-mono">—</span>';
 
-      var remarksHtml = '';
-      if (remarks) {
-        remarksHtml = '<span class="px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">' + remarks + '</span>';
-      } else if (!isNumericNewId && newId && newId !== 'Blank') {
-        remarksHtml = '<span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">' + newId + '</span>';
-      } else if (isNumericNewId) {
-        remarksHtml = '<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold text-emerald-600 dark:text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Joined</span>';
-      } else {
-        remarksHtml = '<span class="text-slate-400 text-xs">—</span>';
-      }
+      // Glossy remarks formatting
+      var remarksHtml = formatGlossyRemark(rawRemarks, isNumericNewId, cleanNewId);
 
-      return '<tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors divide-x divide-slate-100 dark:divide-slate-800/60">' +
-             '  <!-- Group 1: Replaced Employee (6 columns) -->' +
-             '  <td class="px-2.5 py-2.5 text-center font-mono text-[11px] text-slate-400 bg-purple-50/20 dark:bg-purple-950/10">' + slDisplay + '</td>' +
-             '  <td class="px-3 py-2.5 text-center bg-purple-50/20 dark:bg-purple-950/10">' + repIdHtml + '</td>' +
-             '  <td class="px-3.5 py-2.5 bg-purple-50/20 dark:bg-purple-950/10">' + repNameHtml + '</td>' +
-             '  <td class="px-3 py-2.5 bg-purple-50/20 dark:bg-purple-950/10">' + repDesigHtml + '</td>' +
-             '  <td class="px-3 py-2.5 bg-purple-50/20 dark:bg-purple-950/10">' + repSecHtml + '</td>' +
-             '  <td class="px-3 py-2.5 text-center bg-purple-50/20 dark:bg-purple-950/10 border-r-2 border-purple-500/30">' + repDojHtml + '</td>' +
+      return '<tr class="rep-table-row transition-colors divide-x divide-slate-100/80 dark:divide-slate-800/60">' +
+             '  <!-- Group 1: Replaced Employee (Royal Amethyst Category - 6 columns) -->' +
+             '  <td class="px-2 py-2 text-center font-mono text-[11px] text-purple-700/70 dark:text-purple-300/70 rep-cell-replaced">' + slDisplay + '</td>' +
+             '  <td class="px-2.5 py-2 text-center rep-cell-replaced">' + repIdHtml + '</td>' +
+             '  <td class="px-3 py-2 rep-cell-replaced">' + repNameHtml + '</td>' +
+             '  <td class="px-2.5 py-2 rep-cell-replaced">' + repDesigHtml + '</td>' +
+             '  <td class="px-2.5 py-2 rep-cell-replaced">' + repSecHtml + '</td>' +
+             '  <td class="px-2.5 py-2 text-center rep-cell-replaced border-r-2 border-purple-500/50 dark:border-purple-400/50">' + repDojHtml + '</td>' +
 
-             '  <!-- Group 2: New Employee (7 columns) -->' +
-             '  <td class="px-2.5 py-2.5 text-center font-mono text-[11px] text-slate-400 bg-emerald-50/20 dark:bg-emerald-950/10">' + newSlDisplay + '</td>' +
-             '  <td class="px-3 py-2.5 text-center bg-emerald-50/20 dark:bg-emerald-950/10">' + newIdHtml + '</td>' +
-             '  <td class="px-3.5 py-2.5 bg-emerald-50/20 dark:bg-emerald-950/10">' + newNameHtml + '</td>' +
-             '  <td class="px-3 py-2.5 bg-emerald-50/20 dark:bg-emerald-950/10">' + newDesigHtml + '</td>' +
-             '  <td class="px-3 py-2.5 bg-emerald-50/20 dark:bg-emerald-950/10">' + newSecHtml + '</td>' +
-             '  <td class="px-3 py-2.5 text-center bg-emerald-50/20 dark:bg-emerald-950/10">' + newDojHtml + '</td>' +
-             '  <td class="px-3 py-2.5 bg-emerald-50/20 dark:bg-emerald-950/10">' + remarksHtml + '</td>' +
-             '  <!-- Action / Delete Column -->' +
-             '  <td class="px-2.5 py-2 text-center bg-slate-50/50 dark:bg-dark-900/40 border-l border-slate-200/60 dark:border-slate-800/60">' +
-             '    <button type="button" onclick="window.HRMEmployeeEntry.deleteReplacementRecord(' + (item.sl || 0) + ', \'' + repId + '\', \'' + newId + '\')" class="mep-delete-btn inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-white dark:bg-rose-950/40 dark:hover:bg-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all cursor-pointer shadow-2xs group" title="Delete Replacement Record">' +
-             '      <i class="ph-bold ph-trash text-xs group-hover:scale-110 transition-transform"></i>' +
-             '      <span>Delete</span>' +
+             '  <!-- Group 2: New Employee (Emerald Jade Category - 7 columns) -->' +
+             '  <td class="px-2 py-2 text-center font-mono text-[11px] text-emerald-700/70 dark:text-emerald-300/70 rep-cell-new">' + newSlDisplay + '</td>' +
+             '  <td class="px-2.5 py-2 text-center rep-cell-new">' + newIdHtml + '</td>' +
+             '  <td class="px-3 py-2 rep-cell-new">' + newNameHtml + '</td>' +
+             '  <td class="px-2.5 py-2 rep-cell-new">' + newDesigHtml + '</td>' +
+             '  <td class="px-2.5 py-2 rep-cell-new">' + newSecHtml + '</td>' +
+             '  <td class="px-2.5 py-2 text-center rep-cell-new">' + newDojHtml + '</td>' +
+             '  <td class="px-3 py-2 rep-cell-new">' + remarksHtml + '</td>' +
+
+             '  <!-- Action / Delete Column: Premium Glowing Red Liquid Glass Icon Button -->' +
+             '  <td class="px-2 py-2 text-center bg-slate-50/50 dark:bg-slate-900/50 border-l border-slate-200/60 dark:border-slate-800/60">' +
+             '    <button type="button" onclick="window.HRMEmployeeEntry.deleteReplacementRecord(' + (item.sl || 0) + ', \'' + cleanRepId + '\', \'' + cleanNewId + '\')" class="mep-delete-btn rep-delete-glass-btn inline-flex items-center justify-center w-8 h-8 rounded-xl transition-all cursor-pointer group shadow-xs" title="Delete Replacement Record">' +
+             '      <i class="ph-bold ph-trash text-sm group-hover:scale-115 transition-transform duration-200"></i>' +
              '    </button>' +
              '  </td>' +
              '</tr>';
@@ -1357,9 +1674,9 @@
   function deleteReplacementRecord(sl, repId, newId) {
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। প্রতিস্থাপন রেকর্ড ডিলিট করা যাবে না।', 'warning');
+        window.showHRToast('🔒 Edit Mode is disabled. Enable Edit Mode in Settings to delete replacement records.', 'warning');
       } else {
-        alert('Edit Mode is currently stopped/locked in Settings.');
+        alert('Edit Mode is currently disabled in Settings.');
       }
       return;
     }
@@ -1367,89 +1684,123 @@
     var cleanRepId = String(repId || '').replace(/^[#\s]+/, '').trim();
     var cleanNewId = String(newId || '').replace(/^[#\s]+/, '').trim();
 
-    var confirmMsg = '⚠️ আপনি কি নিশ্চিতভাবে এই প্রতিস্থাপন রেকর্ডটি ডিলিট করতে চান?\n\n' +
-      '• Replaced Staff: #' + (cleanRepId || '—') + '\n' +
-      '• New Appointee: #' + (cleanNewId || '—') + '\n\n' +
-      '✅ ডিলিট করার পর প্রতিস্থাপন রেকর্ডটি মুছে যাবে এবং কর্মী #' + cleanRepId + ' কে পুনরায় Active তালিকায় ফিরিয়ে আনা হবে।';
+    var confirmMsg = '⚠️ Are you sure you want to delete this replacement record?\n\n' +
+      '• Replaced Staff ID: ' + (cleanRepId || '—') + '\n' +
+      '• New Appointee ID: ' + (cleanNewId || '—') + '\n\n' +
+      'This will remove the replacement record and restore employee ID ' + cleanRepId + ' to Active status.';
 
     if (!confirm(confirmMsg)) return;
 
-    fetch('/api/hrm/replacement/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sl: sl, replace_id: cleanRepId, new_id: cleanNewId })
-    })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          if (!res.ok || (data && data.success === false)) {
-            throw new Error((data && data.error) ? data.error : 'Delete failed');
-          }
-          return data;
-        });
-      })
-      .then(function (data) {
-        if (data.data && Array.isArray(data.data)) {
-          window.MEP_REPLACEMENT_MASTER = data.data;
-          state.replacementList = data.data.slice();
-        } else {
-          state.replacementList = state.replacementList.filter(function (r) {
-            if (sl && r.sl === sl) return false;
-            if (cleanRepId && cleanNewId && String(r.replace_id).replace(/^#/, '').trim() === cleanRepId &&
-                String(r.new_id).replace(/^#/, '').trim() === cleanNewId) return false;
-            return true;
-          });
-          window.MEP_REPLACEMENT_MASTER = state.replacementList.slice();
-        }
-
-        applyReplacementFilters();
-        renderReplacementKPIs();
-        renderReplacementTable();
-        updateBadges(state.replacementList.length);
-
-        // Synchronize in-memory window.HRMManpower state immediately
-        if (window.HRMManpower && window.HRMManpower.state && Array.isArray(window.HRMManpower.state.allEmployees)) {
-          var stillReplaced = window.MEP_REPLACEMENT_MASTER.some(function (r) {
-            return String(r.replace_id || '').replace(/^[#\s]+/, '').trim() === cleanRepId;
-          });
-
-          if (!stillReplaced && cleanRepId) {
-            var repEmp = window.HRMManpower.state.allEmployees.find(function (e) {
-              return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanRepId;
-            });
-            if (repEmp) {
-              repEmp.status = 'Active';
-              if (repEmp.remarks && repEmp.remarks.indexOf('Replaced by') !== -1) {
-                repEmp.remarks = '';
-              }
-            }
-          }
-
-          if (cleanNewId) {
-            var newEmp = window.HRMManpower.state.allEmployees.find(function (e) {
-              return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanNewId;
-            });
-            if (newEmp && String(newEmp.replace_id || '').replace(/^[#\s]+/, '').trim() === cleanRepId) {
-              newEmp.replace_id = '';
-              newEmp.replace_name = '';
-              if (newEmp.hiring_type === 'Replacement') newEmp.hiring_type = '';
-            }
-          }
-
-          if (typeof window.HRMManpower.computeClientMetadata === 'function') {
-            window.HRMManpower.computeClientMetadata(window.HRMManpower.state.allEmployees);
-          }
-          if (typeof window.HRMManpower.applyFilters === 'function') {
-            window.HRMManpower.applyFilters();
-          }
-        }
-
-        if (window.showHRToast) {
-          window.showHRToast('🗑️ প্রতিস্থাপন রেকর্ড সফলভাবে মুছে ফেলা হয়েছে এবং কর্মী #' + cleanRepId + ' কে পুনরায় Active তালিকায় ফিরিয়ে আনা হয়েছে!');
-        }
-      })
-      .catch(function (err) {
-        alert('রেকর্ড ডিলিট করা যায়নি:\n\n' + (err.message || err));
+    function performLocalReplacementDelete() {
+      state.replacementList = state.replacementList.filter(function (r) {
+        if (sl && r.sl === sl) return false;
+        if (cleanRepId && cleanNewId && String(r.replace_id).replace(/^#/, '').trim() === cleanRepId &&
+            String(r.new_id).replace(/^#/, '').trim() === cleanNewId) return false;
+        return true;
       });
+      window.MEP_REPLACEMENT_MASTER = state.replacementList.slice();
+
+      applyReplacementFilters();
+      renderReplacementKPIs();
+      renderReplacementTable();
+      updateBadges(state.replacementList.length);
+
+      // Synchronize in-memory employee states across ALL active caches
+      var delSources = [];
+      if (window.HRMManpower && window.HRMManpower.state && Array.isArray(window.HRMManpower.state.allEmployees)) {
+        delSources.push(window.HRMManpower.state.allEmployees);
+      }
+      if (window.MEP_MANPOWER_DATABASE && Array.isArray(window.MEP_MANPOWER_DATABASE.employees)) {
+        delSources.push(window.MEP_MANPOWER_DATABASE.employees);
+      }
+      if (window.HRM_MANPOWER_CACHE && Array.isArray(window.HRM_MANPOWER_CACHE.employees)) {
+        delSources.push(window.HRM_MANPOWER_CACHE.employees);
+      }
+
+      var stillReplaced = window.MEP_REPLACEMENT_MASTER.some(function (r) {
+        return String(r.replace_id || '').replace(/^[#\s]+/, '').trim() === cleanRepId;
+      });
+
+      delSources.forEach(function (sourceList) {
+        if (!stillReplaced && cleanRepId) {
+          var repEmp = sourceList.find(function (e) {
+            return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanRepId;
+          });
+          if (repEmp) {
+            repEmp.status = 'Active';
+            if (repEmp.remarks && repEmp.remarks.indexOf('Replaced by') !== -1) {
+              repEmp.remarks = '';
+            }
+          }
+        }
+
+        if (cleanNewId) {
+          var newEmp = sourceList.find(function (e) {
+            return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanNewId;
+          });
+          if (newEmp && String(newEmp.replace_id || '').replace(/^[#\s]+/, '').trim() === cleanRepId) {
+            newEmp.replace_id = '';
+            newEmp.replace_name = '';
+            if (newEmp.hiring_type === 'Replacement') newEmp.hiring_type = '';
+          }
+        }
+      });
+
+      if (window.HRMManpower && typeof window.HRMManpower.refreshAll === 'function') {
+        window.HRMManpower.refreshAll();
+      }
+
+      // Cross-module reactive event broadcast
+      try {
+        if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+          window.HRMEventBus.emit('REPLACEMENT_CHANGED', { type: 'delete', replace_id: cleanRepId, new_id: cleanNewId });
+        }
+        if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+          window.HRMDashboard.render();
+        }
+        if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+          window.HRMManpowerSummary.render();
+        }
+        if (window.HRMPermanentEmployees && typeof window.HRMPermanentEmployees.init === 'function') {
+          window.HRMPermanentEmployees.init();
+        }
+        if (window.HRMSectionSalary && typeof window.HRMSectionSalary.render === 'function') {
+          window.HRMSectionSalary.render();
+        }
+        if (window.HRMIncrement && typeof window.HRMIncrement.init === 'function') {
+          window.HRMIncrement.init();
+        }
+        if (window.HRMTransfer && typeof window.HRMTransfer.render === 'function') {
+          window.HRMTransfer.render();
+        }
+      } catch (eDel) {}
+
+      if (typeof window.showHRToast === 'function') {
+        window.showHRToast('🗑️ Replacement record removed & staff ' + cleanRepId + ' restored to Active!', 'success');
+      }
+    }
+
+    // 1. Direct Firebase Cloud Delete
+    if (window.HRMFirebase && typeof window.HRMFirebase.deleteReplacement === 'function') {
+      window.HRMFirebase.deleteReplacement(sl, cleanRepId, cleanNewId).catch(function(e) {
+        console.warn('[HRM_FIREBASE] Cloud replacement delete notice:', e);
+      });
+    }
+
+    // 2. Perform Local UI update immediately
+    performLocalReplacementDelete();
+
+    // 3. Optional local server sync if running on local server
+    var isLocalHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalHost) {
+      fetch('/api/hrm/replacement/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sl: sl, replace_id: cleanRepId, new_id: cleanNewId })
+      }).catch(function(err) {
+        console.warn('Server replacement delete notice:', err);
+      });
+    }
   }
 
   function renderPagination(total) {
@@ -1458,7 +1809,7 @@
 
     var perPage = state.filters.per_page;
     if (perPage >= 999999) {
-      container.innerHTML = '<span class="text-[11px] font-mono text-slate-400">সবগুলো ' + total + ' টি রেকর্ড প্রদর্শিত হচ্ছে</span>';
+      container.innerHTML = '<span class="text-[11px] font-mono text-slate-400">Showing all ' + total + ' records</span>';
       return;
     }
 
@@ -1472,19 +1823,19 @@
     var btns = [];
 
     btns.push('<button onclick="window.HRMEmployeeEntry.changePage(' + (curr - 1) + ')" ' + (curr === 1 ? 'disabled' : '') +
-              ' class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 disabled:opacity-40 cursor-pointer">Prev</button>');
+              ' class="rep-input-glass px-2.5 py-1 rounded-lg text-xs font-bold disabled:opacity-40 cursor-pointer">Prev</button>');
 
     for (var p = 1; p <= totalPages; p++) {
       if (p === 1 || p === totalPages || (p >= curr - 1 && p <= curr + 1)) {
-        var activeClass = p === curr ? 'bg-purple-600 text-white font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800';
-        btns.push('<button onclick="window.HRMEmployeeEntry.changePage(' + p + ')" class="px-2.5 py-1 rounded-lg text-xs border border-slate-200 dark:border-slate-700 ' + activeClass + ' cursor-pointer">' + p + '</button>');
+        var activeClass = p === curr ? 'rep-btn-glass-purple text-white font-black shadow-sm' : 'rep-input-glass text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold';
+        btns.push('<button onclick="window.HRMEmployeeEntry.changePage(' + p + ')" class="px-2.5 py-1 rounded-lg text-xs ' + activeClass + ' cursor-pointer">' + p + '</button>');
       } else if (p === curr - 2 || p === curr + 2) {
         btns.push('<span class="px-1 text-slate-400">...</span>');
       }
     }
 
     btns.push('<button onclick="window.HRMEmployeeEntry.changePage(' + (curr + 1) + ')" ' + (curr === totalPages ? 'disabled' : '') +
-              ' class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 disabled:opacity-40 cursor-pointer">Next</button>');
+              ' class="rep-input-glass px-2.5 py-1 rounded-lg text-xs font-bold disabled:opacity-40 cursor-pointer">Next</button>');
 
     container.innerHTML = '<div class="flex items-center gap-1.5">' + btns.join('') + '</div>';
   }
@@ -1526,18 +1877,27 @@
       return;
     }
     state.filters[key] = value;
-    applyReplacementFilters();
-    renderReplacementTable();
+    if (key === 'search') {
+      clearTimeout(state.filterSearchTimer);
+      state.filterSearchTimer = setTimeout(function () {
+        applyReplacementFilters();
+        renderReplacementTable();
+      }, 120);
+    } else {
+      applyReplacementFilters();
+      renderReplacementTable();
+    }
   }
 
   function viewReplacedDossier(staffId) {
     if (!staffId) return;
+    var cleanId = String(staffId).replace(/^[#\s]+/, '').trim();
     var all = getAllEmployees();
-    var emp = all.find(function (e) { return String(e.staff_id) === String(staffId); });
+    var emp = all.find(function (e) { return String(e.staff_id).replace(/^[#\s]+/, '').trim() === cleanId; });
     if (emp && window.HRMManpower && typeof window.HRMManpower.openDossier === 'function') {
       window.HRMManpower.openDossier(emp);
     } else {
-      alert('কর্মী #' + staffId + '-এর তথ্য ডাটাবেজে সংরক্ষিত নেই (Employee #' + staffId + ' not found in current view).');
+      alert('Employee ID ' + cleanId + ' not found in current database view.');
     }
   }
 
@@ -1589,13 +1949,13 @@
   // -------------------------------------------------------------
   function exportReplacementExcel() {
     if (typeof XLSX === 'undefined') {
-      alert('Excel লাইব্রেরি লোড হচ্ছে, অনুগ্রহ করে কয়েক সেকেন্ড পর আবার চেষ্টা করুন।');
+      alert('Excel library is still loading, please try again in a few moments.');
       return;
     }
 
     var list = state.filteredReplacements || [];
     if (list.length === 0) {
-      if (window.showHRToast) window.showHRToast('কোনো প্রতিস্থাপন তথ্য পাওয়া যায়নি।');
+      if (window.showHRToast) window.showHRToast('No replacement data found to export.', 'warning');
       return;
     }
 
@@ -1630,20 +1990,24 @@
     ];
 
     list.forEach(function (item, idx) {
+      var cRepId = String(item.replace_id || '').replace(/^[#\s]+/, '').trim();
+      var cNewId = String(item.new_id || '').replace(/^[#\s]+/, '').trim();
+      var cRemarks = String(item.remarks || '').replace(/\s*\/\s*[\u0980-\u09FF\s]+/g, '').replace(/[\u0980-\u09FF]/g, '').trim();
+
       rows.push([
         idx + 1,
-        item.replace_id || '',
+        cRepId,
         (item.replace_name && item.replace_name !== 'Blank') ? item.replace_name : '',
         (item.replace_designation && item.replace_designation !== 'Blank') ? item.replace_designation : '',
         (item.replace_section && item.replace_section !== 'Blank') ? item.replace_section : '',
-        (item.replace_doj && item.replace_doj !== 'Blank' && item.replace_doj !== '0-Jan-00') ? item.replace_doj : '',
+        (item.replace_doj && item.replace_doj !== 'Blank' && item.replace_doj !== '0-Jan-00') ? formatCompactDOJ(item.replace_doj) : '',
         idx + 1,
-        (item.new_id && item.new_id !== 'Blank') ? item.new_id : '',
+        (cNewId && cNewId !== 'Blank') ? cNewId : '',
         (item.new_name && item.new_name !== 'Blank') ? item.new_name : '',
         (item.new_designation && item.new_designation !== 'Blank') ? item.new_designation : '',
         (item.new_section && item.new_section !== 'Blank') ? item.new_section : '',
-        (item.new_doj && item.new_doj !== 'Blank' && item.new_doj !== '0-Jan-00') ? item.new_doj : '',
-        item.remarks || ''
+        (item.new_doj && item.new_doj !== 'Blank' && item.new_doj !== '0-Jan-00') ? formatCompactDOJ(item.new_doj) : '',
+        cRemarks
       ]);
     });
 
@@ -1810,7 +2174,7 @@
     XLSX.writeFile(wb, filename);
 
     if (window.showHRToast) {
-      window.showHRToast('প্রতিস্থাপন মাস্টার রিপোর্ট প্রিমিয়াম Excel ফাইল সম্পূর্ণ বর্ডার সহ ডাউনলোড হয়েছে!');
+      window.showHRToast('Replacement Master Report Excel file downloaded successfully with formatted borders!');
     }
   }
 
@@ -1819,14 +2183,14 @@
   // -------------------------------------------------------------
   function exportReplacementPDF() {
     if (!window.jspdf || !window.jspdf.jsPDF) {
-      if (window.showHRToast) window.showHRToast('PDF লাইব্রেরি লোড হচ্ছে, প্রিন্ট ডায়ালগ ওপেন করা হচ্ছে...');
+      if (window.showHRToast) window.showHRToast('PDF library loading, opening print dialog...');
       window.print();
       return;
     }
 
     var list = state.filteredReplacements || [];
     if (list.length === 0) {
-      if (window.showHRToast) window.showHRToast('কোনো প্রতিস্থাপন তথ্য পাওয়া যায়নি।');
+      if (window.showHRToast) window.showHRToast('No replacement data found to export.');
       return;
     }
 
@@ -1890,20 +2254,24 @@
     ];
 
     var body = list.map(function (item, idx) {
+      var rId = (item.replace_id || '').toString().replace(/^[#\s]+/, '').trim();
+      var nId = (item.new_id && item.new_id !== 'Blank') ? item.new_id.toString().replace(/^[#\s]+/, '').trim() : '';
+      var rem = (item.remarks || '').toString().replace(/\s*\/\s*[\u0980-\u09FF\s]+/g, '').replace(/[\u0980-\u09FF]/g, '').trim();
+
       return [
         idx + 1,
-        item.replace_id || '',
+        rId,
         (item.replace_name && item.replace_name !== 'Blank') ? item.replace_name : '',
         (item.replace_designation && item.replace_designation !== 'Blank') ? item.replace_designation : '',
         (item.replace_section && item.replace_section !== 'Blank') ? item.replace_section : '',
-        (item.replace_doj && item.replace_doj !== 'Blank' && item.replace_doj !== '0-Jan-00') ? item.replace_doj : '',
+        (item.replace_doj && item.replace_doj !== 'Blank' && item.replace_doj !== '0-Jan-00') ? formatCompactDOJ(item.replace_doj) : '',
         idx + 1,
-        (item.new_id && item.new_id !== 'Blank') ? item.new_id : '',
+        nId,
         (item.new_name && item.new_name !== 'Blank') ? item.new_name : '',
         (item.new_designation && item.new_designation !== 'Blank') ? item.new_designation : '',
         (item.new_section && item.new_section !== 'Blank') ? item.new_section : '',
-        (item.new_doj && item.new_doj !== 'Blank' && item.new_doj !== '0-Jan-00') ? item.new_doj : '',
-        item.remarks || ''
+        (item.new_doj && item.new_doj !== 'Blank' && item.new_doj !== '0-Jan-00') ? formatCompactDOJ(item.new_doj) : '',
+        rem
       ];
     });
 
@@ -1979,7 +2347,7 @@
     doc.save(pdfFilename);
 
     if (window.showHRToast) {
-      window.showHRToast('প্রতিস্থাপন মাস্টার রিপোর্ট প্রিমিয়াম PDF সম্পূর্ণ বর্ডার সহ ডাউনলোড হয়েছে!');
+      window.showHRToast('Replacement Master Report PDF downloaded successfully with formatted borders!');
     }
   }
 
@@ -1992,20 +2360,24 @@
     ];
 
     list.forEach(function (item, idx) {
+      var rId = (item.replace_id || '').toString().replace(/^[#\s]+/, '').trim();
+      var nId = (item.new_id && item.new_id !== 'Blank') ? item.new_id.toString().replace(/^[#\s]+/, '').trim() : '';
+      var rem = (item.remarks || '').toString().replace(/\s*\/\s*[\u0980-\u09FF\s]+/g, '').replace(/[\u0980-\u09FF]/g, '').trim();
+
       csvRows.push([
         idx + 1,
-        '"' + (item.replace_id || '') + '"',
+        '"' + rId + '"',
         '"' + ((item.replace_name && item.replace_name !== 'Blank') ? item.replace_name : '') + '"',
         '"' + ((item.replace_designation && item.replace_designation !== 'Blank') ? item.replace_designation : '') + '"',
         '"' + ((item.replace_section && item.replace_section !== 'Blank') ? item.replace_section : '') + '"',
-        '"' + ((item.replace_doj && item.replace_doj !== 'Blank' && item.replace_doj !== '0-Jan-00') ? item.replace_doj : '') + '"',
+        '"' + ((item.replace_doj && item.replace_doj !== 'Blank' && item.replace_doj !== '0-Jan-00') ? formatCompactDOJ(item.replace_doj) : '') + '"',
         idx + 1,
-        '"' + ((item.new_id && item.new_id !== 'Blank') ? item.new_id : '') + '"',
+        '"' + nId + '"',
         '"' + ((item.new_name && item.new_name !== 'Blank') ? item.new_name : '') + '"',
         '"' + ((item.new_designation && item.new_designation !== 'Blank') ? item.new_designation : '') + '"',
         '"' + ((item.new_section && item.new_section !== 'Blank') ? item.new_section : '') + '"',
-        '"' + ((item.new_doj && item.new_doj !== 'Blank' && item.new_doj !== '0-Jan-00') ? item.new_doj : '') + '"',
-        '"' + (item.remarks || '') + '"'
+        '"' + ((item.new_doj && item.new_doj !== 'Blank' && item.new_doj !== '0-Jan-00') ? formatCompactDOJ(item.new_doj) : '') + '"',
+        '"' + rem + '"'
       ]);
     });
 

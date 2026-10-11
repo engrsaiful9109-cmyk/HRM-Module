@@ -53,8 +53,8 @@
   }
 
   function formatMoney(num) {
-    if (num === null || num === undefined || isNaN(num)) return '৳ 0';
-    return '৳ ' + Math.round(num).toLocaleString('en-IN');
+    if (num === null || num === undefined || isNaN(num)) return 'Tk 0';
+    return 'Tk ' + Math.round(num).toLocaleString('en-IN');
   }
 
   function formatNum(num) {
@@ -318,7 +318,7 @@
     YEARS.forEach(function (y) {
       var badgeVal = document.getElementById('inc-badge-val-' + y);
       var badgeCount = document.getElementById('inc-badge-count-' + y);
-      if (badgeVal) badgeVal.textContent = '৳ ' + Math.round(s.yearlyTotals[y] || 0).toLocaleString();
+      if (badgeVal) badgeVal.textContent = 'Tk ' + Math.round(s.yearlyTotals[y] || 0).toLocaleString();
       if (badgeCount) badgeCount.textContent = (s.yearlyCounts[y] || 0) + ' staff';
     });
   }
@@ -370,7 +370,7 @@
         breakdownHtml += 
           '<button type="button" onclick="window.HRMIncrement.setYear(\'' + y + '\')" class="px-2 py-1 rounded-lg text-[11px] font-mono font-bold bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-1 cursor-pointer transition-all hover:scale-105 shadow-2xs" title="Switch to ' + y + ' Increment">' +
             '<span class="text-purple-600 dark:text-purple-400 font-bold">' + y + ':</span>' +
-            '<span class="text-slate-800 dark:text-slate-200 font-extrabold">৳' + Math.round(amt).toLocaleString() + '</span>' +
+            '<span class="text-slate-800 dark:text-slate-200 font-extrabold">Tk ' + Math.round(amt).toLocaleString() + '</span>' +
             '<span class="text-[10px] text-slate-400">(' + cnt + ')</span>' +
           '</button>';
       });
@@ -390,7 +390,7 @@
           '<div class="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 shadow-2xs">' +
             '<i class="ph-bold ph-trend-up text-emerald-600 dark:text-emerald-400"></i>' +
             '<span class="text-[10px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400">Disbursed:</span>' +
-            '<span class="text-xs font-mono font-black">৳' + Math.round(yAmt).toLocaleString() + '</span>' +
+            '<span class="text-xs font-mono font-black">Tk ' + Math.round(yAmt).toLocaleString() + '</span>' +
           '</div>' +
           // Staff
           '<div class="px-2.5 py-1 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-800 dark:text-blue-300 flex items-center gap-1.5 shadow-2xs">' +
@@ -402,19 +402,19 @@
           '<div class="px-2.5 py-1 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-800 dark:text-purple-300 flex items-center gap-1.5 shadow-2xs" title="' + selYear + ' Gross Salary Pool (Back-calculated)">' +
             '<i class="ph-bold ph-wallet text-purple-600 dark:text-purple-400"></i>' +
             '<span class="text-[10px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400">' + selYear + ' Gross:</span>' +
-            '<span class="text-xs font-mono font-black">৳' + Math.round(yGross).toLocaleString() + '</span>' +
+            '<span class="text-xs font-mono font-black">Tk ' + Math.round(yGross).toLocaleString() + '</span>' +
           '</div>' +
           // Basic Pool
           '<div class="px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center gap-1.5 shadow-2xs" title="' + selYear + ' Basic Salary Pool">' +
             '<i class="ph-bold ph-coins text-amber-600 dark:text-amber-400"></i>' +
             '<span class="text-[10px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400">' + selYear + ' Basic:</span>' +
-            '<span class="text-xs font-mono font-black">৳' + Math.round(yBasic).toLocaleString() + '</span>' +
+            '<span class="text-xs font-mono font-black">Tk ' + Math.round(yBasic).toLocaleString() + '</span>' +
           '</div>' +
           // Avg & %
           '<div class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs">' +
             '<i class="ph-bold ph-calculator text-emerald-500"></i>' +
             '<span class="text-[10px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400">Avg Inc:</span>' +
-            '<span class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">৳' + yAvg.toLocaleString() + '</span>' +
+            '<span class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">Tk ' + yAvg.toLocaleString() + '</span>' +
             '<span class="text-[10px] font-mono font-bold text-slate-400">(' + yPct + ')</span>' +
           '</div>' +
           // Quick other years cycle buttons
@@ -460,7 +460,7 @@
 
     tabs.forEach(function (tab) {
       var isSel = selYear === tab.id;
-      var amtStr = tab.amount > 0 ? ' • ৳ ' + Math.round(tab.amount).toLocaleString('en-IN') : '';
+      var amtStr = tab.amount > 0 ? ' • Tk ' + Math.round(tab.amount).toLocaleString('en-IN') : '';
       html += '<option value="' + tab.id + '"' + (isSel ? ' selected' : '') + '>' +
         tab.label + ' (' + tab.count + ' Staff' + amtStr + ')' +
         '</option>';
@@ -532,7 +532,7 @@
           '<th class="px-3 py-2 text-center min-w-[110px] whitespace-nowrap bg-slate-100/95 dark:bg-slate-800/95">DOJ</th>' +
           '<th class="px-3 py-2 text-right min-w-[135px] whitespace-nowrap text-slate-900 dark:text-white font-black bg-slate-100/95 dark:bg-slate-800/95">' + grossTitle + '</th>' +
           '<th class="px-3 py-2 text-right min-w-[130px] whitespace-nowrap bg-slate-100/95 dark:bg-slate-800/95">' + basicTitle + '</th>' +
-          '<th class="px-3 py-2 text-right min-w-[140px] whitespace-nowrap bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 font-black">' + yearLabel + ' Increment (৳)</th>' +
+          '<th class="px-3 py-2 text-right min-w-[140px] whitespace-nowrap bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 font-black">' + yearLabel + ' Increment (Tk)</th>' +
           '<th class="px-3 py-2 text-center min-w-[95px] whitespace-nowrap bg-slate-100/95 dark:bg-slate-800/95">% of Basic</th>' +
           '<th class="px-3 py-2 text-center w-20 min-w-[80px] whitespace-nowrap bg-slate-100/95 dark:bg-slate-800/95">Status</th>' +
           '<th class="px-3 py-2 text-center w-16 min-w-[65px] whitespace-nowrap bg-slate-100/95 dark:bg-slate-800/95">Action</th>' +
@@ -617,7 +617,7 @@
             var colorClass = (y === '2026' || y === '2025')
               ? 'font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/5'
               : 'font-bold text-slate-700 dark:text-slate-300';
-            html += '<td class="px-2.5 py-1.5 text-right font-mono text-xs whitespace-nowrap ' + colorClass + '">৳' + Math.round(amt).toLocaleString() + '</td>';
+            html += '<td class="px-2.5 py-1.5 text-right font-mono text-xs whitespace-nowrap ' + colorClass + '">Tk ' + Math.round(amt).toLocaleString() + '</td>';
           } else {
             html += '<td class="px-2.5 py-1.5 text-right text-xs text-slate-300 dark:text-slate-600 select-none">—</td>';
           }
@@ -636,7 +636,7 @@
         html += '<td class="px-3 py-1.5 text-right font-mono font-bold text-xs whitespace-nowrap text-slate-900 dark:text-white">' + formatMoney(sal.gross) + '</td>' +
           '<td class="px-3 py-1.5 text-right font-mono text-xs whitespace-nowrap text-slate-600 dark:text-slate-400">' + formatMoney(sal.basic) + '</td>' +
           '<td class="px-3 py-1.5 text-right font-mono font-black text-xs whitespace-nowrap bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">' +
-          (selectedInc > 0 ? '+৳' + Math.round(selectedInc).toLocaleString() : '—') +
+          (selectedInc > 0 ? '+Tk ' + Math.round(selectedInc).toLocaleString() : '—') +
           '</td>' +
           '<td class="px-3 py-1.5 text-center font-mono text-xs whitespace-nowrap text-emerald-600 dark:text-emerald-400 font-bold">' + pct + '</td>';
       }
@@ -688,7 +688,7 @@
 
     if (isAll) {
       YEARS.forEach(function (y) {
-        fHtml += '<td class="px-2.5 py-2 text-right font-black whitespace-nowrap text-purple-700 dark:text-purple-300 ' + cellBg + '">৳' + Math.round(sumYears[y]).toLocaleString() + '</td>';
+        fHtml += '<td class="px-2.5 py-2 text-right font-black whitespace-nowrap text-purple-700 dark:text-purple-300 ' + cellBg + '">Tk ' + Math.round(sumYears[y]).toLocaleString() + '</td>';
       });
       fHtml += '<td class="px-3 py-2 text-right font-black whitespace-nowrap text-emerald-700 dark:text-emerald-300 bg-emerald-500/20 text-sm ' + cellBg + '">' + formatMoney(sumGrand) + '</td>' +
         '<td colspan="2" class="px-3 py-2 ' + cellBg + '"></td>';
@@ -696,7 +696,7 @@
       var selInc = sumYears[state.selectedYear] || 0;
       var avgPct = sumBasic > 0 && selInc > 0 ? ((selInc / sumBasic) * 100).toFixed(1) + '%' : '—';
       fHtml += '<td class="px-3 py-2 text-right font-bold whitespace-nowrap text-slate-700 dark:text-slate-300 ' + cellBg + '">' + formatMoney(sumBasic) + '</td>' +
-        '<td class="px-3 py-2 text-right font-black whitespace-nowrap text-emerald-700 dark:text-emerald-300 bg-emerald-500/25 text-sm ' + cellBg + '">৳' + Math.round(selInc).toLocaleString() + '</td>' +
+        '<td class="px-3 py-2 text-right font-black whitespace-nowrap text-emerald-700 dark:text-emerald-300 bg-emerald-500/25 text-sm ' + cellBg + '">Tk ' + Math.round(selInc).toLocaleString() + '</td>' +
         '<td class="px-3 py-2 text-center font-black text-emerald-600 dark:text-emerald-400 ' + cellBg + '">' + avgPct + '</td>' +
         '<td colspan="2" class="px-3 py-2 ' + cellBg + '"></td>';
     }
@@ -1006,7 +1006,7 @@
       var xlsxFilename = 'MEP_HRM_Yearly_Increment_' + state.selectedYear + '_' + new Date().toISOString().slice(0, 10) + '.xlsx';
       XLSX.utils.book_append_sheet(wb, ws, 'Increment_' + state.selectedYear);
       XLSX.writeFile(wb, xlsxFilename);
-      if (window.showHRToast) window.showHRToast('ইনক্রিমেন্ট রেজিস্টার প্রিমিয়াম Excel ফাইল সম্পূর্ণ বর্ডার সহ ডাউনলোড হয়েছে!');
+      if (window.showHRToast) window.showHRToast('Increment register Excel report downloaded successfully with full styling!');
       return;
     }
 
@@ -1108,14 +1108,14 @@
   // -------------------------------------------------------------
   function exportIncrementPDF() {
     if (!window.jspdf || !window.jspdf.jsPDF) {
-      if (window.showHRToast) window.showHRToast('PDF লাইব্রেরি লোড হচ্ছে, প্রিন্ট ডায়ালগ ওপেন করা হচ্ছে...');
+      if (window.showHRToast) window.showHRToast('Loading PDF engine, opening print view...');
       window.print();
       return;
     }
 
     var items = state.filteredEmployees;
     if (!items || items.length === 0) {
-      if (window.showHRToast) window.showHRToast('কোনো ইনক্রিমেন্ট তথ্য পাওয়া যায়নি।');
+      if (window.showHRToast) window.showHRToast('No increment records found to export.');
       return;
     }
 
@@ -1357,7 +1357,7 @@
     doc.save(pdfFilename);
 
     if (window.showHRToast) {
-      window.showHRToast('ইনক্রিমেন্ট রেজিস্টার প্রিমিয়াম PDF সম্পূর্ণ বর্ডার সহ ডাউনলোড হয়েছে!');
+      window.showHRToast('Increment register PDF exported successfully with table styling!');
     }
   }
 
@@ -1439,7 +1439,10 @@
     },
     onSearchInput: function (val) {
       state.filters.search = val;
-      applyFilters();
+      if (window._incSearchTimer) clearTimeout(window._incSearchTimer);
+      window._incSearchTimer = setTimeout(function () {
+        applyFilters();
+      }, 120);
     },
     onSectionChange: function (val) {
       state.filters.section = val;
@@ -1498,5 +1501,18 @@
   document.addEventListener('DOMContentLoaded', function () {
     setTimeout(initData, 200);
   });
+
+  // Cross-module reactive event listeners
+  if (window.HRMEventBus && typeof window.HRMEventBus.on === 'function') {
+    ['EMPLOYEE_MUTATED', 'EMPLOYEE_DELETED', 'TRANSFER_EXECUTED', 'mep:data-updated'].forEach(function (evt) {
+      window.HRMEventBus.on(evt, function () {
+        try {
+          initData();
+        } catch (eInc) {
+          console.warn('[HRMIncrement] Reactive update error:', eInc);
+        }
+      });
+    });
+  }
 
 })();

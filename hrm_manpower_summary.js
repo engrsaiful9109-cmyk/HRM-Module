@@ -1,6 +1,6 @@
 /**
  * MEP GROUP - Enterprise Human Resource Management (HRM)
- * Manpower Summary Controller (ম্যানপাওয়ার সামারি)
+ * Manpower Summary Controller
  * Authorized Manpower Matrix vs Live Existing Active Deployment
  * Features:
  *   - 11 Standard Production Sections & Subtotals
@@ -266,7 +266,7 @@
           'id="btn-edit-summary" ' +
           'onclick="window.HRMManpowerSummary.toggleEditMode()" ' +
           'class="mep-edit-btn px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer border border-amber-600/30" ' +
-          'title="অনুমোদিত জনবল কাঠামো এডিট করুন (Edit Authorized Manpower Specs)"' +
+          'title="Edit Authorized Manpower Specs"' +
         '>' +
           '<i class="ph-bold ph-pencil-simple text-sm"></i>' +
           '<span>Edit Specs</span>' +
@@ -278,7 +278,7 @@
             'type="button" ' +
             'onclick="window.HRMManpowerSummary.saveEditMode()" ' +
             'class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-black shadow-xs flex items-center gap-1 cursor-pointer transition-all" ' +
-            'title="পরিবর্তনসমূহ সংরক্ষণ করুন (Save Specs)"' +
+            'title="Save Specs"' +
           '>' +
             '<i class="ph-bold ph-floppy-disk text-sm"></i>' +
             '<span>Save Specs</span>' +
@@ -287,7 +287,7 @@
             'type="button" ' +
             'onclick="window.HRMManpowerSummary.cancelEditMode()" ' +
             'class="px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 active:scale-95 text-slate-800 dark:text-slate-100 text-xs font-bold transition-all cursor-pointer" ' +
-            'title="বাতিল করুন (Cancel)"' +
+            'title="Cancel"' +
           '>' +
             '<i class="ph-bold ph-x text-sm"></i>' +
             '<span>Cancel</span>' +
@@ -296,7 +296,7 @@
             'type="button" ' +
             'onclick="window.HRMManpowerSummary.resetDefaultSpecs()" ' +
             'class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-bold border border-rose-300 dark:border-rose-800 transition-all cursor-pointer" ' +
-            'title="ফ্যাক্টরি স্ট্যান্ডার্ড 272 এ রিসেট করুন (Reset to 272)"' +
+            'title="Reset to Factory Standard (272)"' +
           '>' +
             '<i class="ph-bold ph-arrow-counter-clockwise text-xs"></i>' +
             '<span>Reset 272</span>' +
@@ -365,13 +365,13 @@
     // Col 8: Existing Manpower (Worker)
     html += '<td class="py-2 px-2 text-center font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50/40 dark:bg-emerald-950/20 border border-slate-300 dark:border-slate-700">' + (existW || '') + '</td>';
 
-    // Col 9: Total Authorize Manpower (Need / লক্ষ্যমাত্রা)
+    // Col 9: Total Authorize Manpower (Need)
     html += '<td class="py-2 px-2 text-center font-black text-slate-900 dark:text-white bg-purple-50/50 dark:bg-purple-950/30 border border-slate-300 dark:border-slate-700 font-mono">' + rowAuthTotal + '</td>';
 
-    // Col 10: Total Existing Manpower (কর্মরত মোট)
+    // Col 10: Total Existing Manpower (Current Total)
     html += '<td class="py-2 px-2 text-center font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/30 border border-slate-300 dark:border-slate-700 font-mono">' + (rowExistTotal || '') + '</td>';
 
-    // Col 11: Due Manpower (ঘাটতি / বাকি)
+    // Col 11: Due Manpower (Shortage / Due)
     if (rowDue > 0) {
       html += '<td class="py-2 px-2 text-center font-black border border-slate-300 dark:border-slate-700 bg-rose-50/50 dark:bg-rose-950/30">' +
         '<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-black bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-200 border border-rose-300 dark:border-rose-700 shadow-2xs">' +
@@ -500,13 +500,17 @@
 
     var badge = document.getElementById('sidebar-summary-badge');
     if (badge) badge.textContent = summary.total.authTotal;
+    var bAuth = document.getElementById('sidebar-auth-badge');
+    if (bAuth) bAuth.textContent = summary.total.authTotal;
+    var bMat = document.getElementById('sidebar-sub-matrix-count');
+    if (bMat) bMat.textContent = summary.total.authTotal;
   }
 
   // Edit Mode Actions
   function toggleEditMode() {
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (window.showHRToast) {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। Specs এডিট মোড পরিবর্তন করা যাবে না।', 'warning');
+        window.showHRToast('🔒 Edit Mode is disabled. Cannot modify specifications.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -516,7 +520,7 @@
     specsWorkingCopy = JSON.parse(JSON.stringify(SECTION_CONFIG));
     render();
     if (window.showHRToast) {
-      window.showHRToast('অনুমোদিত কাঠামো সম্পাদনা মোড সক্রিয় হয়েছে। সংখ্যা পরিবর্তন করে Save Specs এ ক্লিক করুন।');
+      window.showHRToast('Authorized specs edit mode activated. Adjust numbers and click Save Specs.');
     }
   }
 
@@ -536,6 +540,10 @@
 
     var badge = document.getElementById('sidebar-summary-badge');
     if (badge) badge.textContent = summary.total.authTotal;
+    var bAuth = document.getElementById('sidebar-auth-badge');
+    if (bAuth) bAuth.textContent = summary.total.authTotal;
+    var bMat = document.getElementById('sidebar-sub-matrix-count');
+    if (bMat) bMat.textContent = summary.total.authTotal;
 
     // Re-render table body without losing input focus if active
     var activeId = document.activeElement ? document.activeElement : null;
@@ -568,7 +576,7 @@
 
     render();
     if (window.showHRToast) {
-      window.showHRToast('ম্যানপাওয়ার সামারি অনুমোদিত কাঠামো সফলভাবে সংরক্ষিত হয়েছে!');
+      window.showHRToast('Manpower summary authorized specs saved successfully!');
     }
   }
 
@@ -577,12 +585,12 @@
     specsWorkingCopy = [];
     render();
     if (window.showHRToast) {
-      window.showHRToast('সম্পাদনা বাতিল করা হয়েছে। পূর্ববর্তী ডেটা অপরিবর্তিত রয়েছে।');
+      window.showHRToast('Editing cancelled. Previous specs retained.');
     }
   }
 
   function resetDefaultSpecs() {
-    if (confirm('আপনি কি ফ্যাক্টরি স্ট্যান্ডার্ড 272 কাঠামোর ডিফল্ট সংখ্যায় রিসেট করতে চান?')) {
+    if (confirm('Are you sure you want to reset authorized specs to default factory standard (272)?')) {
       SECTION_CONFIG = JSON.parse(JSON.stringify(DEFAULT_SECTION_CONFIG));
       specsWorkingCopy = JSON.parse(JSON.stringify(DEFAULT_SECTION_CONFIG));
       isEditMode = false;
@@ -601,7 +609,7 @@
 
       render();
       if (window.showHRToast) {
-        window.showHRToast('অনুমোদিত কাঠামো ডিফল্ট 272 এ রিসেট ও সংরক্ষিত হয়েছে!');
+        window.showHRToast('Authorized specs reset to default 272 and saved!');
       }
     }
   }
@@ -609,7 +617,7 @@
   // Export to Premium Excel (.xlsx) with all 11 columns and full grid borders
   function exportExcel() {
     if (!window.XLSX) {
-      if (window.showHRToast) window.showHRToast('Excel ইঞ্জিন পাওয়া যায়নি। প্রিন্ট বিকল্প ব্যবহার করুন।');
+      if (window.showHRToast) window.showHRToast('Excel engine unavailable. Please use the Print option.');
       return;
     }
 
@@ -803,14 +811,14 @@
     XLSX.writeFile(wb, filename);
 
     if (window.showHRToast) {
-      window.showHRToast('ম্যানপাওয়ার সামারি প্রিমিয়াম Excel ফাইল ১১টি কলাম ও সম্পূর্ণ বর্ডার সহ ডাউনলোড হয়েছে!');
+      window.showHRToast('Manpower summary premium Excel report downloaded successfully with all 11 columns!');
     }
   }
 
   // Export to Premium Landscape PDF (.pdf) with all 11 columns and full grid borders
   function exportPDF() {
     if (!window.jspdf || !window.jspdf.jsPDF) {
-      if (window.showHRToast) window.showHRToast('PDF লাইব্রেরি লোড হচ্ছে, প্রিন্ট অপশন ওপেন করা হচ্ছে...');
+      if (window.showHRToast) window.showHRToast('Loading PDF library, opening print options...');
       window.print();
       return;
     }
@@ -1037,7 +1045,7 @@
     doc.save('MEP_Manpower_Summary_Report_Plant1027_' + new Date().toISOString().slice(0, 10) + '.pdf');
 
     if (window.showHRToast) {
-      window.showHRToast('ম্যানপাওয়ার সামারি প্রিমিয়াম PDF সম্পূর্ণ ১১টি কলাম ও বর্ডার সহ ডাউনলোড হয়েছে!');
+      window.showHRToast('Manpower summary premium PDF report downloaded successfully with all 11 columns!');
     }
   }
 
@@ -1063,6 +1071,25 @@
     });
   } else {
     setTimeout(render, 300);
+  }
+
+  // Reactive updates on data mutations, transfers & cloud sync
+  function onDataChanged() {
+    try {
+      var summarySec = document.getElementById('manpower-summary-section');
+      if (summarySec && !summarySec.classList.contains('hidden')) {
+        render();
+      }
+    } catch (err) {}
+  }
+
+  window.addEventListener('hrm-employees-cloud-synced', onDataChanged);
+  window.addEventListener('mep:data-updated', onDataChanged);
+
+  if (window.HRMEventBus && typeof window.HRMEventBus.on === 'function') {
+    ['EMPLOYEE_MUTATED', 'EMPLOYEE_DELETED', 'TRANSFER_EXECUTED', 'CLOUD_SYNC_RECEIVED', 'SPECS_CHANGED'].forEach(function (evt) {
+      window.HRMEventBus.on(evt, onDataChanged);
+    });
   }
 
 })();

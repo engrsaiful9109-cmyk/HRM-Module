@@ -21,6 +21,7 @@
       department: 'ALL',
       designation: 'ALL',
       gender: 'ALL',
+      confirmation: 'ALL',
       blood_group: 'ALL',
       sort_by: 'sl_no',
       sort_dir: 'asc',
@@ -53,8 +54,8 @@
   }
 
   function formatMoney(num) {
-    if (num === null || num === undefined || isNaN(num)) return '৳ 0';
-    return '৳ ' + Math.round(num).toLocaleString('en-IN');
+    if (num === null || num === undefined || isNaN(num)) return 'Tk 0';
+    return 'Tk ' + Math.round(num).toLocaleString('en-IN');
   }
 
   // Exact M Grade Designations specified by User:
@@ -73,38 +74,67 @@
 
   function getGrade(desig) {
     var d = String(desig || '').trim().toLowerCase();
-    // 1. M Grade (Explicitly specified by User)
+    // 1. M Grade (Explicitly specified by User -> returns 'M')
     for (var i = 0; i < M_GRADE_DESIGNATIONS.length; i++) {
       if (d === M_GRADE_DESIGNATIONS[i] || d.indexOf(M_GRADE_DESIGNATIONS[i]) !== -1) {
-        return 'M Grade';
+        return 'M';
       }
     }
     if (d.includes('engineer') || d.includes('officer') || d.includes('manager') || d.includes('executive')) {
-      return 'M Grade';
+      return 'M';
     }
 
-    // 2. Worker Grade (User explicit: Operator, Sr. Operator, Asst. Operator, Helper, Delivery Asst, etc.)
+    // 2. Worker Grade (User explicit: Operator, Helper, Delivery, Lift, Cleaner, Labor -> returns 'W')
     if (d.includes('helper') || 
         d.includes('operator') || 
         d.includes('delivery') || 
         d.includes('lift') || 
         d.includes('cleaner') || 
         d.includes('labor')) {
-      return 'Worker';
+      return 'W';
     }
 
-    // 3. S Grade: Supervisors, Foremen, Technicalmen
-    return 'S Grade';
+    // 3. S Grade: Supervisors, Foremen, Technicalmen -> returns 'S'
+    return 'S';
   }
 
   function getGradeBadge(grade) {
-    if (grade === 'M Grade') {
-      return '<span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-300 dark:border-purple-800 shadow-2xs">M Grade</span>';
-    } else if (grade === 'S Grade') {
-      return '<span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-300 dark:border-sky-800 shadow-2xs">S Grade</span>';
+    var g = String(grade || '').trim().toUpperCase();
+    if (g === 'M' || g.indexOf('M') !== -1) {
+      return '<span class="grade-pill-m w-7 h-7 rounded-xl font-mono font-black text-xs inline-flex items-center justify-center select-none shadow-2xs" title="Management & Engineering Grade (M)">M</span>';
+    } else if (g === 'S' || g.indexOf('S') !== -1) {
+      return '<span class="grade-pill-s w-7 h-7 rounded-xl font-mono font-black text-xs inline-flex items-center justify-center select-none shadow-2xs" title="Supervisor & Technical Grade (S)">S</span>';
     } else {
-      return '<span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-extrabold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shadow-2xs">Worker</span>';
+      return '<span class="grade-pill-w w-7 h-7 rounded-xl font-mono font-black text-xs inline-flex items-center justify-center select-none shadow-2xs" title="Worker & Operator Grade (W)">W</span>';
     }
+  }
+
+  function formatShortDOJ(str) {
+    if (!str || str === '—' || str === '-' || str === '0' || str === 'null' || str === 'None') return '—';
+    str = String(str).trim();
+    var m1 = str.match(/^(\d{1,2})[-/ ]([A-Za-z]{3})[-/ ](\d{2,4})$/);
+    if (m1) {
+      var d = m1[1].length === 1 ? '0' + m1[1] : m1[1];
+      var mon = m1[2].charAt(0).toUpperCase() + m1[2].slice(1, 3).toLowerCase();
+      var yr = m1[3].length === 4 ? m1[3].slice(-2) : m1[3];
+      return d + '-' + mon + '-' + yr;
+    }
+    var m2 = str.match(/^(\d{4})[-/ ](\d{1,2})[-/ ](\d{1,2})$/);
+    if (m2) {
+      var yr2 = m2[1].slice(-2);
+      var moIdx = parseInt(m2[2], 10) - 1;
+      var mon2 = (moIdx >= 0 && moIdx < 12) ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][moIdx] : 'Jan';
+      var d2 = m2[3].length === 1 ? '0' + m2[3] : m2[3];
+      return d2 + '-' + mon2 + '-' + yr2;
+    }
+    var dObj = new Date(str);
+    if (!isNaN(dObj.getTime())) {
+      var dd = String(dObj.getDate()).padStart(2, '0');
+      var mm = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dObj.getMonth()] || 'Jan';
+      var yy = String(dObj.getFullYear()).slice(-2);
+      return dd + '-' + mm + '-' + yy;
+    }
+    return str;
   }
 
   var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -188,6 +218,43 @@
       .catch(function (err) {
         console.warn('Live API fetch skipped or failed; using local client database cache.', err);
       });
+
+    // 3. Fallback direct cloud fetch for file:/// protocol or standalone execution
+    if (window.location.protocol === 'file:' || !window.HRMFirebase) {
+      setTimeout(function () {
+        if (!window.HRMFirebase || !window.HRMFirebase.state || !window.HRMFirebase.state.isConnected) {
+          fetch('https://whatsapp-c10ef-default-rtdb.firebaseio.com/mep_hrm/employees.json')
+            .then(function (res) { return res.json(); })
+            .then(function (rawData) {
+              if (!rawData) return;
+              var fbList = Array.isArray(rawData) ? rawData.filter(Boolean) : Object.values(rawData).filter(Boolean);
+              var validList = fbList.filter(function (e) {
+                if (!e || (!e.staff_id && !e.sl_no)) return false;
+                var sid = String(e.staff_id || '').trim();
+                return sid && sid !== '14' && sid !== '99989' && e.name;
+              });
+              if (validList.length > 0) {
+                loadDataIntoState({ employees: validList }, true);
+              }
+            })
+            .catch(function () {});
+
+          fetch('https://whatsapp-c10ef-default-rtdb.firebaseio.com/mep_hrm/replacements.json')
+            .then(function (res) { return res.json(); })
+            .then(function (rawReps) {
+              if (!rawReps) return;
+              var repList = Array.isArray(rawReps) ? rawReps.filter(Boolean) : Object.values(rawReps).filter(Boolean);
+              if (repList.length > 0) {
+                window.MEP_REPLACEMENT_MASTER = repList;
+                if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.buildReplacementList === 'function') {
+                  window.HRMEmployeeEntry.buildReplacementList(false);
+                }
+              }
+            })
+            .catch(function () {});
+        }
+      }, 500);
+    }
   }
 
   function loadDataIntoState(dbData, preservePage) {
@@ -207,7 +274,7 @@
 
     updateTopKPIs();
     populateFilterDropdowns();
-    applyFilters(preservePage);
+    setStatusFilter(state.filters.status || 'ALL');
   }
 
   function computeClientMetadata(employees) {
@@ -343,12 +410,12 @@
     var elPayroll = document.getElementById('kpi-monthly-payroll');
     if (elPayroll) {
       var actGrossLakh = (actGross / 100000).toFixed(2);
-      elPayroll.textContent = '৳ ' + actGrossLakh + ' Lakh';
+      elPayroll.textContent = 'Tk ' + actGrossLakh + ' Lakh';
     }
     var elPayrollSub = document.getElementById('kpi-monthly-payroll-sub');
     if (elPayrollSub) {
       var actBasicLakh = (actBasic / 100000).toFixed(2);
-      elPayrollSub.textContent = 'Active Basic: ৳ ' + actBasicLakh + 'L (' + formatMoney(actGross) + ')';
+      elPayrollSub.textContent = 'Active Basic: Tk ' + actBasicLakh + 'L (' + formatMoney(actGross) + ')';
     }
 
     // KPI 4: Active Factory Sections
@@ -385,6 +452,8 @@
     if (elInact) elInact.textContent = inact.toLocaleString();
 
     // Dynamically sync sidebar pills
+    var elSidebarInfo = document.getElementById('sidebar-manpower-info-badge');
+    if (elSidebarInfo) elSidebarInfo.textContent = state.allEmployees.length.toLocaleString();
     var elSidebarAll = document.getElementById('sidebar-all-badge');
     if (elSidebarAll) elSidebarAll.textContent = state.allEmployees.length.toLocaleString();
     var elSubAll = document.getElementById('sidebar-sub-all-count');
@@ -398,27 +467,96 @@
   }
 
   function setStatusFilter(statusVal) {
+    statusVal = statusVal || 'ALL';
     state.filters.status = statusVal;
     var selectEl = document.getElementById('filter-status');
     if (selectEl) selectEl.value = statusVal;
 
+    var norm = statusVal.toLowerCase();
+
+    // Dynamically update the Directory Header to reflect the active page/status
+    var titleEl = document.getElementById('manpower-directory-header-title');
+    var badgeEl = document.getElementById('manpower-directory-header-badge');
+    var subEl = document.getElementById('manpower-directory-header-sub');
+    var iconEl = document.getElementById('manpower-directory-header-icon');
+
+    if (titleEl) {
+      if (norm === 'active') {
+        titleEl.textContent = 'Active Staff Directory';
+        if (badgeEl) {
+          badgeEl.textContent = 'Active Workforce';
+          badgeEl.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 shadow-2xs backdrop-blur-md';
+        }
+        if (subEl) subEl.textContent = 'Verified active plant workforce across all production lines and factory sections';
+        if (iconEl) iconEl.innerHTML = '<i class="ph-bold ph-user-check text-emerald-600 dark:text-emerald-400"></i>';
+      } else if (norm === 'inactive') {
+        titleEl.textContent = 'Inactive Staff Directory';
+        if (badgeEl) {
+          badgeEl.textContent = 'Inactive Workforce';
+          badgeEl.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-500/35 shadow-2xs backdrop-blur-md';
+        }
+        if (subEl) subEl.textContent = 'Historical separated, resigned, and replaced factory personnel records archive';
+        if (iconEl) iconEl.innerHTML = '<i class="ph-bold ph-user-minus text-slate-600 dark:text-slate-400"></i>';
+      } else if (norm === 'hold') {
+        titleEl.textContent = 'Hold Staff Directory';
+        if (badgeEl) {
+          badgeEl.textContent = 'Hold Personnel';
+          badgeEl.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/35 shadow-2xs backdrop-blur-md';
+        }
+        if (subEl) subEl.textContent = 'Personnel on temporary hold status awaiting replacement or administration';
+        if (iconEl) iconEl.innerHTML = '<i class="ph-bold ph-pause-circle text-amber-600 dark:text-amber-400"></i>';
+      } else {
+        titleEl.textContent = 'Manpower Database & Personnel Directory';
+        if (badgeEl) {
+          badgeEl.textContent = 'Master Directory';
+          badgeEl.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/35 shadow-2xs backdrop-blur-md';
+        }
+        if (subEl) subEl.textContent = 'Live master employee database across all plant lines, sections, and departments';
+        if (iconEl) iconEl.innerHTML = '<i class="ph-bold ph-users-four text-purple-600 dark:text-purple-400"></i>';
+      }
+    }
+
     ['all', 'active', 'hold', 'inactive'].forEach(function (s) {
       var btn = document.getElementById('btn-status-' + s);
       if (!btn) return;
-      if (s === statusVal.toLowerCase()) {
+      if (s === norm) {
         if (s === 'hold') {
-          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-white shadow-xs transition-all cursor-pointer flex items-center gap-1.5';
+          btn.className = 'liquid-pill-btn active-hold px-3.5 py-1.5 rounded-xl text-xs font-black text-white shadow-md transition-all cursor-pointer flex items-center gap-1.5';
         } else if (s === 'active') {
-          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow-xs transition-all cursor-pointer flex items-center gap-1.5';
+          btn.className = 'liquid-pill-btn active-active px-3.5 py-1.5 rounded-xl text-xs font-black text-white shadow-md transition-all cursor-pointer flex items-center gap-1.5';
         } else if (s === 'inactive') {
-          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-600 text-white shadow-xs transition-all cursor-pointer flex items-center gap-1.5';
+          btn.className = 'liquid-pill-btn active-inactive px-3.5 py-1.5 rounded-xl text-xs font-black text-white shadow-md transition-all cursor-pointer flex items-center gap-1.5';
         } else {
-          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold bg-purple-600 text-white shadow-xs transition-all cursor-pointer';
+          btn.className = 'liquid-pill-btn active-all px-3.5 py-1.5 rounded-xl text-xs font-black text-white shadow-md transition-all cursor-pointer flex items-center gap-1.5';
         }
       } else {
-        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all flex items-center gap-1.5 cursor-pointer';
+        btn.className = 'liquid-pill-btn inactive-pill px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all flex items-center gap-1.5 cursor-pointer';
       }
     });
+
+    // Dynamically update theme classes for the table container box, section card, and telemetry strip
+    var tableBox = document.getElementById('manpower-table-wrapper');
+    var sectionEl = document.getElementById('manpower-database-section');
+    var telemetryStrip = document.getElementById('manpower-telemetry-strip');
+
+    var themeClass = (norm === 'active') ? 'theme-active' :
+                     (norm === 'inactive') ? 'theme-inactive' :
+                     (norm === 'hold') ? 'theme-hold' : 'theme-all';
+
+    var allThemes = ['theme-active', 'theme-inactive', 'theme-hold', 'theme-all'];
+
+    if (tableBox) {
+      allThemes.forEach(function (t) { tableBox.classList.remove(t); });
+      tableBox.classList.add(themeClass);
+    }
+    if (sectionEl) {
+      allThemes.forEach(function (t) { sectionEl.classList.remove(t); });
+      sectionEl.classList.add(themeClass);
+    }
+    if (telemetryStrip) {
+      allThemes.forEach(function (t) { telemetryStrip.classList.remove(t); });
+      telemetryStrip.classList.add(themeClass);
+    }
 
     applyFilters();
   }
@@ -471,11 +609,44 @@
   }
 
   // -------------------------------------------------------------
+  // Confirmation / Permanent Staff Lookup Helper
+  // -------------------------------------------------------------
+  function getConfirmedStaffMap() {
+    var map = {};
+    var list = [];
+    if (window.HRMPermanentEmployees && typeof window.HRMPermanentEmployees.getAll === 'function') {
+      list = window.HRMPermanentEmployees.getAll() || [];
+    }
+    if ((!list || list.length === 0) && window.MEP_PERMANENT_EMPLOYEES && Array.isArray(window.MEP_PERMANENT_EMPLOYEES)) {
+      list = window.MEP_PERMANENT_EMPLOYEES;
+    }
+    if (Array.isArray(list)) {
+      list.forEach(function (p) {
+        if (p && p.staff_id) {
+          var sid = String(p.staff_id).replace(/^[#\s]+/, '').trim();
+          if (sid) {
+            map[sid] = p;
+          }
+        }
+      });
+    }
+    return map;
+  }
+
+  function isEmployeeConfirmed(staffId) {
+    if (!staffId) return false;
+    var sid = String(staffId).replace(/^[#\s]+/, '').trim();
+    var confMap = getConfirmedStaffMap();
+    return !!confMap[sid];
+  }
+
+  // -------------------------------------------------------------
   // Filtering & Sorting Logic
   // -------------------------------------------------------------
   function applyFilters(preservePage) {
     var f = state.filters;
     var q = (f.search || '').trim().toLowerCase();
+    var confMap = (f.confirmation && f.confirmation !== 'ALL') ? getConfirmedStaffMap() : null;
 
     var result = state.allEmployees.filter(function (emp) {
       // 1. Text Search Query — Filter ONLY by Employee ID (Staff ID) and Employee Name
@@ -519,6 +690,15 @@
       // 6. Gender Filter
       if (f.gender && f.gender !== 'ALL') {
         if ((emp.gender || '').toLowerCase() !== f.gender.toLowerCase()) return false;
+      }
+
+      // 6.5. Permanent / Confirmation Status Filter (Permanent vs Non-Permanent)
+      if (confMap) {
+        var sid = String(emp.staff_id || '').replace(/^[#\s]+/, '').trim();
+        var isConf = !!confMap[sid];
+        var targetConf = String(f.confirmation).toLowerCase().replace(/[\s\-_]+/g, '');
+        if ((targetConf === 'permanent' || targetConf === 'confirmation' || targetConf === 'confirmed' || targetConf === 'confarmation') && !isConf) return false;
+        if ((targetConf === 'nonpermanent' || targetConf === 'nonconfirmation' || targetConf === 'nonconfirmed' || targetConf === 'noncofarmation') && isConf) return false;
       }
 
       // 7. Blood Group Filter
@@ -599,6 +779,7 @@
       if (f.department !== 'ALL') activeTags.push('Dept: ' + f.department);
       if (f.designation !== 'ALL') activeTags.push('Role: ' + f.designation);
       if (f.gender !== 'ALL') activeTags.push('Gender: ' + f.gender);
+      if (f.confirmation && f.confirmation !== 'ALL') activeTags.push('Permanent: ' + f.confirmation);
       if (f.blood_group !== 'ALL') activeTags.push('Blood: ' + f.blood_group);
 
       if (activeTags.length > 0) {
@@ -621,20 +802,23 @@
   // -------------------------------------------------------------
   // Table & Pagination Rendering
   // -------------------------------------------------------------
-  function getEmployeeReplaceId(emp) {
+  function getEmployeeReplaceId(emp, repLookup) {
     if (!emp) return '';
-    var rep = String(emp.replace_id || '').trim();
+    var rep = String(emp.replace_id || '').replace(/^[#\s]+/, '').trim();
     if (rep && rep !== '0' && rep !== 'None' && rep !== 'null' && rep !== '—' && rep !== '-') {
       return rep;
     }
-    var staffId = String(emp.staff_id || '').trim();
+    var staffId = String(emp.staff_id || '').replace(/^[#\s]+/, '').trim();
+    if (repLookup && repLookup[staffId]) {
+      return repLookup[staffId];
+    }
     if (staffId && window.MEP_REPLACEMENT_MASTER && Array.isArray(window.MEP_REPLACEMENT_MASTER)) {
       var found = window.MEP_REPLACEMENT_MASTER.find(function (r) {
-        return String(r.new_id || '').trim() === staffId;
+        return String(r.new_id || '').replace(/^[#\s]+/, '').trim() === staffId;
       });
       if (found && found.replace_id) {
-        var foundRep = String(found.replace_id).trim();
-        if (foundRep && foundRep !== '0' && foundRep !== 'None' && foundRep !== 'null') {
+        var foundRep = String(found.replace_id).replace(/^[#\s]+/, '').trim();
+        if (foundRep && foundRep !== '0' && foundRep !== 'None' && foundRep !== 'null' && foundRep !== '—' && foundRep !== '-') {
           return foundRep;
         }
       }
@@ -656,7 +840,7 @@
       if (found) {
         return {
           new_id: String(found.new_id || '').replace(/^[#\s]+/, '').trim(),
-          new_name: found.new_name || 'নতুন কর্মী',
+          new_name: found.new_name || 'New Employee',
           replace_id: cleanId,
           replace_name: found.replace_name || '',
           joining_date: found.joining_date || '',
@@ -677,7 +861,7 @@
       if (foundEmp) {
         return {
           new_id: String(foundEmp.staff_id || '').replace(/^[#\s]+/, '').trim(),
-          new_name: foundEmp.name || 'নতুন কর্মী',
+          new_name: foundEmp.name || 'New Employee',
           replace_id: cleanId,
           replace_name: '',
           joining_date: foundEmp.doj || '',
@@ -697,11 +881,11 @@
     var employees = state.filteredEmployees;
 
     if (!employees || employees.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="14" class="py-12 text-center text-slate-400 dark:text-slate-500">' +
+      tbody.innerHTML = '<tr><td colspan="15" class="py-12 text-center text-slate-400 dark:text-slate-500">' +
         '<div class="flex flex-col items-center justify-center gap-2">' +
         '<i class="ph-bold ph-user-minus text-3xl text-slate-300 dark:text-slate-600"></i>' +
         '<span class="text-sm font-bold">No employee records match the selected criteria.</span>' +
-        '<button type="button" onclick="window.HRMManpower.resetFilters()" class="mt-2 px-3.5 py-1.5 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 shadow-xs cursor-pointer">Reset All Filters</button>' +
+        '<button type="button" onclick="window.HRMManpower.resetFilters()" class="liquid-btn-primary mt-2 px-4 py-2 rounded-xl text-white font-bold text-xs shadow-xs cursor-pointer">Reset All Filters</button>' +
         '</div></td></tr>';
       renderPagination(0, 1, f.per_page);
       return;
@@ -717,7 +901,22 @@
     var endIdx = Math.min(startIdx + perPage, total);
     var pagedData = employees.slice(startIdx, endIdx);
 
-    var isEditLocked = typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled();
+    // Build constant-time replacement index map to avoid O(N*M) lookups
+    var repLookup = {};
+    if (window.MEP_REPLACEMENT_MASTER && Array.isArray(window.MEP_REPLACEMENT_MASTER)) {
+      window.MEP_REPLACEMENT_MASTER.forEach(function (r) {
+        if (r && r.new_id) {
+          var nid = String(r.new_id).replace(/^[#\s]+/, '').trim();
+          var rid = String(r.replace_id || '').replace(/^[#\s]+/, '').trim();
+          if (nid && rid && rid !== '0' && rid !== 'None' && rid !== 'null' && rid !== '—' && rid !== '-') {
+            repLookup[nid] = rid;
+          }
+        }
+      });
+    }
+
+    // Build constant-time permanent confirmation map outside loop
+    var confMap = getConfirmedStaffMap();
 
     var html = '';
     pagedData.forEach(function (emp, index) {
@@ -733,32 +932,54 @@
 
       var bloodGroupBadge = emp.blood_group && emp.blood_group !== '0' && emp.blood_group !== '-'
         ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30">' + emp.blood_group + '</span>'
-        : '<span class="text-[10px] text-slate-400">—</span>';
+        : '<span class="text-[10px] text-slate-400 select-none">—</span>';
 
       var empGrade = getGrade(emp.designation);
       var gradeBadge = getGradeBadge(empGrade);
 
-      var repId = getEmployeeReplaceId(emp);
-      var replaceBadge = repId
-        ? '<button type="button" onclick="window.HRMManpower.viewReplacedInfo(\'' + repId + '\', ' + emp.sl_no + ')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-mono text-[11px] font-black bg-amber-500/10 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 border border-amber-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 group/rep" title="Replaced Staff ID: #' + repId + ' (যার পরিবর্তে এই কর্মী নিযুক্ত হয়েছেন - ক্লিক করে বিস্তারিত দেখুন)">' +
-          '<i class="ph-bold ph-arrows-clockwise text-[10px] text-amber-600 dark:text-amber-400 group-hover/rep:rotate-180 transition-transform"></i>#' + repId +
+      var repId = getEmployeeReplaceId(emp, repLookup);
+      var cleanRepId = String(repId || '').replace(/^[#\s]+/, '').trim();
+      var replaceBadge = cleanRepId
+        ? '<button type="button" onclick="window.HRMManpower.viewReplacedInfo(\'' + cleanRepId + '\', ' + emp.sl_no + ')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-mono text-[11px] font-black bg-amber-500/10 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/35 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 group/rep backdrop-blur-md" title="Replaced Staff ID: ' + cleanRepId + ' (Click to view replacement details)">' +
+          '<i class="ph-bold ph-arrows-clockwise text-[11px] text-amber-600 dark:text-amber-400 group-hover/rep:rotate-180 transition-transform"></i>' + cleanRepId +
           '</button>'
         : '<span class="text-slate-400 dark:text-slate-600 text-xs font-mono select-none">—</span>';
 
+      // Gender SVG Icon Badge (Female ♀ / Male ♂ - Strict SVG Vector, No Text)
       var genderBadgeCol = isFemale
-        ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-pink-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/25 shadow-2xs select-none"><i class="ph-bold ph-gender-female text-[10px]"></i>Female</span>'
+        ? '<span class="gender-pill-female w-7 h-7 rounded-xl inline-flex items-center justify-center select-none shadow-2xs group/gen cursor-default" title="Female">' +
+          '<svg class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 group-hover/gen:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+          '<circle cx="12" cy="9" r="5"></circle>' +
+          '<line x1="12" y1="14" x2="12" y2="21"></line>' +
+          '<line x1="9" y1="18" x2="15" y2="18"></line>' +
+          '</svg></span>'
         : isMale
-        ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 shadow-2xs select-none"><i class="ph-bold ph-gender-male text-[10px]"></i>Male</span>'
+        ? '<span class="gender-pill-male w-7 h-7 rounded-xl inline-flex items-center justify-center select-none shadow-2xs group/gen cursor-default" title="Male">' +
+          '<svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover/gen:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+          '<circle cx="10" cy="14" r="5"></circle>' +
+          '<line x1="19" y1="5" x2="13.6" y2="10.4"></line>' +
+          '<polyline points="15 5 19 5 19 9"></polyline>' +
+          '</svg></span>'
         : '<span class="text-slate-400 dark:text-slate-600 text-xs font-mono select-none">—</span>';
 
-      html += '<tr class="border-b border-slate-200/70 dark:border-slate-800/80 hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors group">' +
-        // 1. SL No (Starts from 1 for the filtered section or table view)
+      var sid = String(emp.staff_id || '').replace(/^[#\s]+/, '').trim();
+      var confInfo = confMap[sid];
+      var isConfirmed = !!confInfo;
+
+      var confirmationBadgeCol = isConfirmed
+        ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shadow-2xs select-none"' + (confInfo && confInfo.permanent_date ? ' title="Permanent Confirmation Date: ' + confInfo.permanent_date + '"' : ' title="Permanent Staff"') + '><i class="ph-bold ph-check-circle text-[10px] text-emerald-600 dark:text-emerald-400"></i>Permanent</span>'
+        : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-2xs select-none" title="Non-Permanent / Temporary / Probationary"><i class="ph-bold ph-x-circle text-[10px] text-slate-400"></i>Non-Permanent</span>';
+
+      var cleanStaffId = String(emp.staff_id || '').replace(/^[#\s]+/, '').trim();
+
+      html += '<tr class="border-b border-slate-200/60 dark:border-slate-800/70 transition-colors group">' +
+        // 1. SL No
         '<td class="px-3 py-1.5 font-mono text-xs text-slate-400 dark:text-slate-500 text-center select-none whitespace-nowrap" title="Row #' + rowNumber + ' (Database ID: ' + emp.sl_no + ')">' + rowNumber + '</td>' +
 
-        // 2. Staff ID Capsule
+        // 2. Staff ID Capsule (Strictly NO '#' prefix)
         '<td class="px-3 py-1.5 whitespace-nowrap">' +
-        '<span class="px-2 py-0.5 rounded-lg text-xs font-mono font-black tracking-tight bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-2xs inline-flex items-center gap-1 cursor-pointer" onclick="window.HRMManpower.openDossier(' + emp.sl_no + ')" title="View Dossier">' +
-        '<i class="ph-bold ph-identification-card text-[10px] text-purple-400 dark:text-purple-600"></i>' + emp.staff_id +
+        '<span class="px-2.5 py-1 rounded-xl text-xs font-mono font-black tracking-tight bg-slate-900/90 text-white dark:bg-white/95 dark:text-slate-900 border border-slate-700/50 dark:border-white/30 shadow-2xs inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-all" onclick="window.HRMManpower.openDossier(' + emp.sl_no + ')" title="View Personnel Dossier">' +
+        '<i class="ph-bold ph-identification-card text-[11px] text-purple-400 dark:text-purple-600"></i>' + cleanStaffId +
         '</span>' +
         '</td>' +
 
@@ -784,19 +1005,19 @@
         (function() {
           var repInfo = getReplacementForEmployee(emp.staff_id);
           if (repInfo) {
-            return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="⚠️ প্রতিস্থাপিত কর্মী (Replaced Staff)! তাঁর পরিবর্তে নতুন কর্মী #' + repInfo.new_id + ' (' + repInfo.new_name + ') নিযুক্ত হয়েছেন।">' +
-              '<span class="px-2 py-0.5 rounded-lg text-[10.5px] font-mono font-bold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 inline-flex items-center gap-1 shadow-2xs group-hover/st:bg-rose-600 group-hover/st:text-white transition-all">' +
+            return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="Replaced Staff! Replaced by new employee ' + repInfo.new_id + ' (' + repInfo.new_name + ')">' +
+              '<span class="px-2.5 py-1 rounded-xl text-[10.5px] font-mono font-bold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 inline-flex items-center gap-1 shadow-2xs group-hover/st:bg-rose-600 group-hover/st:text-white transition-all backdrop-blur-md">' +
               '<i class="ph-bold ph-arrows-clockwise text-[11px]"></i>Inactive (Replaced)</span>' +
               '</button>';
           }
           var s = (emp.status || 'Active').trim().toLowerCase();
           var btnInner = '';
           if (s === 'active') {
-            btnInner = '<span class="px-2 py-0.5 rounded-lg text-[11px] font-mono font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1 shadow-2xs group-hover/st:bg-emerald-500 group-hover/st:text-white transition-all"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-beacon group-hover/st:bg-white"></span>Active</span>';
+            btnInner = '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-emerald-500 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-beacon group-hover/st:bg-white"></span>Active</span>';
           } else if (s === 'hold') {
-            btnInner = '<span class="px-2 py-0.5 rounded-lg text-[11px] font-mono font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 inline-flex items-center gap-1 shadow-2xs group-hover/st:bg-amber-500 group-hover/st:text-white transition-all"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 live-beacon group-hover/st:bg-white"></span>Hold</span>';
+            btnInner = '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/35 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-amber-500 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 live-beacon group-hover/st:bg-white"></span>Hold</span>';
           } else {
-            btnInner = '<span class="px-2 py-0.5 rounded-lg text-[11px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 inline-flex items-center gap-1 shadow-2xs group-hover/st:bg-slate-700 group-hover/st:text-white transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 group-hover/st:bg-white"></span>Inactive</span>';
+            btnInner = '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-500/30 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-slate-700 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 group-hover/st:bg-white"></span>Inactive</span>';
           }
           return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="Click to cycle status: Active -> Hold -> Inactive">' + btnInner + '</button>';
         })() +
@@ -810,19 +1031,19 @@
 
         // 5. Section & Department
         '<td class="px-3 py-1.5 whitespace-nowrap min-w-[180px]">' +
-        '<span class="px-2 py-0.5 rounded-lg text-[11px] font-bold border inline-flex items-center gap-1 shadow-2xs ' + secStyle.bg + '">' +
+        '<span class="px-2.5 py-1 rounded-xl text-[11px] font-bold border inline-flex items-center gap-1.5 shadow-2xs ' + secStyle.bg + '">' +
         '<i class="ph-bold ' + secStyle.icon + ' text-[11px]"></i>' +
         '<span class="truncate max-w-[170px]">' + emp.section + '</span>' +
         '</span>' +
         '</td>' +
 
-        // 6. DOJ & Days (Spacious & strictly nowrap)
-        '<td class="px-3 py-1.5 text-xs font-mono whitespace-nowrap min-w-[135px]">' +
-        '<span class="font-bold text-slate-800 dark:text-slate-200 block leading-tight whitespace-nowrap">' + (emp.doj || '—') + '</span>' +
-        '<span class="text-[10px] text-slate-400 block leading-tight whitespace-nowrap">' + (emp.total_working_days ? emp.total_working_days + ' days' : '—') + '</span>' +
+        // 6. DOJ & Days (Compact Short Form: DD-Mon-YY, e.g. 17-Jul-16)
+        '<td class="px-3 py-1.5 text-xs font-mono whitespace-nowrap min-w-[125px]">' +
+        '<span class="px-2 py-0.5 rounded-lg text-[11px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700/80 inline-block leading-tight whitespace-nowrap shadow-2xs">' + formatShortDOJ(emp.doj) + '</span>' +
+        '<span class="text-[10px] text-slate-400 block leading-tight whitespace-nowrap mt-0.5">' + (emp.total_working_days ? emp.total_working_days + ' days' : '—') + '</span>' +
         '</td>' +
 
-        // 7. Gross & Basic Salary (Spacious & strictly nowrap)
+        // 7. Gross & Basic Salary (Tk)
         '<td class="px-3 py-1.5 text-right whitespace-nowrap min-w-[135px]">' +
         '<span class="font-mono font-black text-xs text-slate-900 dark:text-white block leading-tight whitespace-nowrap">' + formatMoney(emp.gross_salary) + '</span>' +
         '<span class="text-[10px] font-mono text-slate-400 block leading-tight whitespace-nowrap">Basic: ' + formatMoney(emp.basic_salary) + '</span>' +
@@ -836,31 +1057,34 @@
         (emp.nid ? '<span class="text-[10px] text-slate-400 truncate max-w-[140px] block leading-tight whitespace-nowrap" title="NID: ' + emp.nid + '">NID: ' + emp.nid + '</span>' : '') +
         '</td>' +
 
-        // 8.5. Grade (User requested "Grade" column in red area)
+        // 8.5. Grade (Strictly W, S, M in Jewel Liquid Glass Badge)
         '<td class="px-3 py-1.5 text-center whitespace-nowrap">' + gradeBadge + '</td>' +
 
         // 9. Blood Group
         '<td class="px-3 py-1.5 text-center whitespace-nowrap">' + bloodGroupBadge + '</td>' +
 
-        // 9.5. Replace ID
+        // 9.5. Replace ID (Strictly NO '#' prefix)
         '<td class="px-3 py-1.5 text-center whitespace-nowrap">' + replaceBadge + '</td>' +
 
-        // 9.6. Gender (Direct Badge, No Dropdown)
+        // 9.6. Gender (Direct SVG Badge Only: ♂ Male / ♀ Female)
         '<td class="px-3 py-1.5 text-center whitespace-nowrap">' + genderBadgeCol + '</td>' +
 
-        // 10. Actions
+        // 9.7. Confirmation Status
+        '<td class="px-3 py-1.5 text-center whitespace-nowrap">' + confirmationBadgeCol + '</td>' +
+
+        // 10. Actions (Liquid Glass Buttons with Liquid Slide Transitions)
         '<td class="px-3 py-1.5 text-right whitespace-nowrap">' +
-        '<div class="flex items-center justify-end gap-1">' +
-        '<button type="button" onclick="window.HRMManpower.openDossier(' + emp.sl_no + ')" class="w-6 h-6 rounded-md bg-purple-500/10 hover:bg-purple-600 text-purple-600 hover:text-white dark:text-purple-400 dark:hover:text-white border border-purple-500/20 flex items-center justify-center text-xs transition-colors cursor-pointer shadow-2xs" title="View Full Dossier">' +
-        '<i class="ph-bold ph-eye"></i>' +
+        '<div class="flex items-center justify-end gap-1.5">' +
+        '<button type="button" onclick="window.HRMManpower.openDossier(' + emp.sl_no + ')" class="liquid-btn-glass w-7 h-7 rounded-xl bg-purple-500/10 hover:bg-purple-600 text-purple-600 hover:text-white dark:text-purple-400 dark:hover:text-white border border-purple-500/30 flex items-center justify-center text-xs transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95" title="View Full Dossier">' +
+        '<i class="ph-bold ph-eye text-[12px]"></i>' +
         '</button>' +
-        '<button type="button" onclick="window.HRMManpower.openEditModal(' + emp.sl_no + ')" class="mep-edit-btn w-6 h-6 rounded-md bg-slate-100 hover:bg-slate-900 text-slate-600 hover:text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs transition-colors cursor-pointer shadow-2xs" title="Edit Employee">' +
-        '<i class="ph-bold ph-pencil-simple"></i>' +
+        '<button type="button" onclick="window.HRMManpower.openEditModal(' + emp.sl_no + ')" class="liquid-btn-glass mep-edit-btn w-7 h-7 rounded-xl bg-slate-100 hover:bg-slate-900 text-slate-600 hover:text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95" title="Edit Employee">' +
+        '<i class="ph-bold ph-pencil-simple text-[12px]"></i>' +
         '</button>' +
-        '<button type="button" onclick="window.HRMManpower.deleteEmployee(' + emp.sl_no + ')" class="mep-delete-btn w-6 h-6 rounded-md bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-white dark:bg-rose-950/40 dark:hover:bg-rose-600 dark:text-rose-400 dark:hover:text-white border border-rose-500/20 flex items-center justify-center text-xs transition-colors cursor-pointer shadow-2xs" title="Delete Employee">' +
-        '<i class="ph-bold ph-trash"></i>' +
+        '<button type="button" onclick="window.HRMManpower.deleteEmployee(' + emp.sl_no + ')" class="liquid-btn-glass mep-delete-btn w-7 h-7 rounded-xl bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-white dark:bg-rose-950/40 dark:hover:bg-rose-600 dark:text-rose-400 dark:hover:text-white border border-rose-500/30 flex items-center justify-center text-xs transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95" title="Delete Employee">' +
+        '<i class="ph-bold ph-trash text-[12px]"></i>' +
         '</button>' +
-        '<span class="mep-locked-badge items-center justify-center w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700/60 shadow-2xs" title="Editing Locked"><i class="ph-bold ph-lock text-xs"></i></span>' +
+        '<span class="mep-locked-badge items-center justify-center w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700/60 shadow-2xs" title="Editing Locked"><i class="ph-bold ph-lock text-xs"></i></span>' +
         '</div>' +
         '</td>' +
         '</tr>';
@@ -896,12 +1120,12 @@
       return;
     }
 
-    var html = '<div class="flex items-center gap-1">';
+    var html = '<div class="flex items-center gap-1.5">';
 
     // Previous Button
     html += '<button type="button" onclick="window.HRMManpower.changePage(' + (currentPage - 1) + ')" ' +
-      (currentPage === 1 ? 'disabled class="opacity-40 cursor-not-allowed ' : 'cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 ') +
-      'px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs flex items-center gap-1 transition-all">' +
+      (currentPage === 1 ? 'disabled class="opacity-40 cursor-not-allowed ' : 'cursor-pointer hover:scale-105 active:scale-95 ') +
+      'liquid-btn-glass px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs flex items-center gap-1.5 transition-all">' +
       '<i class="ph-bold ph-caret-left"></i> Prev</button>';
 
     // Page Number Buttons (smart ellipsis)
@@ -920,18 +1144,18 @@
 
     pages.forEach(function (p) {
       if (p === '...') {
-        html += '<span class="px-2 text-xs font-mono text-slate-400">...</span>';
+        html += '<span class="px-2 text-xs font-mono text-slate-400 select-none">...</span>';
       } else if (p === currentPage) {
-        html += '<button type="button" class="w-8 h-8 rounded-xl bg-purple-600 text-white font-black text-xs shadow-xs">' + p + '</button>';
+        html += '<button type="button" class="liquid-btn-primary w-8 h-8 rounded-xl text-white font-black text-xs shadow-xs select-none">' + p + '</button>';
       } else {
-        html += '<button type="button" onclick="window.HRMManpower.changePage(' + p + ')" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs shadow-2xs transition-all cursor-pointer">' + p + '</button>';
+        html += '<button type="button" onclick="window.HRMManpower.changePage(' + p + ')" class="liquid-btn-glass w-8 h-8 rounded-xl text-slate-700 dark:text-slate-300 font-bold text-xs shadow-2xs transition-all cursor-pointer hover:scale-105 active:scale-95">' + p + '</button>';
       }
     });
 
     // Next Button
     html += '<button type="button" onclick="window.HRMManpower.changePage(' + (currentPage + 1) + ')" ' +
-      (currentPage === totalPages ? 'disabled class="opacity-40 cursor-not-allowed ' : 'cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 ') +
-      'px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs flex items-center gap-1 transition-all">' +
+      (currentPage === totalPages ? 'disabled class="opacity-40 cursor-not-allowed ' : 'cursor-pointer hover:scale-105 active:scale-95 ') +
+      'liquid-btn-glass px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs flex items-center gap-1.5 transition-all">' +
       'Next <i class="ph-bold ph-caret-right"></i></button>';
 
     html += '</div>';
@@ -1062,7 +1286,7 @@
   function openAddModal() {
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। সেটিং থেকে Edit Mode চালু করুন।', 'warning');
+        window.showHRToast('🔒 Edit Mode is currently locked. Please enable Edit Mode from Settings.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -1108,7 +1332,7 @@
   function openEditModal(slNo) {
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। সেটিং থেকে Edit Mode চালু করুন।', 'warning');
+        window.showHRToast('🔒 Edit Mode is currently locked. Please enable Edit Mode from Settings.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -1120,9 +1344,10 @@
     var modal = document.getElementById('employee-edit-modal');
     if (!modal) return;
 
-    document.getElementById('edit-modal-title').textContent = 'Edit Employee Dossier #' + emp.staff_id;
+    var cleanEditId = String(emp.staff_id || '').replace(/^[#\s]+/, '').trim();
+    document.getElementById('edit-modal-title').textContent = 'Edit Employee Dossier ' + cleanEditId;
     document.getElementById('emp-form-sl-no').value = emp.sl_no;
-    document.getElementById('emp-form-staff-id').value = emp.staff_id || '';
+    document.getElementById('emp-form-staff-id').value = cleanEditId;
     document.getElementById('emp-form-name').value = emp.name || '';
     document.getElementById('emp-form-designation').value = emp.designation || 'Helper';
     document.getElementById('emp-form-qualification').value = emp.qualification || '';
@@ -1153,9 +1378,9 @@
         warnNotice.innerHTML = '<div class="p-3 rounded-xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-start gap-2.5 shadow-2xs">' +
           '<i class="ph-bold ph-warning-circle text-lg text-amber-500 shrink-0 mt-0.5"></i>' +
           '<div>' +
-          '<span class="font-bold text-amber-900 dark:text-amber-100">⚠️ প্রতিস্থাপিত কর্মী (Replaced Staff):</span> ' +
-          'এই কর্মীর পরিবর্তে নতুন কর্মী <strong class="font-mono text-purple-700 dark:text-purple-300">#' + repInfo.new_id + ' (' + repInfo.new_name + ')</strong> নিযুক্ত হয়েছেন। ' +
-          'তাই এই আইডি <strong class="text-rose-600 dark:text-rose-400">Active</strong> বা <strong class="text-amber-600 dark:text-amber-400">Hold</strong> এ নেওয়া যাবে না (শুধুমাত্র Inactive থাকবে)।' +
+          '<span class="font-bold text-amber-900 dark:text-amber-100">⚠️ Replaced Personnel Notice:</span> ' +
+          'This employee was replaced by new staff <strong class="font-mono text-purple-700 dark:text-purple-300">' + repInfo.new_id + ' (' + repInfo.new_name + ')</strong>. ' +
+          'Therefore this ID cannot be set to <strong class="text-rose-600 dark:text-rose-400">Active</strong> or <strong class="text-amber-600 dark:text-amber-400">Hold</strong> (must remain Inactive).' +
           '</div>' +
           '</div>';
         warnNotice.classList.remove('hidden');
@@ -1184,7 +1409,7 @@
 
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। কর্মী সংরক্ষণ করা যাবে না।', 'warning');
+        window.showHRToast('🔒 Edit Mode is currently locked. Cannot save employee.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -1200,24 +1425,24 @@
       return;
     }
 
-    var cleanSid = staffId.replace(/^#/, '').trim();
+    var cleanSid = staffId.replace(/^[#\s]+/, '').trim();
     if (!sl) {
       // Adding new employee: verify staff_id does not already exist
       var duplicate = state.allEmployees.find(function (e) {
-        return String(e.staff_id || '').replace(/^#/, '').trim() === cleanSid;
+        return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanSid;
       });
       if (duplicate) {
-        alert('❌ Staff ID #' + cleanSid + ' ইতিমধ্যে ডাটাবেজে রয়েছে (' + (duplicate.name || 'কর্মী') + ')!\nএকই Staff ID দিয়ে একাধিক এন্ট্রি করা যাবে না।');
+        alert('❌ Staff ID ' + cleanSid + ' already exists in the database (' + (duplicate.name || 'Staff') + ')!\nDuplicate Staff IDs are not permitted.');
         return;
       }
     } else {
       // Editing existing: verify staff_id does not conflict with another employee
       var curSl = parseInt(sl, 10);
       var collision = state.allEmployees.find(function (e) {
-        return e.sl_no !== curSl && String(e.staff_id || '').replace(/^#/, '').trim() === cleanSid;
+        return e.sl_no !== curSl && String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanSid;
       });
       if (collision) {
-        alert('❌ Staff ID #' + cleanSid + ' ইতিমধ্যে অন্য কর্মী (' + collision.name + ') এর জন্য নির্ধারিত!');
+        alert('❌ Staff ID ' + cleanSid + ' is already assigned to employee ' + collision.name + '!');
         return;
       }
     }
@@ -1225,9 +1450,9 @@
     var chosenStatus = document.getElementById('emp-form-status') ? document.getElementById('emp-form-status').value : 'Active';
     var repCheck = getReplacementForEmployee(cleanSid);
     if (repCheck && (chosenStatus === 'Active' || chosenStatus === 'Hold')) {
-      var warnMsg = '⚠️ এই কর্মীটি (#' + cleanSid + (name ? ' - ' + name : '') + ') ইতিমধ্যে প্রতিস্থাপিত (Replaced)!\n\n' +
-        '👉 তাঁর পরিবর্তে নতুন কর্মী #' + repCheck.new_id + ' (' + repCheck.new_name + ') যুক্ত হয়েছেন।\n\n' +
-        '❌ তাই এই আইডি Active বা Hold এ সংরক্ষণ করা যাবে না। Status "Inactive" থাকতে হবে।';
+      var warnMsg = '⚠️ Notice: Employee (' + cleanSid + (name ? ' - ' + name : '') + ') is already marked as Replaced!\n\n' +
+        '👉 New replacement staff assigned: ' + repCheck.new_id + ' (' + repCheck.new_name + ').\n\n' +
+        '❌ This ID cannot be set to Active or Hold. Status must remain "Inactive".';
       alert(warnMsg);
       if (typeof window.showHRToast === 'function') {
         window.showHRToast(warnMsg, 'warning');
@@ -1328,7 +1553,25 @@
 
       closeEditModal();
       refreshAll();
-      if (window.showHRToast) window.showHRToast('☁️ [Cloud Synced] কর্মী #' + staffId + ' সফলভাবে সংরক্ষিত ও সিঙ্ক হয়েছে!', 'success');
+
+      // Reactive cross-module event broadcast
+      if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+        window.HRMEventBus.emit('EMPLOYEE_MUTATED', { emp: saved, type: 'save' });
+      }
+      if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+        window.HRMDashboard.render();
+      }
+      if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+        window.HRMManpowerSummary.render();
+      }
+      if (window.HRMPermanentEmployees && typeof window.HRMPermanentEmployees.init === 'function') {
+        window.HRMPermanentEmployees.init();
+      }
+      if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.renderHoldCandidatesShelf === 'function') {
+        window.HRMEmployeeEntry.renderHoldCandidatesShelf();
+      }
+
+      if (window.showHRToast) window.showHRToast('☁️ [Cloud Synced] Staff ' + staffId + ' successfully saved and synced!', 'success');
     }
 
     if (window.HRMFirebase && typeof window.HRMFirebase.saveEmployee === 'function') {
@@ -1374,13 +1617,13 @@
   // -------------------------------------------------------------
   function exportExcel() {
     if (typeof XLSX === 'undefined') {
-      alert('Excel লাইব্রেরি লোড হচ্ছে, অনুগ্রহ করে কয়েক সেকেন্ড পর আবার চেষ্টা করুন।');
+      alert('Excel library is loading, please try again in a few seconds.');
       return;
     }
 
     var list = (state.filteredEmployees && state.filteredEmployees.length > 0) ? state.filteredEmployees : state.allEmployees;
     if (!list || list.length === 0) {
-      if (window.showHRToast) window.showHRToast('কোনো কর্মী তথ্য পাওয়া যায়নি।');
+      if (window.showHRToast) window.showHRToast('No employee records found.');
       return;
     }
 
@@ -1390,12 +1633,12 @@
     // 1. Build table rows
     var rows = [
       // Row 0: Company Header Banner
-      ['MEP GROUP • CEILING FAN FACTORY (PLANT 1027)', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+      ['MEP GROUP • CEILING FAN FACTORY (PLANT 1027)', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
       // Row 1: Subtitle Banner
-      ['HRM MANPOWER DATABASE & SHOP FLOOR PERSONNEL DIRECTORY', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+      ['HRM MANPOWER DATABASE & SHOP FLOOR PERSONNEL DIRECTORY', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
       // Row 2: Metadata Banner
-      ['Filter Status: ' + statusTag + ' | Section: ' + (state.filters.section || 'ALL') + ' | Verified By: Senior Manager Md. Saiful Islam | Export Date: ' + new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + ' | Total Records: ' + list.length + ' Personnel', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-      // Row 3: Column Headers (14 cols)
+      ['Filter Status: ' + statusTag + ' | Section: ' + (state.filters.section || 'ALL') + ' | Verified By: Senior Manager Md. Saiful Islam | Export Date: ' + new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + ' | Total Records: ' + list.length + ' Personnel', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+      // Row 3: Column Headers (15 cols)
       [
         'Sl.',
         'Staff ID',
@@ -1410,6 +1653,7 @@
         'Blood Group',
         'Replace ID',
         'Gender',
+        'Permanent / Non-Permanent',
         'Status'
       ]
     ];
@@ -1438,6 +1682,7 @@
         emp.blood_group || '',
         getEmployeeReplaceId(emp),
         emp.gender || '',
+        isEmployeeConfirmed(emp.staff_id) ? 'Permanent' : 'Non-Permanent',
         emp.status || 'Active'
       ]);
     });
@@ -1446,7 +1691,7 @@
     rows.push([
       'Total Registered Personnel: ' + list.length, '', '', '', '', '', '',
       totalGross,
-      '', '', '', '', '', 'Verified Matrix'
+      '', '', '', '', '', '', 'Verified Matrix'
     ]);
 
     var wb = XLSX.utils.book_new();
@@ -1454,9 +1699,9 @@
 
     // Merges
     ws['!merges'] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }, // Title
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 13 } }, // Subtitle
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 13 } }, // Meta
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 14 } }, // Title
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 14 } }, // Subtitle
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 14 } }, // Meta
       { s: { r: rows.length - 1, c: 0 }, e: { r: rows.length - 1, c: 6 } } // Total summary label
     ];
 
@@ -1475,6 +1720,7 @@
       { wch: 12 }, // Blood
       { wch: 14 }, // Replace ID
       { wch: 12 }, // Gender
+      { wch: 22 }, // Confirmation Status
       { wch: 12 }  // Status
     ];
 
@@ -1595,7 +1841,7 @@
     XLSX.writeFile(wb, filename);
 
     if (window.showHRToast) {
-      window.showHRToast('ম্যানপাওয়ার ডিরেক্টরি প্রিমিয়াম Excel ফাইল সম্পূর্ণ বর্ডার সহ ডাউনলোড হয়েছে!');
+      window.showHRToast('Manpower directory premium Excel file exported with full grid borders.');
     }
   }
 
@@ -1604,14 +1850,14 @@
   // -------------------------------------------------------------
   function exportPDF() {
     if (!window.jspdf || !window.jspdf.jsPDF) {
-      if (window.showHRToast) window.showHRToast('PDF লাইব্রেরি লোড হচ্ছে, প্রিন্ট ডায়ালগ ওপেন করা হচ্ছে...');
+      if (window.showHRToast) window.showHRToast('Loading PDF engine, opening print dialog...');
       window.print();
       return;
     }
 
     var list = (state.filteredEmployees && state.filteredEmployees.length > 0) ? state.filteredEmployees : state.allEmployees;
     if (!list || list.length === 0) {
-      if (window.showHRToast) window.showHRToast('কোনো কর্মী তথ্য পাওয়া যায়নি।');
+      if (window.showHRToast) window.showHRToast('No employee records found.');
       return;
     }
 
@@ -1666,7 +1912,7 @@
     // 3. Table Structure via AutoTable
     var head = [[
       'Sl.', 'Staff ID', 'Employee Name', 'Designation', 'Section / Line', 'Department',
-      'DOJ', 'Gross Sal (Tk)', 'Mobile', 'Grade', 'Blood', 'Replace ID', 'Gender', 'Status'
+      'DOJ', 'Gross Sal (Tk)', 'Mobile', 'Grade', 'Blood', 'Replace ID', 'Gender', 'Permanent', 'Status'
     ]];
 
     var totalGross = 0;
@@ -1693,6 +1939,7 @@
         emp.blood_group || '',
         getEmployeeReplaceId(emp) || '—',
         emp.gender || '—',
+        isEmployeeConfirmed(emp.staff_id) ? 'Permanent' : 'Non-Perm',
         emp.status || 'Active'
       ];
     });
@@ -1701,7 +1948,7 @@
     var foot = [[
       { content: 'Total Count: ' + list.length + ' Personnel', colSpan: 7, styles: { halign: 'left', fontStyle: 'bold' } },
       { content: totalGross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { halign: 'right', fontStyle: 'bold' } },
-      { content: '', colSpan: 5 },
+      { content: '', colSpan: 6 },
       { content: 'Verified', styles: { halign: 'center', fontStyle: 'bold' } }
     ]];
 
@@ -1787,7 +2034,7 @@
     doc.save(pdfFilename);
 
     if (window.showHRToast) {
-      window.showHRToast('ম্যানপাওয়ার ডিরেক্টরি প্রিমিয়াম PDF সম্পূর্ণ বর্ডার সহ ডাউনলোড হয়েছে!');
+      window.showHRToast('Manpower directory premium PDF file exported successfully.');
     }
   }
 
@@ -1813,7 +2060,7 @@
   function toggleEmployeeStatus(slNo) {
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। Status পরিবর্তন করা যাবে না।', 'warning');
+        window.showHRToast('🔒 Edit Mode is currently locked. Status cannot be changed.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -1826,11 +2073,13 @@
     var repInfo = getReplacementForEmployee(emp.staff_id);
     if (repInfo) {
       emp.status = 'Inactive';
-      var warnMsg = '⚠️ এই কর্মীটি (#' + (emp.staff_id || '') + (emp.name ? ' - ' + emp.name : '') + ') ইতিমধ্যে প্রতিস্থাপিত (Replaced)!\n\n' +
-        '👉 তাঁর পরিবর্তে নতুন কর্মী #' + repInfo.new_id + ' (' + repInfo.new_name + ') নিযুক্ত হয়েছেন।\n\n' +
-        '❌ তাই এই আইডি Active বা Hold এ নেওয়া যাবে না (শুধুমাত্র Inactive থাকবে)।';
+      var repCleanId = String(repInfo.new_id || '').replace(/^[#\s]+/, '');
+      var repCleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
+      var warnMsg = '⚠️ Notice: Employee (' + repCleanEmpId + (emp.name ? ' - ' + emp.name : '') + ') is already marked as Replaced!\n\n' +
+        '👉 Replacement staff assigned: ' + repCleanId + ' (' + repInfo.new_name + ').\n\n' +
+        '❌ This ID cannot be set to Active or Hold. Status must remain "Inactive".';
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('⚠️ #' + emp.staff_id + ' প্রতিস্থাপিত! নতুন কর্মী: #' + repInfo.new_id + ' (' + repInfo.new_name + ')', 'warning');
+        window.showHRToast('Staff ' + repCleanEmpId + ' was replaced by ' + repCleanId + ' (' + repInfo.new_name + ')', 'warning');
       }
       alert(warnMsg);
       renderTable();
@@ -1851,27 +2100,23 @@
       });
     }
 
-    // Send update to server
-    fetch('/api/hrm/employee/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emp)
-    })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          if (!res.ok || (data && data.success === false)) {
-            throw new Error((data && data.error) ? data.error : 'Server returned ' + res.status);
-          }
-          return data;
+    // Send update to server if running on localhost
+    var isLocalHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalHost) {
+      fetch('/api/hrm/employee/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emp)
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.metadata) state.metadata = data.metadata;
+          updateTopKPIs();
+        })
+        .catch(function (err) {
+          console.warn('Server status save notice:', err);
         });
-      })
-      .then(function (data) {
-        if (data && data.metadata) state.metadata = data.metadata;
-        updateTopKPIs();
-      })
-      .catch(function (err) {
-        alert(err.message || 'Status update failed');
-      });
+    }
 
     state.metadata = computeClientMetadata(state.allEmployees);
     updateTopKPIs();
@@ -1880,14 +2125,15 @@
       window.HRMEmployeeEntry.renderHoldCandidatesShelf();
     }
     if (window.showHRToast) {
-      window.showHRToast('Personnel #' + emp.staff_id + ' (' + emp.name + ') status updated to ' + newStatus);
+      var cleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
+      window.showHRToast('Personnel ' + cleanEmpId + ' (' + emp.name + ') status updated to ' + newStatus);
     }
   }
 
   function updateGender(slNo, newGender) {
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। সেটিং থেকে Edit Mode চালু করুন।', 'warning');
+        window.showHRToast('🔒 Edit Mode is currently locked. Please enable Edit Mode from Settings.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -1907,23 +2153,27 @@
       });
     }
 
-    // Send update to server
-    fetch('/api/hrm/employee/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emp)
-    })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (data && data.metadata) state.metadata = data.metadata;
-        updateTopKPIs();
+    // Send update to server if running on localhost
+    var isLocalHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalHost) {
+      fetch('/api/hrm/employee/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emp)
       })
-      .catch(function () {});
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.metadata) state.metadata = data.metadata;
+          updateTopKPIs();
+        })
+        .catch(function () {});
+    }
 
     state.metadata = computeClientMetadata(state.allEmployees);
     updateTopKPIs();
     if (window.showHRToast) {
-      window.showHRToast('Staff #' + emp.staff_id + ' (' + emp.name + ') gender set to ' + newGender, 'success');
+      var cleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
+      window.showHRToast('Staff ' + cleanEmpId + ' (' + emp.name + ') gender set to ' + newGender, 'success');
     }
   }
 
@@ -1947,7 +2197,7 @@
     }
 
     if (repRecord) {
-      var msg = 'Replaced Staff #' + cleanId + ': ' + (repRecord.replace_name || 'Former Staff') +
+      var msg = 'Replaced Staff ' + cleanId + ': ' + (repRecord.replace_name || 'Former Staff') +
         ' (' + (repRecord.replace_designation || '') + ' - ' + (repRecord.replace_section || '') + ') | ' +
         (repRecord.remarks || 'Resigned / Exited');
       if (window.showHRToast) {
@@ -1957,7 +2207,7 @@
       }
     } else {
       if (window.showHRToast) {
-        window.showHRToast('Replaced Staff ID #' + cleanId + ' archived record.', 'info');
+        window.showHRToast('Replaced Staff ID ' + cleanId + ' archived record.', 'info');
       }
     }
   }
@@ -1970,7 +2220,7 @@
   function deleteEmployee(slNo) {
     if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('🔒 Edit Mode বন্ধ রয়েছে। কর্মী মোছা যাবে না।', 'warning');
+        window.showHRToast('🔒 Edit Mode is currently locked. Cannot delete employee.', 'warning');
       } else {
         alert('Edit Mode is currently stopped/locked in Settings.');
       }
@@ -1980,93 +2230,97 @@
     var emp = state.allEmployees.find(function (e) { return e.sl_no === slNo; });
     if (!emp) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('কর্মী তথ্য পাওয়া যায়নি।', 'warning');
+        window.showHRToast('Employee record not found.', 'warning');
       }
       return;
     }
 
-    var empIdStr = emp.staff_id ? '#' + emp.staff_id : '';
-    var confirmMsg = 'আপনি কি নিশ্চিত যে কর্মী ' + empIdStr + ' (' + (emp.name || 'অজ্ঞাত') + ') এর তথ্য ডাটাবেজ থেকে মুছে ফেলতে চান?\n\n' +
-                     'সেকশন: ' + (emp.section || '—') + '\n' +
-                     'পদবী: ' + (emp.designation || '—') + '\n' +
-                     'স্ট্যাটাস: ' + (emp.status || 'Active') + '\n\n' +
-                     '⚠️ মুছে ফেলার পর এই কর্মীর রেকর্ডটি স্থায়ীভাবে মুছে যাবে।';
+    var empIdStr = emp.staff_id ? String(emp.staff_id).replace(/^[#\s]+/, '') : '';
+    var confirmMsg = 'Are you sure you want to permanently delete Employee ' + empIdStr + ' (' + (emp.name || 'Unknown') + ') from the database?\n\n' +
+                     'Section: ' + (emp.section || '—') + '\n' +
+                     'Designation: ' + (emp.designation || '—') + '\n' +
+                     'Status: ' + (emp.status || 'Active') + '\n\n' +
+                     '⚠️ This record will be permanently deleted from the database.';
 
     if (!confirm(confirmMsg)) {
       return;
     }
 
-    // Call Firebase Realtime Cloud Delete
+    function performLocalEmployeeDelete() {
+      // Remove from state.allEmployees by sl_no
+      state.allEmployees = state.allEmployees.filter(function (e) {
+        if (slNo) return e.sl_no !== slNo;
+        return String(e.staff_id || '').trim() !== String(emp.staff_id || '').trim();
+      });
+
+      // Sync MEP_MANPOWER_DATABASE
+      if (window.MEP_MANPOWER_DATABASE && Array.isArray(window.MEP_MANPOWER_DATABASE.employees)) {
+        window.MEP_MANPOWER_DATABASE.employees = window.MEP_MANPOWER_DATABASE.employees.filter(function (e) {
+          if (slNo) return e.sl_no !== slNo;
+          return String(e.staff_id || '').trim() !== String(emp.staff_id || '').trim();
+        });
+      }
+
+      // Sync HRM_MANPOWER_CACHE
+      if (window.HRM_MANPOWER_CACHE && Array.isArray(window.HRM_MANPOWER_CACHE.employees)) {
+        window.HRM_MANPOWER_CACHE.employees = window.HRM_MANPOWER_CACHE.employees.filter(function (e) {
+          if (slNo) return e.sl_no !== slNo;
+          return String(e.staff_id || '').trim() !== String(emp.staff_id || '').trim();
+        });
+      }
+
+      state.metadata = computeClientMetadata(state.allEmployees);
+      updateTopKPIs();
+      applyFilters();
+
+      if (state.activeDossierEmp && state.activeDossierEmp.sl_no === slNo) {
+        closeDossier();
+      }
+
+      if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.renderHoldCandidatesShelf === 'function') {
+        window.HRMEmployeeEntry.renderHoldCandidatesShelf();
+      }
+
+      // Reactive cross-module event broadcast
+      if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+        window.HRMEventBus.emit('EMPLOYEE_DELETED', { sl_no: slNo, staff_id: emp.staff_id });
+      }
+      if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+        window.HRMDashboard.render();
+      }
+      if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+        window.HRMManpowerSummary.render();
+      }
+      if (window.HRMPermanentEmployees && typeof window.HRMPermanentEmployees.init === 'function') {
+        window.HRMPermanentEmployees.init();
+      }
+
+      if (typeof window.showHRToast === 'function') {
+        window.showHRToast('🗑️ Employee ' + empIdStr + ' (' + (emp.name || '') + ') successfully deleted.', 'success');
+      }
+    }
+
+    // 1. Call Firebase Realtime Cloud Delete
     if (window.HRMFirebase && typeof window.HRMFirebase.deleteEmployee === 'function') {
-      window.HRMFirebase.deleteEmployee(emp.staff_id, emp.sl_no).catch(function (e) {
+      window.HRMFirebase.deleteEmployee(emp.staff_id, emp.sl_no, true).catch(function (e) {
         console.warn('[HRM_FIREBASE] Cloud delete notice:', e);
       });
     }
 
-    // Call server delete API
-    fetch('/api/hrm/employee/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sl_no: emp.sl_no, staff_id: emp.staff_id })
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('Server returned status ' + res.status);
-        return res.json();
-      })
-      .then(function (data) {
-        // Remove from state.allEmployees by sl_no
-        state.allEmployees = state.allEmployees.filter(function (e) {
-          if (slNo) return e.sl_no !== slNo;
-          return String(e.staff_id || '').trim() !== String(emp.staff_id || '').trim();
-        });
+    // 2. Perform local UI delete immediately
+    performLocalEmployeeDelete();
 
-        // Sync MEP_MANPOWER_DATABASE
-        if (window.MEP_MANPOWER_DATABASE && Array.isArray(window.MEP_MANPOWER_DATABASE.employees)) {
-          window.MEP_MANPOWER_DATABASE.employees = window.MEP_MANPOWER_DATABASE.employees.filter(function (e) {
-            if (slNo) return e.sl_no !== slNo;
-            return String(e.staff_id || '').trim() !== String(emp.staff_id || '').trim();
-          });
-          if (data.metadata) window.MEP_MANPOWER_DATABASE.metadata = data.metadata;
-        }
-
-        // Sync HRM_MANPOWER_CACHE
-        if (window.HRM_MANPOWER_CACHE && Array.isArray(window.HRM_MANPOWER_CACHE.employees)) {
-          window.HRM_MANPOWER_CACHE.employees = window.HRM_MANPOWER_CACHE.employees.filter(function (e) {
-            if (slNo) return e.sl_no !== slNo;
-            return String(e.staff_id || '').trim() !== String(emp.staff_id || '').trim();
-          });
-          if (data.metadata) window.HRM_MANPOWER_CACHE.metadata = data.metadata;
-        }
-
-        state.metadata = data.metadata || computeClientMetadata(state.allEmployees);
-        updateTopKPIs();
-        applyFilters();
-
-        if (state.activeDossierEmp && state.activeDossierEmp.sl_no === slNo) {
-          closeDossier();
-        }
-
-        if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.renderHoldCandidatesShelf === 'function') {
-          window.HRMEmployeeEntry.renderHoldCandidatesShelf();
-        }
-
-        if (typeof window.showHRToast === 'function') {
-          window.showHRToast('কর্মী ' + empIdStr + ' (' + (emp.name || '') + ') ডাটাবেজ থেকে সফলভাবে মুছে ফেলা হয়েছে।', 'success');
-        }
-      })
-      .catch(function (err) {
-        console.error('Delete employee error:', err);
-        state.allEmployees = state.allEmployees.filter(function (e) { return e.sl_no !== slNo; });
-        state.metadata = computeClientMetadata(state.allEmployees);
-        updateTopKPIs();
-        applyFilters();
-        if (state.activeDossierEmp && state.activeDossierEmp.sl_no === slNo) {
-          closeDossier();
-        }
-        if (typeof window.showHRToast === 'function') {
-          window.showHRToast('কর্মী ' + empIdStr + ' তালিকা থেকে মুছে ফেলা হয়েছে।', 'success');
-        }
+    // 3. Call server delete API if running on localhost
+    var isLocalHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalHost) {
+      fetch('/api/hrm/employee/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sl_no: emp.sl_no, staff_id: emp.staff_id })
+      }).catch(function(e) {
+        console.warn('Server delete employee notice:', e);
       });
+    }
   }
 
   function resetFilters() {
@@ -2076,6 +2330,7 @@
     state.filters.department = 'ALL';
     state.filters.designation = 'ALL';
     state.filters.gender = 'ALL';
+    state.filters.confirmation = 'ALL';
     state.filters.blood_group = 'ALL';
     state.filters.sort_by = 'sl_no';
     state.filters.sort_dir = 'asc';
@@ -2093,6 +2348,8 @@
     if (desigSelect) desigSelect.value = 'ALL';
     var genSelect = document.getElementById('filter-gender');
     if (genSelect) genSelect.value = 'ALL';
+    var confSelect = document.getElementById('filter-confirmation');
+    if (confSelect) confSelect.value = 'ALL';
     var bgSelect = document.getElementById('filter-blood');
     if (bgSelect) bgSelect.value = 'ALL';
     var sortSelect = document.getElementById('filter-sort-by');
@@ -2120,7 +2377,10 @@
     toggleEmployeeStatus: toggleEmployeeStatus,
     onSearchInput: function (val) {
       state.filters.search = val;
-      applyFilters();
+      if (window._hrmSearchTimer) clearTimeout(window._hrmSearchTimer);
+      window._hrmSearchTimer = setTimeout(function () {
+        applyFilters();
+      }, 120);
     },
     onFilterChange: function (field, val) {
       if (field === 'status') {
@@ -2160,6 +2420,8 @@
     openDossierByStaffId: openDossierByStaffId,
     getEmployeeReplaceId: getEmployeeReplaceId,
     getReplacementForEmployee: getReplacementForEmployee,
+    isEmployeeConfirmed: isEmployeeConfirmed,
+    getConfirmedStaffMap: getConfirmedStaffMap,
     exportExcel: exportExcel,
     exportPDF: exportPDF,
     exportCSV: exportCSV,

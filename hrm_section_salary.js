@@ -95,7 +95,7 @@
   // Currency Formatter
   function formatMoney(num) {
     var n = Math.round(Number(num) || 0);
-    return '৳ ' + n.toLocaleString('en-US');
+    return 'Tk ' + n.toLocaleString('en-US');
   }
 
   // Pure Number Formatter
@@ -140,11 +140,23 @@
       };
     });
 
+    secMap['Other / Unassigned'] = {
+      sl: 12,
+      name: 'Other / Unassigned',
+      group: 'other',
+      groupLabel: 'Other / Unassigned',
+      staff: 0,
+      gross: 0.0,
+      basic: 0.0,
+      ot: 0.0,
+      total: 0.0,
+      employees: []
+    };
+
     activeEmps.forEach(function (emp) {
       var canon = matchCanonicalSection(emp.section);
       if (!secMap[canon]) {
-        // Fallback to assemble line if unexpected
-        canon = 'Fan Assemble Line';
+        canon = 'Other / Unassigned';
       }
       var calc = calcEmpOvertime(emp, monthlyOtHours);
       var row = secMap[canon];
@@ -182,6 +194,15 @@
         othSub.total += row.total;
       }
     });
+
+    if (secMap['Other / Unassigned'] && secMap['Other / Unassigned'].staff > 0) {
+      var unassignedRow = secMap['Other / Unassigned'];
+      othSub.staff += unassignedRow.staff;
+      othSub.gross += unassignedRow.gross;
+      othSub.basic += unassignedRow.basic;
+      othSub.ot += unassignedRow.ot;
+      othSub.total += unassignedRow.total;
+    }
 
     var grandTotal = {
       staff: cfSub.staff + othSub.staff,
@@ -268,10 +289,10 @@
                 '<div class="flex items-center justify-between w-full">' +
                   '<div class="flex items-center gap-2.5 text-xs sm:text-sm font-black text-indigo-950 dark:text-indigo-200">' +
                     '<span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs shadow-xs"><i class="ph-bold ph-fan"></i></span>' +
-                    '<span>1. CEILING FAN PRODUCTION LINES (সিলিং ফ্যান বিভাগ - ০৯ টি সেকশন)</span>' +
+                    '<span>1. CEILING FAN PRODUCTION LINES (09 Sections)</span>' +
                   '</div>' +
                   '<span class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-white/90 dark:bg-dark-800 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-800/80 shadow-2xs">' +
-                    '০৯ টি সেকশন • ' + cfSub.staff + ' জন সক্রিয় কর্মী' +
+                    '09 Sections • ' + cfSub.staff + ' Active Staff' +
                   '</span>' +
                 '</div>' +
               '</td>' +
@@ -313,7 +334,7 @@
     html += '<tr class="bg-[#D9E1F2] dark:bg-blue-950/70 text-slate-950 dark:text-blue-100 font-black border-y-2 border-slate-400 dark:border-slate-600 text-xs">' +
               '<td class="py-2.5 px-2 border-r border-slate-400 text-center">★</td>' +
               '<td class="py-2.5 px-3 border-r border-slate-400 text-left font-black tracking-tight">' +
-                '<span>TOTAL CEILING FAN (সিলিং ফ্যান মোট)</span>' +
+                '<span>TOTAL CEILING FAN</span>' +
               '</td>' +
               '<td class="py-2.5 px-2 border-r border-slate-400 text-center text-sm">' + cfSub.staff + '</td>' +
               '<td class="py-2.5 px-3 border-r border-slate-400 text-right text-indigo-950 dark:text-indigo-200">' + formatMoney(cfSub.gross) + '</td>' +
@@ -330,10 +351,10 @@
                 '<div class="flex items-center justify-between w-full">' +
                   '<div class="flex items-center gap-2.5 text-xs sm:text-sm font-black text-emerald-950 dark:text-emerald-200">' +
                     '<span class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs shadow-xs"><i class="ph-bold ph-battery-charging"></i></span>' +
-                    '<span>2. RECHARGEABLE, EXHAUST & SPECIALIZED LINES (রিচার্জেবল ও এগজস্ট ফ্যান - ০২ টি সেকশন)</span>' +
+                    '<span>2. RECHARGEABLE, EXHAUST & SPECIALIZED LINES (02 Sections)</span>' +
                   '</div>' +
                   '<span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-white/90 dark:bg-dark-800 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800/80 shadow-2xs">' +
-                    '০২ টি সেকশন • ' + othSub.staff + ' জন সক্রিয় কর্মী' +
+                    '02 Sections • ' + othSub.staff + ' Active Staff' +
                   '</span>' +
                 '</div>' +
               '</td>' +
@@ -375,7 +396,7 @@
     html += '<tr class="bg-[#E2EFDA] dark:bg-emerald-950/70 text-slate-950 dark:text-emerald-100 font-black border-y-2 border-slate-400 dark:border-slate-600 text-xs">' +
               '<td class="py-2.5 px-2 border-r border-slate-400 text-center">★</td>' +
               '<td class="py-2.5 px-3 border-r border-slate-400 text-left font-black tracking-tight">' +
-                '<span>RECHARGEABLE / EXHAUST / CAPACITOR (রিচার্জেবল ও এগজস্ট মোট)</span>' +
+                '<span>RECHARGEABLE / EXHAUST / CAPACITOR</span>' +
               '</td>' +
               '<td class="py-2.5 px-2 border-r border-slate-400 text-center text-sm">' + othSub.staff + '</td>' +
               '<td class="py-2.5 px-3 border-r border-slate-400 text-right text-indigo-950 dark:text-indigo-200">' + formatMoney(othSub.gross) + '</td>' +
@@ -392,7 +413,7 @@
     html += '<tr class="bg-[#FCE4D6] dark:bg-amber-950/80 text-slate-950 dark:text-amber-100 font-black border-t-2 border-b-4 border-slate-500 dark:border-slate-500 text-sm">' +
               '<td class="py-3 px-2 border-r border-slate-400 text-center text-base">✪</td>' +
               '<td class="py-3 px-3 border-r border-slate-400 text-left font-black tracking-tight">' +
-                '<span>GRAND TOTAL FACTORY PAYROLL (সর্বমোট ফ্যাক্টরি পে-রোল)</span>' +
+                '<span>GRAND TOTAL FACTORY PAYROLL</span>' +
               '</td>' +
               '<td class="py-3 px-2 border-r border-slate-400 text-center text-base font-black">' + grand.staff + '</td>' +
               '<td class="py-3 px-3 border-r border-slate-400 text-right text-indigo-950 dark:text-indigo-100 font-black">' + formatMoney(grand.gross) + '</td>' +

@@ -1,0 +1,90 @@
+[
+  {
+    "sm": 1,
+    "name": "Fan Administation",
+    "authM": 3,
+    "authS": 0,
+    "authW": 0,
+    "group": "ceiling"
+  },
+  {
+    "sm": 2,
+    "name": "Fan Assemble Line",
+    "authM": 1,
+    "authS": 2,
+    "authW": 45,
+    "group": "ceiling"
+  },
+  {
+    "sm": 3,
+    "name": "Fan Dimmer & Blade",
+    "authM": 1,
+    "authS": 0,
+    "authW": 17,
+    "group": "ceiling"
+  },
+  {
+    "sm": 4,
+    "name": "Fan Armature Winding",
+    "authM": 1,
+    "authS": 1,
+    "authW": 25,
+    "group": "ceiling"
+  },
+  {
+    "sm": 5,
+    "name": "Fan Replace",
+    "authM": 1,
+    "authS": 1,
+    "authW": 7,
+    "group": "ceiling"
+  },
+  {
+    "sm": 6,
+    "name": "Fan Power Press & Stamping",
+    "authM": 3,
+    "authS": 3,
+    "authW": 24,
+    "group": "ceiling"
+  },
+  {
+    "sm": 7,
+    "name": "Fan Dhalai & Die Casting",
+    "authM": 1,
+    "authS": 0,
+    "authW": 24,
+    "group": "ceiling"
+  },
+  {
+    "sm": 8,
+    "name": "Fan Lathe",
+    "authM": 1,
+    "authS": 1,
+    "authW": 28,
+    "group": "ceiling"
+  },
+  {
+    "sm": 9,
+    "name": "Fan Auto Powder Coating",
+    "authM": 2,
+    "authS": 3,
+    "authW": 47,
+    "group": "ceiling"
+  },
+  {
+    "sm": 10,
+    "name": "Fan Rojonigondha",
+    "authM": 1,
+    "authS": 1,
+    "authW": 0,
+    "group": "other"
+  },
+  {
+    "sm": 11,
+    "name": "Fan Sada Shapla",
+    "authM": 1,
+    "authS": 1,
+    "authW": 26,
+    "group": "other"
+  }
+]

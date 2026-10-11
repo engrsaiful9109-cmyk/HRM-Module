@@ -127,6 +127,7 @@
     }
   }
 
+  var _transferSearchTimer = null;
   function onSearchInput(val) {
     state.searchQuery = (val || '').trim();
     var clearBtn = document.getElementById('transfer-search-clear-btn');
@@ -137,7 +138,10 @@
         clearBtn.classList.add('hidden');
       }
     }
-    showSuggestions();
+    if (_transferSearchTimer) clearTimeout(_transferSearchTimer);
+    _transferSearchTimer = setTimeout(function () {
+      showSuggestions();
+    }, 120);
   }
 
   function showSuggestions() {
@@ -318,7 +322,7 @@
 
     if (!staffId || !state.selectedEmployee) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('অনুগ্রহ করে কর্মী নির্বাচন করুন (Step 1 Search & Select)', 'error');
+        window.showHRToast('Please select an employee (Step 1 Search & Select)', 'error');
       } else {
         alert('Please search and select an employee first.');
       }
@@ -329,7 +333,7 @@
     var targetSection = targetSelect ? targetSelect.value.trim() : '';
     if (!targetSection) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('অনুগ্রহ করে গন্তব্য সেকশন নির্বাচন করুন (Target Section)', 'error');
+        window.showHRToast('Please select a target section (Target Section)', 'error');
       } else {
         alert('Please select a target destination section.');
       }
@@ -339,7 +343,7 @@
     var fromSection = state.selectedEmployee.section || '';
     if (fromSection.toLowerCase() === targetSection.toLowerCase()) {
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('কর্মীটি ইতিমধ্যে এই সেকশনে আছেন। ভিন্ন সেকশন নির্বাচন করুন।', 'warning');
+        window.showHRToast('Employee is already assigned to this section. Please select a different section.', 'warning');
       } else {
         alert('Employee is already in this section. Please choose a different destination.');
       }
@@ -375,7 +379,7 @@
       .then(function (data) {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="ph-bold ph-arrows-left-right text-base"></i> <span>Confirm &amp; Execute Transfer (বদলি নিশ্চিত করুন)</span>';
+          submitBtn.innerHTML = '<i class="ph-bold ph-arrows-left-right text-base"></i> <span>Confirm &amp; Execute Transfer</span>';
         }
 
         if (!data || !data.success) {
@@ -413,13 +417,22 @@
           window.HRMManpower.init();
         }
 
-        // 4. Update Manpower Summary if loaded
+        // 4. Cross-module instant reactive synchronization
+        if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+          window.HRMDashboard.render();
+        }
         if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
           window.HRMManpowerSummary.render();
         }
+        if (window.HRMPermanentEmployees && typeof window.HRMPermanentEmployees.init === 'function') {
+          window.HRMPermanentEmployees.init();
+        }
+        if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+          window.HRMEventBus.emit('TRANSFER_EXECUTED', { staff_id: staffId, to: targetSection });
+        }
 
         if (typeof window.showHRToast === 'function') {
-          window.showHRToast('কর্মী #' + staffId + ' (' + (state.selectedEmployee.name || '') + ') সফলভাবে ' + targetSection + ' এ বদলি সম্পন্ন হয়েছে!', 'success');
+          window.showHRToast('Employee ' + staffId + ' (' + (state.selectedEmployee.name || '') + ') transferred successfully to ' + targetSection + '!', 'success');
         }
 
         resetForm();
@@ -429,11 +442,11 @@
       .catch(function (err) {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="ph-bold ph-arrows-left-right text-base"></i> <span>Confirm &amp; Execute Transfer (বদলি নিশ্চিত করুন)</span>';
+          submitBtn.innerHTML = '<i class="ph-bold ph-arrows-left-right text-base"></i> <span>Confirm &amp; Execute Transfer</span>';
         }
         console.error('Transfer error:', err);
         if (typeof window.showHRToast === 'function') {
-          window.showHRToast('বদলি ব্যর্থ হয়েছে: ' + err.message, 'error');
+          window.showHRToast('Transfer failed: ' + err.message, 'error');
         } else {
           alert('Transfer failed: ' + err.message);
         }
@@ -441,7 +454,7 @@
   }
 
   function revertTransfer(transferId) {
-    if (!confirm('আপনি কি নিশ্চিত যে এই বদলিটি বাতিল করে কর্মীকে আগের সেকশনে ফেরত পাঠাতে চান?')) {
+    if (!confirm('Are you sure you want to revert this transfer and return employee to previous section?')) {
       return;
     }
 
@@ -480,15 +493,27 @@
 
         // Sync Revert to Firebase Cloud
         if (window.HRMFirebase && typeof window.HRMFirebase.revertTransfer === 'function') {
-          window.HRMFirebase.revertTransfer(transferId, targetT ? targetT.staff_id : null, targetT ? targetT.from_section : null);
+          window.HRMFirebase.revertTransfer(transferId, targetT ? targetT.staff_id : null, targetT ? targetT.from_section : null, true);
         }
 
         if (window.HRMManpower && typeof window.HRMManpower.init === 'function') {
           window.HRMManpower.init();
         }
+        if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+          window.HRMDashboard.render();
+        }
+        if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+          window.HRMManpowerSummary.render();
+        }
+        if (window.HRMPermanentEmployees && typeof window.HRMPermanentEmployees.init === 'function') {
+          window.HRMPermanentEmployees.init();
+        }
+        if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+          window.HRMEventBus.emit('TRANSFER_EXECUTED', { transfer_id: transferId, type: 'revert' });
+        }
 
         if (typeof window.showHRToast === 'function') {
-          window.showHRToast(data.message || 'বদলি আদেশ সফলভাবে বাতিল ও কর্মী পুনর্বহাল করা হয়েছে।', 'success');
+          window.showHRToast(data.message || 'Transfer order reverted and employee restored successfully.', 'success');
         }
 
         updateKPIs();
@@ -497,17 +522,21 @@
       .catch(function (err) {
         console.error('Revert error:', err);
         if (typeof window.showHRToast === 'function') {
-          window.showHRToast('বাতিলকরণ ব্যর্থ: ' + err.message, 'error');
+          window.showHRToast('Revert failed: ' + err.message, 'error');
         } else {
           alert('Revert failed: ' + err.message);
         }
       });
   }
 
+  var _transferTableSearchTimer = null;
   function onTableSearch(val) {
     state.tableSearch = (val || '').trim().toLowerCase();
     state.page = 1;
-    renderTable();
+    if (_transferTableSearchTimer) clearTimeout(_transferTableSearchTimer);
+    _transferTableSearchTimer = setTimeout(function () {
+      renderTable();
+    }, 120);
   }
 
   function renderTable() {
@@ -698,7 +727,7 @@
 
     var html = '<!DOCTYPE html><html><head><title>MEP Inter Section Transfer Register</title><style>body{font-family:sans-serif;padding:20px;} table{width:100%;border-collapse:collapse;margin-top:15px;font-size:11px;} th{border:1px solid #666;padding:8px;background:#f3f4f6;} h2,h4{margin:4px 0;text-align:center;}</style></head><body>';
     html += '<h2>MEP GROUP — FAN DIVISION (PLANT 1027)</h2>';
-    html += '<h4>INTER SECTION PERSONNEL TRANSFER REGISTER (কর্মীবদলি রেজিস্টার)</h4>';
+    html += '<h4>INTER SECTION PERSONNEL TRANSFER REGISTER</h4>';
     html += '<p style="font-size:10px;text-align:center;color:#666;">Generated on: ' + new Date().toLocaleString() + ' | Total Transfers: ' + state.transfers.length + '</p>';
     html += '<table><thead><tr><th>SL</th><th>Date</th><th>Staff ID</th><th>Name</th><th>Designation</th><th>From Section</th><th>To Section</th><th>Reason</th><th>Memo No</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
     html += '</body></html>';
