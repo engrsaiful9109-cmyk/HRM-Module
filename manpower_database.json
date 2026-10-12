@@ -1,27 +1,27 @@
 {
   "metadata": {
     "total_headcount": 1248,
-    "active_headcount": 260,
-    "hold_headcount": 14,
-    "inactive_headcount": 974,
+    "active_headcount": 256,
+    "hold_headcount": 17,
+    "inactive_headcount": 975,
     "total_gross_salary": 8625686.0,
-    "active_gross_salary": 2395883.0,
-    "hold_gross_salary": 92439.0,
-    "inactive_gross_salary": 6137364.0,
+    "active_gross_salary": 2370335.0,
+    "hold_gross_salary": 110437.0,
+    "inactive_gross_salary": 6144914.0,
     "total_basic_salary": 4042068.0,
-    "active_basic_salary": 1063116.5,
-    "hold_basic_salary": 46219.5,
-    "inactive_basic_salary": 2932732.0,
+    "active_basic_salary": 1050342.5,
+    "hold_basic_salary": 55218.5,
+    "inactive_basic_salary": 2936507.0,
     "status_distribution": {
-      "Active": 260,
-      "Hold": 14,
-      "Inactive": 974
+      "Active": 256,
+      "Hold": 17,
+      "Inactive": 975
     },
     "average_gross_salary": 6911.61,
     "gender_distribution": {
-      "Male": 503,
-      "FeMale": 2,
-      "Female": 710,
+      "Male": 504,
+      "FeMale": 3,
+      "Female": 708,
       "Unknown": 33
     },
     "department_distribution": {
@@ -74,7 +74,7 @@
       "Delivery Assistant": 2,
       "Supervisor": 1
     },
-    "generated_at": "2026-10-12 10:54:28"
+    "generated_at": "2026-10-12 12:08:01"
   },
   "employees": [
     {
@@ -3410,6 +3410,7 @@
       "_fb_key": "emp_14094"
     },
     {
+      "_fb_key": "emp_14142",
       "address": "Kawnia,Barishal",
       "bank_rocket_acc": "013101367814",
       "basic_salary": 3608,
@@ -3436,12 +3437,12 @@
       "reference_id": "",
       "remarks": "Replaced by #19156 (Sadia Akter) on 10-Oct-2026",
       "replace_id": "19156",
+      "replace_name": "Sadia Akter",
       "section": "Fan Blade & Dimmer",
       "sl_no": 105,
       "staff_id": "14142",
       "status": "Inactive",
-      "total_working_days": "1201",
-      "_fb_key": "emp_14142"
+      "total_working_days": "1201"
     },
     {
       "address": "Kawnia,Barishal",
@@ -3500,12 +3501,13 @@
       "nid": "",
       "qualification": "",
       "reference_id": "12423",
-      "remarks": "",
-      "replace_id": "",
+      "remarks": "Replaced by #19102 (Abul Bashar) on 04-Oct-2026",
+      "replace_id": "19102",
+      "replace_name": "Abul Bashar",
       "section": "Fan Power Press & Stamping",
       "sl_no": 107,
       "staff_id": "14315",
-      "status": "Active",
+      "status": "Inactive",
       "total_working_days": "1148"
     },
     {
@@ -3855,8 +3857,9 @@
       "nid": "",
       "qualification": "",
       "reference_id": "641",
-      "remarks": "",
-      "replace_id": "",
+      "remarks": "Replaced by #19152 (Karima) on 10-Oct-2026",
+      "replace_id": "19152",
+      "replace_name": "Karima",
       "section": "Fan Sada Shapla",
       "sl_no": 118,
       "staff_id": "14535",
@@ -7740,18 +7743,20 @@
       "_fb_key": "emp_16744"
     },
     {
+      "_fb_key": "emp_16749",
       "address": "Jalokhati, Barishal",
       "bank_rocket_acc": "2111214026883",
       "basic_salary": 5419.5,
-      "blood_group": "",
+      "blood_group": "B+",
       "contact_number": "1317284215",
       "department": "Production",
       "designation": "Jr. Engineer",
       "dob": "11-Jun-2002",
       "doj": "18-Jan-2025",
       "first_joining_section": "Fan Blade & Dimmer",
-      "gender": "Female",
+      "gender": "Male",
       "gross_salary": 10839,
+      "hiring_type": "New Direct",
       "increment_2021": 0,
       "increment_2022": 0,
       "increment_2023": 0,
@@ -7761,15 +7766,14 @@
       "is_hidden": false,
       "name": "Nafija Islam",
       "nid": "",
-      "qualification": "Diploma (ET)",
+      "qualification": "",
       "reference_id": "15998",
       "replace_id": "",
       "section": "Fan Blade & Dimmer",
       "sl_no": 240,
       "staff_id": "16749",
       "status": "Active",
-      "total_working_days": "606",
-      "_fb_key": "emp_16749"
+      "total_working_days": "606"
     },
     {
       "address": "Kotoali  Barishal.",
@@ -40362,8 +40366,9 @@
       "nid": "2822794216",
       "qualification": "",
       "reference_id": "13095",
-      "remarks": "Replaced by #19154 (Summon Hossen) on 08-Oct-2026",
-      "replace_id": "18656",
+      "remarks": "Replaced by #19154 (Summon Hossen) on 03-Oct-2026",
+      "replace_id": "19154",
+      "replace_name": "Summon Hossen",
       "section": "Fan Lathe",
       "sl_no": 1255,
       "staff_id": "18806",
@@ -41506,10 +41511,11 @@
       "_fb_key": "emp_19101"
     },
     {
+      "_fb_key": "emp_19102",
       "address": "Borguna, Barisal",
       "bank_rocket_acc": "",
       "basic_salary": 3000,
-      "blood_group": "N/A",
+      "blood_group": "B+",
       "contact_number": "01705131402",
       "department": "Production",
       "designation": "Helper",
@@ -41529,33 +41535,7 @@
       "section": "Fan Power Press & Stamping",
       "sl_no": 1297,
       "staff_id": "19102",
-      "status": "Active",
-      "_fb_key": "emp_19102"
-    },
-    {
-      "address": "Borguna,Barishal",
-      "bank_rocket_acc": "",
-      "basic_salary": 2999,
-      "blood_group": "B+",
-      "contact_number": "01354020868",
-      "department": "Production",
-      "designation": "Helper",
-      "dob": "05-Feb-2007",
-      "doj": "10-Oct-2026",
-      "gender": "",
-      "gross_salary": 5998,
-      "hiring_type": "Replacement",
-      "name": "Sadia Akter",
-      "nid": "20070410915111987",
-      "qualification": "SSC",
-      "reference_id": "15688",
-      "replace_id": "14142",
-      "replace_name": "Rubaiya",
-      "section": "Fan Blade & Dimmer",
-      "sl_no": 1297,
-      "staff_id": "19156",
-      "status": "Active",
-      "_fb_key": "emp_19156"
+      "status": "Active"
     },
     {
       "address": "Beltola, Barishal",
@@ -41720,16 +41700,17 @@
       "_fb_key": "emp_19135"
     },
     {
+      "_fb_key": "emp_19152",
       "address": "Borguna,Barishal",
       "bank_rocket_acc": "",
       "basic_salary": 3000,
-      "blood_group": "N/A",
+      "blood_group": "",
       "contact_number": "01330135804",
       "department": "Production",
       "designation": "Helper",
       "dob": "10-May-1996",
       "doj": "10-Oct-2026",
-      "gender": "Female",
+      "gender": "",
       "gross_salary": 6000,
       "hiring_type": "Replacement",
       "name": "Karima",
@@ -41743,8 +41724,7 @@
       "section": "Fan Lathe",
       "sl_no": 1305,
       "staff_id": "19152",
-      "status": "Active",
-      "_fb_key": "emp_19152"
+      "status": "Hold"
     },
     {
       "address": "Bakergonj,Barishal",
@@ -41801,6 +41781,7 @@
       "_fb_key": "emp_19153"
     },
     {
+      "_fb_key": "emp_19154",
       "address": "Cownia,Barishal",
       "bank_rocket_acc": "",
       "basic_salary": 3000,
@@ -41824,8 +41805,32 @@
       "section": "Fan Lathe",
       "sl_no": 1308,
       "staff_id": "19154",
-      "status": "Active",
-      "_fb_key": "emp_19154"
+      "status": "Hold"
+    },
+    {
+      "_fb_key": "emp_19156",
+      "address": "Borguna,Barishal",
+      "bank_rocket_acc": "",
+      "basic_salary": 2999,
+      "blood_group": "B+",
+      "contact_number": "01354020868",
+      "department": "Production",
+      "designation": "Helper",
+      "dob": "05-Feb-2007",
+      "doj": "10-Oct-2026",
+      "gender": "FeMale",
+      "gross_salary": 5998,
+      "hiring_type": "Replacement",
+      "name": "Sadia Akter",
+      "nid": "20070410915111987",
+      "qualification": "SSC",
+      "reference_id": "15688",
+      "replace_id": "14142",
+      "replace_name": "Rubaiya",
+      "section": "Fan Blade & Dimmer",
+      "sl_no": 1309,
+      "staff_id": "19156",
+      "status": "Hold"
     }
   ]
 }

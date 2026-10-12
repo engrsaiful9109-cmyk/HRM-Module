@@ -3776,6 +3776,7 @@
     "_fb_key": "rep_236"
   },
   {
+    "_fb_key": "rep_237",
     "new_designation": "Helper",
     "new_doj": "10-Oct-2026",
     "new_id": "19156",
@@ -3784,12 +3785,11 @@
     "new_sl": "237",
     "remarks": "Replacement Appointed",
     "replace_designation": "Helper",
-    "replace_doj": "03-Jun-2023",
+    "replace_doj": "10-Oct-2026",
     "replace_id": "14142",
     "replace_name": "Rubaiya",
     "replace_section": "Fan Blade & Dimmer",
-    "sl": 237,
-    "_fb_key": "rep_237"
+    "sl": 237
   },
   {
     "new_designation": "Helper",
@@ -3825,18 +3825,33 @@
   },
   {
     "new_designation": "Helper",
-    "new_doj": "03-Oct-2026",
-    "new_id": "19154",
-    "new_name": "Summon Hossen",
+    "new_doj": "10-Oct-2026",
+    "new_id": "19152",
+    "new_name": "Karima",
     "new_section": "Fan Lathe",
     "new_sl": "241",
-    "remarks": "Left without Notice / নোটিশ ছাড়া প্রস্থান",
+    "remarks": "Replacement Appointed",
     "replace_designation": "Helper",
-    "replace_doj": "08-Oct-2026",
-    "replace_id": "18806",
-    "replace_name": "Lucky Begum",
-    "replace_section": "Fan Lathe",
+    "replace_doj": "04-Sep-2023",
+    "replace_id": "14535",
+    "replace_name": "Shilpy Rany Das",
+    "replace_section": "Fan Sada Shapla",
     "sl": 241,
     "_fb_key": "rep_241"
+  },
+  {
+    "sl": 241,
+    "replace_id": "18806",
+    "replace_name": "Lucky Begum",
+    "replace_designation": "Helper",
+    "replace_section": "Fan Lathe",
+    "replace_doj": "18-Aug-2026",
+    "new_sl": "241",
+    "new_id": "19154",
+    "new_name": "Summon Hossen",
+    "new_designation": "Helper",
+    "new_section": "Fan Lathe",
+    "new_doj": "03-Oct-2026",
+    "remarks": "Replacement Appointed"
   }
 ]

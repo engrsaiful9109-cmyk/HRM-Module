@@ -163,11 +163,26 @@
   function getActiveEmployees() {
     var emps = [];
     if (window.HRMManpower && typeof window.HRMManpower.getAllEmployees === 'function') {
-      emps = window.HRMManpower.getAllEmployees();
-    } else if (window.MEP_MANPOWER_DATABASE && Array.isArray(window.MEP_MANPOWER_DATABASE)) {
-      emps = window.MEP_MANPOWER_DATABASE;
+      var all = window.HRMManpower.getAllEmployees();
+      if (all && all.length > 0) {
+        emps = all;
+      }
+    }
+    if (emps.length === 0) {
+      var source = window.MEP_MANPOWER_DATABASE || window.HRM_MANPOWER_CACHE;
+      if (source) {
+        if (Array.isArray(source)) {
+          emps = source;
+        } else if (Array.isArray(source.employees)) {
+          emps = source.employees;
+        }
+      }
     }
     return emps.filter(function (e) {
+      if (!e) return false;
+      if (e.is_hidden === true) return false;
+      var sec = String(e.section || '').trim().toLowerCase();
+      if (sec === 'fan qc') return false;
       return String(e.status || '').trim().toLowerCase() === 'active';
     });
   }
@@ -1102,18 +1117,17 @@
   // Reactive updates on data mutations, transfers & cloud sync
   function onDataChanged() {
     try {
-      var summarySec = document.getElementById('manpower-summary-section');
-      if (summarySec && !summarySec.classList.contains('hidden')) {
-        render();
-      }
+      render();
     } catch (err) {}
   }
 
   window.addEventListener('hrm-employees-cloud-synced', onDataChanged);
   window.addEventListener('mep:data-updated', onDataChanged);
+  window.addEventListener('mep:employee-updated', onDataChanged);
+  window.addEventListener('storage', onDataChanged);
 
   if (window.HRMEventBus && typeof window.HRMEventBus.on === 'function') {
-    ['EMPLOYEE_MUTATED', 'EMPLOYEE_DELETED', 'TRANSFER_EXECUTED', 'CLOUD_SYNC_RECEIVED', 'SPECS_CHANGED'].forEach(function (evt) {
+    ['EMPLOYEE_MUTATED', 'EMPLOYEE_DELETED', 'TRANSFER_EXECUTED', 'CLOUD_SYNC_RECEIVED', 'SPECS_CHANGED', 'EMPLOYEE_SAVED', 'STATUS_TOGGLED'].forEach(function (evt) {
       window.HRMEventBus.on(evt, onDataChanged);
     });
   }

@@ -275,6 +275,9 @@
     updateTopKPIs();
     populateFilterDropdowns();
     setStatusFilter(state.filters.status || 'ALL');
+    if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+      window.HRMManpowerSummary.render();
+    }
   }
 
   function computeClientMetadata(employees) {
@@ -2112,6 +2115,9 @@
         .then(function (data) {
           if (data && data.metadata) state.metadata = data.metadata;
           updateTopKPIs();
+          if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+            window.HRMManpowerSummary.render();
+          }
         })
         .catch(function (err) {
           console.warn('Server status save notice:', err);
@@ -2123,6 +2129,15 @@
     applyFilters(true);
     if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.renderHoldCandidatesShelf === 'function') {
       window.HRMEmployeeEntry.renderHoldCandidatesShelf();
+    }
+    if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+      window.HRMEventBus.emit('EMPLOYEE_MUTATED', { emp: emp, type: 'status' });
+    }
+    if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+      window.HRMDashboard.render();
+    }
+    if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+      window.HRMManpowerSummary.render();
     }
     if (window.showHRToast) {
       var cleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
