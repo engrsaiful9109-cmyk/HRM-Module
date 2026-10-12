@@ -5408,7 +5408,7 @@ a:hover .ph-arrow-up-right,
               <div id="replacement-selection-box" class="pt-3 border-t border-slate-200/60 dark:border-white/10 space-y-3">
                 <div class="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-extrabold text-xs">
                   <i class="ph-bold ph-arrows-clockwise text-base"></i>
-                  <span>Select the predecessor staff member being replaced (Replaced Personnel):</span>
+                  <span>Select the predecessor staff member being replaced (Hold Personnel Only):</span>
                 </div>
 
                 <!-- Hold Candidates Quick Selection Shelf -->
@@ -5439,7 +5439,7 @@ a:hover .ph-arrow-up-right,
                       onclick="window.HRMEmployeeEntry.onSearchReplacedEmployee(this.value)"
                       onblur="window.HRMEmployeeEntry.onSearchBlur(this.value)"
                       onkeydown="if(event.key==='Enter'){event.preventDefault();window.HRMEmployeeEntry.onSearchBlur(this.value);}"
-                      placeholder="Search predecessor by Staff ID (e.g. 17568), name, or section..."
+                      placeholder="Search predecessor from Hold list by Staff ID (e.g. 17568), name, or section..."
                       class="entry-input-glass w-full pl-10 pr-10 py-2.5 text-slate-900 dark:text-white font-medium text-xs shadow-sm"
                       autocomplete="off"
                     >

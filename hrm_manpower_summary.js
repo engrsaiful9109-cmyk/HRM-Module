@@ -17,14 +17,14 @@
   // Factory Standard Default Specifications (Target: 272 Personnel)
   var DEFAULT_SECTION_CONFIG = [
     { sm: 1, name: 'Fan Administation', authM: 3, authS: 0, authW: 0, group: 'ceiling' },
-    { sm: 2, name: 'Fan Assemble Line', authM: 1, authS: 2, authW: 40, group: 'ceiling' },
+    { sm: 2, name: 'Fan Assemble Line', authM: 1, authS: 2, authW: 45, group: 'ceiling' },
     { sm: 3, name: 'Fan Dimmer & Blade', authM: 1, authS: 0, authW: 17, group: 'ceiling' },
-    { sm: 4, name: 'Fan Armature Winding', authM: 1, authS: 1, authW: 32, group: 'ceiling' },
+    { sm: 4, name: 'Fan Armature Winding', authM: 1, authS: 1, authW: 25, group: 'ceiling' },
     { sm: 5, name: 'Fan Replace', authM: 1, authS: 1, authW: 7, group: 'ceiling' },
     { sm: 6, name: 'Fan Power Press & Stamping', authM: 3, authS: 3, authW: 24, group: 'ceiling' },
     { sm: 7, name: 'Fan Dhalai & Die Casting', authM: 1, authS: 0, authW: 24, group: 'ceiling' },
     { sm: 8, name: 'Fan Lathe', authM: 1, authS: 1, authW: 28, group: 'ceiling' },
-    { sm: 9, name: 'Fan Auto Powder Coating', authM: 2, authS: 3, authW: 45, group: 'ceiling' },
+    { sm: 9, name: 'Fan Auto Powder Coating', authM: 2, authS: 3, authW: 47, group: 'ceiling' },
     { sm: 10, name: 'Fan Rojonigondha', authM: 1, authS: 1, authW: 0, group: 'other' },
     { sm: 11, name: 'Fan Sada Shapla', authM: 1, authS: 1, authW: 26, group: 'other' }
   ];
@@ -46,7 +46,16 @@
       if (local) {
         var parsed = JSON.parse(local);
         if (Array.isArray(parsed) && parsed.length === DEFAULT_SECTION_CONFIG.length) {
-          SECTION_CONFIG = parsed;
+          // If cached specs contain stale values (Assemble=40, Winding=32, Coating=45), purge stale cache
+          var hasObsolete = parsed.some(function (s) {
+            return (s.sm === 2 && s.authW === 40) || (s.sm === 4 && s.authW === 32) || (s.sm === 9 && s.authW === 45);
+          });
+          if (hasObsolete) {
+            localStorage.removeItem(STORAGE_KEY);
+            SECTION_CONFIG = JSON.parse(JSON.stringify(DEFAULT_SECTION_CONFIG));
+          } else {
+            SECTION_CONFIG = parsed;
+          }
         }
       }
     } catch (e) {
@@ -56,7 +65,10 @@
     // Try server sync asynchronously
     if (typeof fetch === 'function') {
       fetch('/api/hrm/manpower-summary-specs')
-        .then(function (res) { return res.json(); })
+        .then(function (res) { 
+          if (!res.ok) throw new Error('API not available');
+          return res.json(); 
+        })
         .then(function (data) {
           if (data && data.success && Array.isArray(data.specs) && data.specs.length === DEFAULT_SECTION_CONFIG.length) {
             SECTION_CONFIG = data.specs;
@@ -69,7 +81,21 @@
           }
         })
         .catch(function (err) {
-          // offline or server not ready, use local/defaults
+          // Fallback to static JSON file if server API not present
+          if (typeof fetch === 'function') {
+            fetch('data/manpower_summary_specs.json')
+              .then(function (res) { return res.json(); })
+              .then(function (specs) {
+                if (Array.isArray(specs) && specs.length === DEFAULT_SECTION_CONFIG.length) {
+                  SECTION_CONFIG = specs;
+                  try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(SECTION_CONFIG));
+                  } catch (e) {}
+                  if (!isEditMode) render();
+                }
+              })
+              .catch(function () {});
+          }
         });
     }
   }

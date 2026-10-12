@@ -465,7 +465,7 @@
 
     var all = getAllEmployees();
     var holdEmployees = all.filter(function (e) {
-      return String(e.status || '').trim().toLowerCase() === 'hold';
+      return String(e.status || '').trim().toLowerCase() === 'hold' && !getReplacedStaffRecord(e.staff_id);
     });
 
     if (countBadge) {
@@ -582,8 +582,8 @@
       return;
     }
 
-    // Eligible candidates for replacement: Hold employees and Active employees who haven't been replaced
-    var eligibleEmployees = holdEmployees.concat(activeEmployees);
+    // Eligible candidates for replacement: ONLY Hold employees who haven't been replaced
+    var eligibleEmployees = holdEmployees;
 
     // Check if user typed an exact staff_id match
     var exactStaff = eligibleEmployees.find(function (e) {
@@ -599,29 +599,24 @@
     var matches = eligibleEmployees.filter(function (e) {
       var id = String(e.staff_id || '').toLowerCase();
       var name = String(e.name || '').toLowerCase();
-      return id.indexOf(q) !== -1 || name.indexOf(q) !== -1;
-    });
-
-    // Prioritize Hold employees at the top
-    matches.sort(function (a, b) {
-      var stA = String(a.status || '').toLowerCase() === 'hold' ? 0 : 1;
-      var stB = String(b.status || '').toLowerCase() === 'hold' ? 0 : 1;
-      return stA - stB;
+      var sec = String(e.section || '').toLowerCase();
+      var desig = String(e.designation || '').toLowerCase();
+      return id.indexOf(q) !== -1 || name.indexOf(q) !== -1 || sec.indexOf(q) !== -1 || desig.indexOf(q) !== -1;
     });
 
     var sliced = matches.slice(0, 12);
 
     if (sliced.length === 0) {
-      // Check if user searched an Inactive employee
-      var inactiveMatch = all.find(function (e) {
-        var isInactive = String(e.status || '').toLowerCase() === 'inactive';
-        return isInactive && (String(e.staff_id).trim() === cleanId || (raw && String(e.name || '').trim().toLowerCase() === raw));
+      // Check if user searched a non-Hold employee (Active or Inactive)
+      var nonHoldMatch = all.find(function (e) {
+        return (String(e.staff_id).trim() === cleanId || (raw && String(e.name || '').trim().toLowerCase() === raw));
       });
-      if (inactiveMatch) {
-        var cleanInactiveId = String(inactiveMatch.staff_id || '').replace(/^[#\s]+/, '');
-        resultsBox.innerHTML = '<div class="p-3 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 text-center font-bold rounded-xl m-1 border border-rose-200 dark:border-rose-800">' +
-          '<i class="ph-bold ph-prohibit text-base mb-1 block"></i>' +
-          '<span>Employee ID: ' + cleanInactiveId + ' (' + inactiveMatch.name + ') is currently <b>Inactive</b>. Please select a <b>Hold</b> or <b>Active</b> employee for replacement.</span>' +
+      if (nonHoldMatch) {
+        var cleanNonHoldId = String(nonHoldMatch.staff_id || '').replace(/^[#\s]+/, '');
+        var nonHoldStatus = nonHoldMatch.status || 'Active';
+        resultsBox.innerHTML = '<div class="p-3 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 text-center font-bold rounded-xl m-1 border border-amber-300 dark:border-amber-800">' +
+          '<i class="ph-bold ph-warning text-base mb-1 block"></i>' +
+          '<span>Employee ID: <b class="font-mono">' + cleanNonHoldId + '</b> (' + nonHoldMatch.name + ') is currently <b>' + nonHoldStatus + '</b>.<br>⚠️ Only <b>Hold</b> staff are eligible for replacement.</span>' +
           '</div>';
         resultsBox.classList.remove('hidden');
         return;
@@ -629,30 +624,26 @@
 
       resultsBox.innerHTML = '<div class="p-3 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 text-center font-medium rounded-xl m-1 border border-amber-300 dark:border-amber-800">' +
         '<i class="ph-bold ph-warning text-base mb-1 block"></i>' +
-        '<span>Employee ID: <b class="font-mono">' + cleanId + '</b> not found. Please select an eligible employee from Hold or Active list.</span>' +
+        '<span>Employee ID: <b class="font-mono">' + cleanId + '</b> not found in Hold list. Only Hold staff can be selected for replacement.</span>' +
         '</div>';
       resultsBox.classList.remove('hidden');
       return;
     }
 
     var html = sliced.map(function (e) {
-      var isHold = String(e.status || '').toLowerCase() === 'hold';
       var cleanItemStaffId = String(e.staff_id || '—').replace(/^[#\s]+/, '');
-      var statusBadge = isHold
-        ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">Hold</span>'
-        : '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">Active</span>';
 
       return '<div onclick="window.HRMEmployeeEntry.selectReplacedEmployee(' + e.sl_no + ')" ' +
-             'class="p-2.5 hover:bg-purple-500/10 dark:hover:bg-purple-900/30 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors">' +
+             'class="p-2.5 hover:bg-amber-500/10 dark:hover:bg-amber-900/30 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors">' +
              '  <div class="flex items-center gap-2.5 min-w-0">' +
-             '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded ' + (isHold ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30' : 'bg-purple-500/20 text-purple-700 dark:text-purple-300') + '">' + cleanItemStaffId + '</span>' +
+             '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">' + cleanItemStaffId + '</span>' +
              '    <div class="truncate">' +
              '      <p class="font-bold text-slate-900 dark:text-white text-xs truncate">' + (e.name || '—') + '</p>' +
              '      <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">' + (e.designation || 'Helper') + ' • ' + (e.section || 'General') + '</p>' +
              '    </div>' +
              '  </div>' +
              '  <div class="flex items-center gap-2 shrink-0">' +
-             '    ' + statusBadge +
+             '    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40">Hold</span>' +
              '    <span class="text-[11px] font-mono text-slate-400">' + formatMoney(e.gross_salary) + '</span>' +
              '  </div>' +
              '</div>';
@@ -686,22 +677,29 @@
       }
 
       // Check if matches an inactive employee
-      var inactiveCheck = all.find(function(e) {
-        return String(e.status || '').toLowerCase() === 'inactive' &&
+      // Check if matches a non-hold employee (active or inactive)
+      var nonHoldCheck = all.find(function(e) {
+        var st = String(e.status || '').toLowerCase();
+        return st !== 'hold' &&
                (String(e.staff_id).trim() === cleanId || String(e.name || '').trim().toLowerCase() === clean.toLowerCase());
       });
-      if (inactiveCheck) {
+      if (nonHoldCheck) {
         clearReplacedEmployee();
         var searchInput = document.getElementById('entry-search-replaced-input');
         if (searchInput) searchInput.value = '';
-        var cleanInactId = String(inactiveCheck.staff_id || '').replace(/^[#\s]+/, '');
-        if (window.showToast) window.showToast('⚠️ Employee ' + cleanInactId + ' is currently Inactive. Please select Hold or Active employee.', 'warning');
+        var cleanNonHoldId = String(nonHoldCheck.staff_id || '').replace(/^[#\s]+/, '');
+        var stLabel = nonHoldCheck.status || 'Active';
+        if (window.showToast) {
+          window.showToast('⚠️ Employee ' + cleanNonHoldId + ' is ' + stLabel + '. Only Hold staff can be selected for replacement.', 'warning');
+        } else if (window.showHRToast) {
+          window.showHRToast('⚠️ Employee ' + cleanNonHoldId + ' is ' + stLabel + '. Only Hold staff can be selected for replacement.');
+        }
         return;
       }
 
       var eligibleEmployees = all.filter(function(e) {
         var st = String(e.status || '').toLowerCase();
-        return (st === 'hold' || st === 'active') && !getReplacedStaffRecord(e.staff_id);
+        return st === 'hold' && !getReplacedStaffRecord(e.staff_id);
       });
 
       var matched = eligibleEmployees.find(function(e) {
@@ -728,6 +726,14 @@
     var all = getAllEmployees();
     var emp = all.find(function (e) { return e.sl_no === slNo || String(e.staff_id) === String(slNo); });
     if (!emp) return;
+
+    // Strict validation: Only Hold employees can be selected for replacement!
+    var empStatus = String(emp.status || '').toLowerCase();
+    if (empStatus !== 'hold') {
+      alert('⚠️ Only Hold staff can be selected for replacement.\n\nEmployee ' + (emp.staff_id || '') + ' (' + (emp.name || '') + ') is currently ' + (emp.status || 'Active') + '.\nPlease select an eligible employee from the Hold list.');
+      clearReplacedEmployee();
+      return;
+    }
 
     // Strict validation: An ID can only be replaced once!
     var alreadyRep = getReplacedStaffRecord(emp.staff_id);
@@ -986,6 +992,15 @@
           setTimeout(function () {
             searchInput.classList.remove('ring-4', 'ring-rose-500/50', 'border-rose-500');
           }, 3000);
+        }
+        return;
+      }
+
+      if (String(matched.status || '').toLowerCase() !== 'hold') {
+        alert('❌ Only Hold staff can be selected for replacement.\n\nEmployee ' + (matched.staff_id || '') + ' (' + matched.name + ') is currently ' + (matched.status || 'Active') + '.\nPlease select an eligible employee from the Hold list.');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return;
       }

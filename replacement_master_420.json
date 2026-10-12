@@ -3838,21 +3838,5 @@
     "replace_section": "Fan Lathe",
     "sl": 241,
     "_fb_key": "rep_241"
-  },
-  {
-    "new_designation": "Helper",
-    "new_doj": "10-Oct-2026",
-    "new_id": "19155",
-    "new_name": "Ibrahim khalile",
-    "new_section": "Fan Sada Shapla",
-    "new_sl": "242",
-    "remarks": "Left without Notice / নোটিশ ছাড়া প্রস্থান",
-    "replace_designation": "Helper",
-    "replace_doj": "08-Oct-2026",
-    "replace_id": "18864",
-    "replace_name": "Lamiya Akter",
-    "replace_section": "Fan Sada Shapla",
-    "sl": 242,
-    "_fb_key": "rep_242"
   }
 ]

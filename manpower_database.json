@@ -1,25 +1,25 @@
 {
   "metadata": {
-    "total_headcount": 1249,
+    "total_headcount": 1248,
     "active_headcount": 260,
     "hold_headcount": 14,
-    "inactive_headcount": 975,
-    "total_gross_salary": 8631686.0,
+    "inactive_headcount": 974,
+    "total_gross_salary": 8625686.0,
     "active_gross_salary": 2395883.0,
     "hold_gross_salary": 92439.0,
-    "inactive_gross_salary": 6143364.0,
-    "total_basic_salary": 4045068.0,
+    "inactive_gross_salary": 6137364.0,
+    "total_basic_salary": 4042068.0,
     "active_basic_salary": 1063116.5,
     "hold_basic_salary": 46219.5,
-    "inactive_basic_salary": 2935732.0,
+    "inactive_basic_salary": 2932732.0,
     "status_distribution": {
       "Active": 260,
       "Hold": 14,
-      "Inactive": 975
+      "Inactive": 974
     },
-    "average_gross_salary": 6910.88,
+    "average_gross_salary": 6911.61,
     "gender_distribution": {
-      "Male": 504,
+      "Male": 503,
       "FeMale": 2,
       "Female": 710,
       "Unknown": 33
@@ -28,8 +28,7 @@
       "Production": 1244,
       "Replace": 2,
       "Hr": 1,
-      "Unassigned": 1,
-      "Fan": 1
+      "Unassigned": 1
     },
     "section_distribution": {
       "Fan Replace": 29,
@@ -38,7 +37,7 @@
       "Fan Assemble Line": 221,
       "Fan Rojonigondha": 26,
       "Fan Auto Powder Coating": 190,
-      "Fan Armature Winding": 175,
+      "Fan Armature Winding": 174,
       "Fan Dhalai & Die Casting": 129,
       "Fan Blade & Dimmer": 96,
       "Fan Sada Shapla": 60,
@@ -53,7 +52,7 @@
       "Foreman": 2,
       "Asst. Technicalman": 4,
       "Operator": 48,
-      "Helper": 1059,
+      "Helper": 1058,
       "Sr. Technicalman": 5,
       "Sr. Production Engineer": 1,
       "Sr. Supervisor": 3,
@@ -75,7 +74,7 @@
       "Delivery Assistant": 2,
       "Supervisor": 1
     },
-    "generated_at": "2026-10-11 17:11:16"
+    "generated_at": "2026-10-12 10:54:28"
   },
   "employees": [
     {
@@ -40817,12 +40816,12 @@
       "nid": "20050615194002371",
       "qualification": "",
       "reference_id": "",
-      "remarks": "Replaced by #19155 (Ibrahim khalile) on 01-Oct-2026",
-      "replace_id": "19155",
+      "remarks": "",
+      "replace_id": "",
       "section": "Fan Sada Shapla",
       "sl_no": 1269,
       "staff_id": "18864",
-      "status": "Inactive",
+      "status": "Active",
       "total_working_days": ""
     },
     {
@@ -41827,34 +41826,6 @@
       "staff_id": "19154",
       "status": "Active",
       "_fb_key": "emp_19154"
-    },
-    {
-      "_fb_key": "emp_19155",
-      "address": "Raypura,Barishal",
-      "bank_rocket_acc": "",
-      "basic_salary": 3000,
-      "blood_group": "B+",
-      "contact_number": "01832629100",
-      "department": "Fan",
-      "designation": "Helper",
-      "dob": "28-Nov-2008",
-      "doj": "01-Oct-2026",
-      "gender": "Male",
-      "gross_salary": 6000,
-      "hiring_type": "Replacement",
-      "name": "Ibrahim khalile",
-      "nid": "20080615143108226",
-      "qualification": "SSC",
-      "reference_id": "7748",
-      "replace_date": "08-Oct-2026",
-      "replace_id": "18864",
-      "replace_name": "Lamiya Akter",
-      "replace_reason": "Left without Notice / নোটিশ ছাড়া প্রস্থান",
-      "salary": 10500,
-      "section": "Fan Armature Winding",
-      "sl_no": 1309,
-      "staff_id": "19155",
-      "status": "Active"
     }
   ]
 }
