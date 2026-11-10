@@ -4,74 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MEP GROUP • Human Resource Management (HRM) Module</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-
-  <!-- Immediate Authentication & Theme Guard (Instant 0ms Execution Before Any Assets) -->
-  <script>
-    (function() {
-      // Theme initialization
-      try {
-        var theme = localStorage.getItem('mep_theme') || 'light';
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      } catch (e) {}
-
-      // Check session authentication for Lucky-Fan with URL token handoff
-      try {
-        var params = new URLSearchParams(window.location.search);
-        var urlToken = params.get('token');
-        var expectedSecret = 'Lucky-Fan-Auth-Token';
-        var expectedToken = 'bdfb1c1cc93dde30257dba06de9e84e30e69e73f0016817f5197a76c2ab2e473';
-
-        // Accept token passed directly in URL (solves file:/// cross-origin storage partition in Opera/Chrome)
-        if (urlToken === expectedSecret || urlToken === expectedToken) {
-          try {
-            sessionStorage.setItem('mep_flat_session', expectedSecret);
-            localStorage.setItem('mep_flat_session', expectedSecret);
-            localStorage.setItem('mep_auth_token', expectedToken);
-            localStorage.setItem('mep_auth_user', 'Lucky-Fan');
-            localStorage.setItem('mep_user_logged_in', 'true');
-            localStorage.setItem('mep_hrm_online_logged_in', 'true');
-            if (window.history && window.history.replaceState) {
-              var cleanUrl = window.location.pathname + (window.location.hash || '');
-              window.history.replaceState({}, document.title, cleanUrl);
-            }
-          } catch(err) {}
-          return; // Authorized!
-        }
-
-        var sessionAuth = sessionStorage.getItem('mep_flat_session') || localStorage.getItem('mep_flat_session');
-        if (sessionAuth === expectedSecret) {
-          localStorage.setItem('mep_auth_token', expectedToken);
-          localStorage.setItem('mep_auth_user', 'Lucky-Fan');
-          localStorage.setItem('mep_user_logged_in', 'true');
-          localStorage.setItem('mep_hrm_online_logged_in', 'true');
-        } else {
-          localStorage.removeItem('mep_auth_token');
-          sessionStorage.removeItem('mep_flat_session');
-          localStorage.removeItem('mep_flat_session');
-          window.location.replace('login.html?unauth=1');
-          return;
-        }
-      } catch (e) {
-        window.location.replace('login.html?unauth=1');
-        return;
-      }
-    })();
-  </script>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
 
   <!-- Preload Essential Fonts -->
   <!-- Preload Essential Fonts -->
-  <link rel="preload" href="inter_var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter_var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
 
   <!-- Local Tailwind Engine with CDN Fallback -->
-  <script src="tailwind.min.js" onerror="this.onerror=null;this.src='https://cdn.tailwindcss.com';"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -130,36 +73,61 @@
       }
     };
   </script>
-  <script src="manpower_cache.js?v=20261011_v1"></script>
-  <script src="replacement_master_cache.js?v=20261011_v1"></script>
-  <script src="inter_section_transfers_cache.js?v=20261011_v1"></script>
-  <script src="hrm_manpower.js?v=20261011_v1" defer></script>
-  <script src="hrm_increment.js?v=20261011_v1" defer></script>
-  <script src="hrm_transfer.js?v=20261011_v1" defer></script>
+  <script src="data/manpower_cache.js?v=20261011_v1"></script>
+  <script src="data/replacement_master_cache.js?v=20261011_v1"></script>
+  <script src="data/inter_section_transfers_cache.js?v=20261011_v1"></script>
+  <script src="js/hrm_manpower.js?v=20261011_v1" defer></script>
+  <script src="js/hrm_increment.js?v=20261011_v1" defer></script>
+  <script src="js/hrm_transfer.js?v=20261011_v1" defer></script>
   <!-- Permanent Employee List (100 Active Staff) Cache & Controller -->
-  <script src="permanent_employees_cache.js?v=20261011_v1"></script>
-  <script src="hrm_permanent_employees.js?v=20261011_v1" defer></script>
+  <script src="data/permanent_employees_cache.js?v=20261011_v1"></script>
+  <script src="js/hrm_permanent_employees.js?v=20261011_v1" defer></script>
   <!-- HRM Executive Dashboard Controller (Gender, Permanent Seniority, Grade Valuation) -->
-  <script src="hrm_dashboard.js?v=20261011_v1" defer></script>
+  <script src="js/hrm_dashboard.js?v=20261011_v1" defer></script>
   <!-- Styled Excel & jsPDF AutoTable Engines (Deferred for fast FCP) -->
-  <script src="xlsx.bundle.js" defer></script>
-  <script src="jspdf.umd.min.js" defer></script>
-  <script src="jspdf.plugin.autotable.min.js" defer></script>
+  <script src="js/xlsx.bundle.js" defer></script>
+  <script src="js/jspdf.umd.min.js" defer></script>
+  <script src="js/jspdf.plugin.autotable.min.js" defer></script>
   <!-- Employee Data Entry & Replacement Management Controller -->
-  <script src="hrm_employee_entry.js?v=20261011_v1" defer></script>
+  <script src="js/hrm_employee_entry.js?v=20261011_v1" defer></script>
   <!-- Manpower Summary Matrix Controller -->
-  <script src="hrm_manpower_summary.js" defer></script>
+  <script src="js/hrm_manpower_summary.js" defer></script>
   <!-- Section Wise Monthly Salary 8H & OT Controller -->
-  <script src="hrm_section_salary.js?v=20261011_v1" defer></script>
+  <script src="js/hrm_section_salary.js?v=20261011_v1" defer></script>
   <!-- Manpower Attendance Controller (Daily, Monthly, Leave Information) -->
-  <script src="erp_attendance_cache.js?v=20261011_v1" defer></script>
-  <script src="hrm_attendance.js?v=20261011_v1" defer></script>
-  <script src="mep_edit_control.js" defer></script>
+  <script src="data/erp_attendance_cache.js?v=20261011_v1" defer></script>
+  <script src="js/hrm_attendance.js?v=20261011_v1" defer></script>
+  <script src="js/mep_edit_control.js" defer></script>
   <!-- Firebase Realtime Cloud Synchronization Engine (v12.19.0) -->
-  <script type="module" src="hrm_firebase_sync.js?v=20261011_v1"></script>
+  <script type="module" src="js/hrm_firebase_sync.js?v=20261011_v1"></script>
 
 
+  <!-- Immediate Authentication & Theme Guard -->
+  <script>
+    (function() {
+      // Standalone Auto-Authentication & Security Initializer
+      var expectedToken = 'bdfb1c1cc93dde30257dba06de9e84e30e69e73f0016817f5197a76c2ab2e473';
+      try {
+        var token = localStorage.getItem('mep_auth_token') || sessionStorage.getItem('mep_auth_token');
+        if (!token || token !== expectedToken) {
+          localStorage.setItem('mep_auth_token', expectedToken);
+          localStorage.setItem('mep_auth_user', 'engr.saiful9109@gmail.com');
+          localStorage.setItem('mep_user_logged_in', 'true');
+          localStorage.setItem('mep_hrm_online_logged_in', 'true');
+        }
+      } catch (e) {}
 
+      // Theme initialization
+      try {
+        var theme = localStorage.getItem('mep_theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <style>
     @font-face {
@@ -167,8 +135,8 @@
       font-style: normal;
       font-weight: 100 900;
       font-display: swap;
-      src: url('inter_var.woff2') format('woff2-variations'),
-           url('inter_var.woff2') format('woff2');
+      src: url('assets/fonts/inter_var.woff2') format('woff2-variations'),
+           url('assets/fonts/inter_var.woff2') format('woff2');
     }
 
     html.dark,
@@ -2589,8 +2557,8 @@ a:hover .ph-arrow-up-right,
         <!-- MEP Ceiling Fan Logo Badge -->
         <div class="h-10 px-3 rounded-xl bg-white/90 dark:bg-dark-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs flex items-center justify-center">
           <picture>
-            <source srcset="logo-mep-ceiling-fan.webp" type="image/webp">
-            <img src="logo-mep-ceiling-fan.png" alt="MEP Ceiling Fan" class="h-6 w-auto object-contain select-none" />
+            <source srcset="assets/logo-mep-ceiling-fan.webp" type="image/webp">
+            <img src="assets/logo-mep-ceiling-fan.png" alt="MEP Ceiling Fan" class="h-6 w-auto object-contain select-none" />
           </picture>
         </div>
 
@@ -2612,16 +2580,16 @@ a:hover .ph-arrow-up-right,
         <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-dark-800/60 border border-slate-200 dark:border-slate-700/80 shadow-2xs">
           <div class="w-7 h-7 rounded-lg overflow-hidden shrink-0 border border-purple-500/30">
             <picture>
-              <source srcset="avatar-saiful.webp" type="image/webp">
-              <img src="avatar-saiful.png" alt="Md Saiful Islam" class="w-full h-full object-cover" />
+              <source srcset="assets/avatar-saiful.webp" type="image/webp">
+              <img src="assets/avatar-saiful.png" alt="Md Saiful Islam" class="w-full h-full object-cover" />
             </picture>
           </div>
           <div class="hidden sm:flex flex-col text-left">
             <span class="text-xs font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-1">
-              Lucky-Fan
-              <i class="ph-fill ph-seal-check text-emerald-500 text-xs" title="Authorized User"></i>
+              Md Saiful Islam
+              <i class="ph-fill ph-seal-check text-emerald-500 text-xs" title="Verified Senior Manager"></i>
             </span>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Authorized Portal User</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Senior Manager</span>
           </div>
         </div>
 
@@ -2694,7 +2662,7 @@ a:hover .ph-arrow-up-right,
         <nav class="space-y-2">
 
           <!-- 0.0 HRM EXECUTIVE DASHBOARD -->
-          <div class="space-y-1 hidden" id="menu-group-hrm-dashboard" style="display: none !important;">
+          <div class="space-y-1" id="menu-group-hrm-dashboard">
             <button 
               type="button" 
               onclick="switchHRMTab('hrm-dashboard')" 
@@ -2732,7 +2700,7 @@ a:hover .ph-arrow-up-right,
           </div>
 
           <!-- 0.1 SECTION WISE MONTHLY SALARY 8H -->
-          <div class="space-y-1 hidden" id="menu-group-section-wise-salary" style="display: none !important;">
+          <div class="space-y-1" id="menu-group-section-wise-salary">
             <button 
               type="button" 
               onclick="switchHRMTab('section-wise-salary')" 
@@ -2751,7 +2719,7 @@ a:hover .ph-arrow-up-right,
           </div>
 
           <!-- 1. MANPOWER INFORMATION (Collapsible Dropdown) -->
-          <div class="space-y-1 pt-0 border-t-0" id="menu-group-manpower-info">
+          <div class="space-y-1 pt-1 border-t border-white/20" id="menu-group-manpower-info">
             <button 
               type="button" 
               onclick="toggleManpowerInfoDropdown(event)" 
@@ -2767,12 +2735,12 @@ a:hover .ph-arrow-up-right,
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
                 <span id="sidebar-manpower-info-badge" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-white/95 text-sky-800 sidebar-badge">1,238</span>
-                <i id="caret-manpower-info" class="ph-bold ph-caret-up text-xs text-white/80 group-hover:text-white transition-transform duration-200"></i>
+                <i id="caret-manpower-info" class="ph-bold ph-caret-down text-xs text-white/80 group-hover:text-white transition-transform duration-200"></i>
               </div>
             </button>
 
             <!-- Nested Sub-Pills under Manpower Information -->
-            <div id="submenu-manpower-information" class="pl-2 space-y-0.5 pt-1 sidebar-submenu transition-all">
+            <div id="submenu-manpower-information" class="hidden pl-2 space-y-0.5 pt-1 sidebar-submenu transition-all">
               <!-- SL 1. Manpower List (Master Directory) -->
               <button 
                 type="button" 
@@ -2865,7 +2833,7 @@ a:hover .ph-arrow-up-right,
               <button 
                 type="button" 
                 onclick="switchHRMTab('permanent-employee-list')" 
-                id="sidebar-sub-permanent-employee-list" style="display: none !important;"
+                id="sidebar-sub-permanent-employee-list"
                 class="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white hover:bg-white/20 flex items-center justify-between transition-all cursor-pointer group"
                 title="Permanent Employee List (100 Active Staff)"
               >
@@ -2880,7 +2848,7 @@ a:hover .ph-arrow-up-right,
               <button 
                 type="button" 
                 onclick="switchHRMTab('yearly-increment')" 
-                id="sidebar-sub-yearly-increment" style="display: none !important;"
+                id="sidebar-sub-yearly-increment"
                 class="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white hover:bg-white/20 flex items-center justify-between transition-all cursor-pointer group"
                 title="Year-Wise Employee Increments (2021–2026)"
               >
@@ -2895,7 +2863,7 @@ a:hover .ph-arrow-up-right,
               <button 
                 type="button" 
                 onclick="switchHRMTab('inter-section-transfer')" 
-                id="sidebar-sub-inter-section-transfer" style="display: none !important;"
+                id="sidebar-sub-inter-section-transfer"
                 class="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white hover:bg-white/20 flex items-center justify-between transition-all cursor-pointer group"
                 title="Inter Section Transfer"
               >
@@ -2909,7 +2877,7 @@ a:hover .ph-arrow-up-right,
           </div>
 
           <!-- 2. AUTHORIZED MANPOWER (Collapsible Dropdown) -->
-          <div class="space-y-1 pt-1 border-t border-white/20 hidden" id="menu-group-authorized" style="display: none !important;">
+          <div class="space-y-1 pt-1 border-t border-white/20" id="menu-group-authorized">
             <button 
               type="button" 
               onclick="toggleAuthorizedDropdown(event)" 
@@ -2986,7 +2954,7 @@ a:hover .ph-arrow-up-right,
           </div>
 
           <!-- 3. MANPOWER ATTENDANCE (Collapsible Dropdown) -->
-          <div class="space-y-1 pt-1 border-t border-white/20 hidden" id="menu-group-attendance" style="display: none !important;">
+          <div class="space-y-1 pt-1 border-t border-white/20" id="menu-group-attendance">
             <button 
               type="button" 
               onclick="toggleAttendanceDropdown(event)" 
@@ -7801,7 +7769,7 @@ a:hover .ph-arrow-up-right,
           sessionStorage.removeItem('mep_user_logged_in');
           document.cookie = 'mep_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
         } catch (e) {}
-        window.location.replace('index.html?logged_out=1');
+        if(window.showHRToast) window.showHRToast('Session active. Standalone Cloud Mode.', 'info');
       }
     }
 
@@ -8457,41 +8425,5 @@ a:hover .ph-arrow-up-right,
     };
   </script>
 
-
-  <script>
-    // Standalone Custom Logout - Redirects to login.html with clean state
-    window.handleLogout = function() {
-      sessionStorage.removeItem('mep_flat_session');
-      localStorage.removeItem('mep_flat_session');
-      localStorage.removeItem('mep_auth_token');
-      localStorage.removeItem('mep_user_logged_in');
-      localStorage.removeItem('mep_hrm_online_logged_in');
-      if (window.showHRToast) window.showHRToast('Signed out successfully.', 'info');
-      setTimeout(function() {
-        window.location.replace('login.html?logout=1');
-      }, 150);
-    };
-
-    // Default tab setup for Flat Edition
-    (function initFlatView() {
-      function ensureFlatTab() {
-        var h = window.location.hash || '';
-        if (h === '#manpower-summary' || h === '#summary') {
-          if (window.switchHRMTab) {
-            window.switchHRMTab('manpower-summary');
-          }
-        } else if (!h || h === '#hrm-dashboard' || h === '#dashboard' || h.indexOf('attendance') !== -1 || h.indexOf('salary') !== -1 || h.indexOf('authorized') !== -1 || h.indexOf('permanent') !== -1 || h.indexOf('increment') !== -1 || h.indexOf('transfer') !== -1) {
-          if (window.switchHRMTab) {
-            window.switchHRMTab('manpower-list', 'Active');
-          }
-        }
-      }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() { setTimeout(ensureFlatTab, 80); });
-      } else {
-        setTimeout(ensureFlatTab, 80);
-      }
-    })();
-  </script>
 </body>
 </html>
