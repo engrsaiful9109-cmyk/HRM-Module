@@ -44,7 +44,7 @@
     "name": "Fan Power Press & Stamping",
     "authM": 3,
     "authS": 3,
-    "authW": 24,
+    "authW": 26,
     "group": "ceiling"
   },
   {
@@ -84,7 +84,7 @@
     "name": "Fan Sada Shapla",
     "authM": 1,
     "authS": 1,
-    "authW": 26,
+    "authW": 24,
     "group": "other"
   }
 ]

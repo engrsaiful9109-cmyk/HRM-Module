@@ -834,10 +834,16 @@
     var cleanId = String(staffId).replace(/^[#\s]+/, '').trim();
     if (!cleanId || cleanId === '0' || cleanId === '—' || cleanId === '-') return null;
 
-    // 1. Authoritative check in window.MEP_REPLACEMENT_MASTER
-    // If the record was deleted from the Replacement report, it is NO LONGER replaced and can be Active!
-    if (window.MEP_REPLACEMENT_MASTER && Array.isArray(window.MEP_REPLACEMENT_MASTER)) {
-      var found = window.MEP_REPLACEMENT_MASTER.find(function (r) {
+    // 1. Authoritative check in window.MEP_REPLACEMENT_MASTER or HRMEmployeeEntry state
+    var masterList = null;
+    if (window.MEP_REPLACEMENT_MASTER && Array.isArray(window.MEP_REPLACEMENT_MASTER) && window.MEP_REPLACEMENT_MASTER.length > 0) {
+      masterList = window.MEP_REPLACEMENT_MASTER;
+    } else if (window.HRMEmployeeEntry && window.HRMEmployeeEntry.state && Array.isArray(window.HRMEmployeeEntry.state.replacementList) && window.HRMEmployeeEntry.state.replacementList.length > 0) {
+      masterList = window.HRMEmployeeEntry.state.replacementList;
+    }
+
+    if (masterList && Array.isArray(masterList) && masterList.length > 0) {
+      var found = masterList.find(function (r) {
         return String(r.replace_id || '').replace(/^[#\s]+/, '').trim() === cleanId;
       });
       if (found) {
@@ -846,16 +852,14 @@
           new_name: found.new_name || 'New Employee',
           replace_id: cleanId,
           replace_name: found.replace_name || '',
-          joining_date: found.joining_date || '',
+          joining_date: found.joining_date || found.replace_doj || '',
           remarks: found.remarks || ''
         };
       }
-      // If window.MEP_REPLACEMENT_MASTER is loaded and cleanId is NOT in it,
-      // it means this ID is NOT replaced (or was removed/deleted from Replacement Report)!
       return null;
     }
 
-    // 2. Fallback only if window.MEP_REPLACEMENT_MASTER is not yet loaded:
+    // 2. Fallback only if replacement master is not yet loaded:
     if (state.allEmployees && state.allEmployees.length > 0) {
       var foundEmp = state.allEmployees.find(function (e) {
         var rep = String(e.replace_id || '').replace(/^[#\s]+/, '').trim();
@@ -1008,21 +1012,30 @@
         (function() {
           var repInfo = getReplacementForEmployee(emp.staff_id);
           if (repInfo) {
-            return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="Replaced Staff! Replaced by new employee ' + repInfo.new_id + ' (' + repInfo.new_name + ')">' +
+            return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-not-allowed select-none transition-transform active:scale-95" title="Replaced Staff! Replaced by new employee ' + repInfo.new_id + ' (' + repInfo.new_name + '). Cannot be moved to Hold Staff list.">' +
               '<span class="px-2.5 py-1 rounded-xl text-[10.5px] font-mono font-bold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 inline-flex items-center gap-1 shadow-2xs group-hover/st:bg-rose-600 group-hover/st:text-white transition-all backdrop-blur-md">' +
-              '<i class="ph-bold ph-arrows-clockwise text-[11px]"></i>Inactive (Replaced)</span>' +
+              '<i class="ph-bold ph-lock text-[11px]"></i>Inactive (Replaced)</span>' +
               '</button>';
           }
           var s = (emp.status || 'Active').trim().toLowerCase();
-          var btnInner = '';
           if (s === 'active') {
-            btnInner = '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-emerald-500 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-beacon group-hover/st:bg-white"></span>Active</span>';
+            return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="Click to move to Hold status">' +
+              '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-emerald-500 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-beacon group-hover/st:bg-white"></span>Active</span>' +
+              '</button>';
           } else if (s === 'hold') {
-            btnInner = '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/35 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-amber-500 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 live-beacon group-hover/st:bg-white"></span>Hold</span>';
+            return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="Click to move to Active status">' +
+              '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/35 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-amber-500 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 live-beacon group-hover/st:bg-white"></span>Hold</span>' +
+              '</button>';
           } else {
-            btnInner = '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-500/30 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-slate-700 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 group-hover/st:bg-white"></span>Inactive</span>';
+            return '<div class="inline-flex items-center gap-1.5">' +
+              '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="Click to move from Inactive to Hold Staff list">' +
+              '<span class="px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-500/30 inline-flex items-center gap-1.5 shadow-2xs group-hover/st:bg-slate-700 group-hover/st:text-white transition-all backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 group-hover/st:bg-white"></span>Inactive</span>' +
+              '</button>' +
+              '<button type="button" onclick="window.HRMManpower.moveToHold(' + emp.sl_no + ')" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-white border border-amber-500/30 flex items-center gap-1 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95" title="Move this employee from Inactive Staff list to Hold Staff list">' +
+              '<i class="ph-bold ph-pause text-[10px]"></i><span>To Hold</span>' +
+              '</button>' +
+              '</div>';
           }
-          return '<button type="button" onclick="window.HRMManpower.toggleEmployeeStatus(' + emp.sl_no + ')" class="group/st cursor-pointer select-none transition-transform hover:scale-105 active:scale-95" title="Click to cycle status: Active -> Hold -> Inactive">' + btnInner + '</button>';
         })() +
         '</td>' +
 
@@ -1374,6 +1387,18 @@
     var repInfo = getReplacementForEmployee(emp.staff_id);
     var warnNotice = document.getElementById('emp-form-replace-warning');
     var statusSelect = document.getElementById('emp-form-status');
+    if (statusSelect) {
+      Array.from(statusSelect.options).forEach(function(opt) {
+        if (repInfo && (opt.value === 'Active' || opt.value === 'Hold')) {
+          opt.disabled = true;
+          opt.textContent = opt.value + ' (Blocked - Replaced in Replacement Report)';
+        } else {
+          opt.disabled = false;
+          opt.textContent = opt.value;
+        }
+      });
+    }
+
     if (repInfo) {
       emp.status = 'Inactive';
       if (statusSelect) statusSelect.value = 'Inactive';
@@ -1382,8 +1407,8 @@
           '<i class="ph-bold ph-warning-circle text-lg text-amber-500 shrink-0 mt-0.5"></i>' +
           '<div>' +
           '<span class="font-bold text-amber-900 dark:text-amber-100">⚠️ Replaced Personnel Notice:</span> ' +
-          'This employee was replaced by new staff <strong class="font-mono text-purple-700 dark:text-purple-300">' + repInfo.new_id + ' (' + repInfo.new_name + ')</strong>. ' +
-          'Therefore this ID cannot be set to <strong class="text-rose-600 dark:text-rose-400">Active</strong> or <strong class="text-amber-600 dark:text-amber-400">Hold</strong> (must remain Inactive).' +
+          'This employee was replaced by new staff <strong class="font-mono text-purple-700 dark:text-purple-300">' + repInfo.new_id + ' (' + repInfo.new_name + ')</strong> in Replacement Report. ' +
+          'Therefore this ID cannot be moved from Inactive Staff list to <strong class="text-amber-600 dark:text-amber-400">Hold</strong> or <strong class="text-rose-600 dark:text-rose-400">Active</strong> (must remain Inactive).' +
           '</div>' +
           '</div>';
         warnNotice.classList.remove('hidden');
@@ -1453,17 +1478,16 @@
     var chosenStatus = document.getElementById('emp-form-status') ? document.getElementById('emp-form-status').value : 'Active';
     var repCheck = getReplacementForEmployee(cleanSid);
     if (repCheck && (chosenStatus === 'Active' || chosenStatus === 'Hold')) {
-      var warnMsg = '⚠️ Notice: Employee (' + cleanSid + (name ? ' - ' + name : '') + ') is already marked as Replaced!\n\n' +
+      var warnMsg = '⚠️ Notice: Employee (' + cleanSid + (name ? ' - ' + name : '') + ') is already marked as Replaced in Replacement Report!\n\n' +
         '👉 New replacement staff assigned: ' + repCheck.new_id + ' (' + repCheck.new_name + ').\n\n' +
-        '❌ This ID cannot be set to Active or Hold. Status must remain "Inactive".';
+        '❌ This ID cannot be moved from Inactive Staff list to Hold Staff list. Status must remain "Inactive".';
       alert(warnMsg);
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast(warnMsg, 'warning');
+        window.showHRToast('Staff ' + cleanSid + ' is in Replacement Report and cannot be moved to Hold.', 'warning');
       }
       if (document.getElementById('emp-form-status')) {
         document.getElementById('emp-form-status').value = 'Inactive';
       }
-      return;
     }
 
     var gross = parseFloat(document.getElementById('emp-form-gross-salary').value) || 0;
@@ -2072,17 +2096,18 @@
     var emp = state.allEmployees.find(function (e) { return e.sl_no === slNo; });
     if (!emp) return;
 
-    // Check if this employee was replaced by another staff
+    var cleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
+
+    // Check if this employee was replaced by another staff in Replacement Report
     var repInfo = getReplacementForEmployee(emp.staff_id);
     if (repInfo) {
       emp.status = 'Inactive';
       var repCleanId = String(repInfo.new_id || '').replace(/^[#\s]+/, '');
-      var repCleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
-      var warnMsg = '⚠️ Notice: Employee (' + repCleanEmpId + (emp.name ? ' - ' + emp.name : '') + ') is already marked as Replaced!\n\n' +
+      var warnMsg = '⚠️ Notice: Employee (' + cleanEmpId + (emp.name ? ' - ' + emp.name : '') + ') is already marked as Replaced in Replacement Report!\n\n' +
         '👉 Replacement staff assigned: ' + repCleanId + ' (' + repInfo.new_name + ').\n\n' +
-        '❌ This ID cannot be set to Active or Hold. Status must remain "Inactive".';
+        '❌ This ID cannot be moved from Inactive Staff list to Hold Staff list. Status must remain "Inactive".';
       if (typeof window.showHRToast === 'function') {
-        window.showHRToast('Staff ' + repCleanEmpId + ' was replaced by ' + repCleanId + ' (' + repInfo.new_name + ')', 'warning');
+        window.showHRToast('Staff ' + cleanEmpId + ' was replaced by ' + repCleanId + ' (' + repInfo.new_name + ') and cannot be moved to Hold.', 'warning');
       }
       alert(warnMsg);
       renderTable();
@@ -2092,7 +2117,8 @@
     var cur = (emp.status || 'Active').trim().toLowerCase();
     var newStatus = 'Active';
     if (cur === 'active') newStatus = 'Hold';
-    else if (cur === 'hold') newStatus = 'Inactive';
+    else if (cur === 'hold') newStatus = 'Active';
+    else if (cur === 'inactive') newStatus = 'Hold';
     else newStatus = 'Active';
     emp.status = newStatus;
 
@@ -2140,8 +2166,87 @@
       window.HRMManpowerSummary.render();
     }
     if (window.showHRToast) {
-      var cleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
-      window.showHRToast('Personnel ' + cleanEmpId + ' (' + emp.name + ') status updated to ' + newStatus);
+      var toastMsg = (newStatus === 'Hold') 
+        ? '✅ Personnel ' + cleanEmpId + ' (' + emp.name + ') moved to Hold Staff list.'
+        : 'Personnel ' + cleanEmpId + ' (' + emp.name + ') status updated to ' + newStatus;
+      window.showHRToast(toastMsg, 'success');
+    }
+  }
+
+  function moveToHold(slNo) {
+    if (typeof window.isEditModeEnabled === 'function' && !window.isEditModeEnabled()) {
+      if (typeof window.showHRToast === 'function') {
+        window.showHRToast('🔒 Edit Mode is currently locked. Status cannot be changed.', 'warning');
+      } else {
+        alert('Edit Mode is currently stopped/locked in Settings.');
+      }
+      return;
+    }
+    var emp = state.allEmployees.find(function (e) { return e.sl_no === slNo; });
+    if (!emp) return;
+
+    var cleanEmpId = String(emp.staff_id || '').replace(/^[#\s]+/, '');
+
+    // Check if this employee was replaced by another staff in Replacement Report
+    var repInfo = getReplacementForEmployee(emp.staff_id);
+    if (repInfo) {
+      emp.status = 'Inactive';
+      var repCleanId = String(repInfo.new_id || '').replace(/^[#\s]+/, '');
+      var warnMsg = '⚠️ Notice: Employee (' + cleanEmpId + (emp.name ? ' - ' + emp.name : '') + ') is already marked as Replaced in Replacement Report!\n\n' +
+        '👉 Replacement staff assigned: ' + repCleanId + ' (' + repInfo.new_name + ').\n\n' +
+        '❌ This ID cannot be moved from Inactive Staff list to Hold Staff list. Status must remain "Inactive".';
+      if (typeof window.showHRToast === 'function') {
+        window.showHRToast('Staff ' + cleanEmpId + ' was replaced by ' + repCleanId + ' (' + repInfo.new_name + ') and cannot be moved to Hold.', 'warning');
+      }
+      alert(warnMsg);
+      renderTable();
+      return;
+    }
+
+    emp.status = 'Hold';
+
+    // Send update to Firebase RTDB Cloud
+    if (window.HRMFirebase && typeof window.HRMFirebase.saveEmployee === 'function') {
+      window.HRMFirebase.saveEmployee(emp).catch(function (e) {
+        console.warn('[HRM_FIREBASE] Status cloud sync error:', e);
+      });
+    }
+
+    var isLocalHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalHost) {
+      fetch('/api/hrm/employee/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emp)
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.metadata) state.metadata = data.metadata;
+          updateTopKPIs();
+          if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+            window.HRMManpowerSummary.render();
+          }
+        })
+        .catch(function (err) {});
+    }
+
+    state.metadata = computeClientMetadata(state.allEmployees);
+    updateTopKPIs();
+    applyFilters(true);
+    if (window.HRMEmployeeEntry && typeof window.HRMEmployeeEntry.renderHoldCandidatesShelf === 'function') {
+      window.HRMEmployeeEntry.renderHoldCandidatesShelf();
+    }
+    if (window.HRMEventBus && typeof window.HRMEventBus.emit === 'function') {
+      window.HRMEventBus.emit('EMPLOYEE_MUTATED', { emp: emp, type: 'status' });
+    }
+    if (window.HRMDashboard && typeof window.HRMDashboard.render === 'function') {
+      window.HRMDashboard.render();
+    }
+    if (window.HRMManpowerSummary && typeof window.HRMManpowerSummary.render === 'function') {
+      window.HRMManpowerSummary.render();
+    }
+    if (window.showHRToast) {
+      window.showHRToast('✅ Personnel ' + cleanEmpId + ' (' + emp.name + ') successfully moved from Inactive to Hold Staff list.', 'success');
     }
   }
 
@@ -2431,6 +2536,7 @@
     closeEditModal: closeEditModal,
     handleSaveEmployee: handleSaveEmployee,
     updateGender: updateGender,
+    moveToHold: moveToHold,
     viewReplacedInfo: viewReplacedInfo,
     openDossierByStaffId: openDossierByStaffId,
     getEmployeeReplaceId: getEmployeeReplaceId,

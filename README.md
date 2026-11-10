@@ -1,38 +1,45 @@
 # 🏢 MEP GROUP — Enterprise Human Resource Management (HRM) Online Cloud Edition
 
-**Standalone Realtime Cloud HRM System (Multi-Folder Structured Edition)**
+**Standalone Realtime Cloud HRM System (Flat Single-Folder Edition)**
 
-This folder contains the complete, self-contained **MEP HRM Module** structured with dedicated `js/`, `data/`, and `assets/` subdirectories. It is ready for direct local execution or standard Git repository deployment to **GitHub Pages**.
+This folder contains the complete, self-contained **MEP HRM Module** ready for instant local access or 1-click deployment to **GitHub Pages**. All components, controllers, cache layers, styling engines, and Firebase Realtime Database connections are included with zero external server dependencies.
 
 ---
 
 ## ⚡ 1. Direct Local Access (Offline / Local Desktop)
 Simply double-click **`index.html`** in this folder to open the HRM Cockpit immediately in your web browser.
 - **Auto-Authentication:** You are automatically logged in as authorized executive (**Md. Saiful Islam**). No login screen or redirects.
-- **Offline Reliability:** All employee records, section distributions, and historical increments load instantly from local memory caches.
+- **Offline Reliability:** If internet connection is unavailable, all employee records, sections, and historical increments load instantly from high-speed local memory caches.
 - **Cloud Connectivity:** When connected to the internet, it connects to Google Firebase Realtime Database with live bidirectional WebSocket synchronization.
 
 ---
 
-## 🚀 2. GitHub Pages Deployment Guide (Step-by-Step)
+## 🚀 2. GitHub Pages Deployment Guide (Step-by-Step, No Git Required)
+
+You do not need Git, GitHub Desktop, or command lines. You can host this live on GitHub in under 2 minutes:
 
 ### Step 1: Create a New GitHub Repository
 1. Log in to [github.com](https://github.com).
 2. Click the **`+`** icon in the top right corner and choose **"New repository"**.
 3. Name your repository (e.g., `mep-hrm` or `hrm-cloud`).
-4. Select **Public** and click **"Create repository"**.
+4. Select **Public** (free GitHub Pages hosting is enabled on Public repositories).
+5. Click **"Create repository"**.
 
-### Step 2: Upload Files (Using Git CLI or GitHub Desktop or Web Upload)
-- **Option A (GitHub Desktop / Git CLI):** Clone the repo, copy all files and folders (`index.html`, `js/`, `data/`, `assets/`, `README.md`) into your cloned folder, commit and push.
-- **Option B (Browser Drag-and-Drop):** In Chrome/Edge, open the repository page on github.com, click "uploading an existing file", drag this entire folder's contents, and commit changes.
+### Step 2: Upload Files via Drag-and-Drop
+1. On the new repository page, click the link: **"uploading an existing file"**.
+2. Open this folder (`MEP-HRM-ONLINE-FLAT`) on your computer.
+3. Press **`Ctrl + A`** on your keyboard to select all files simultaneously.
+4. Drag and drop all selected files into the GitHub browser upload box.
+5. Scroll down and click the green **"Commit changes"** button.
 
-### Step 3: Enable GitHub Pages
-1. Go to **Settings -> Pages**.
-2. Under **Build and deployment**:
+### Step 3: Enable GitHub Pages (Instant Live Website)
+1. Go to the **Settings** tab at the top of your GitHub repository.
+2. In the left navigation menu, click **Pages**.
+3. Under **Build and deployment**:
    - **Source:** Select `Deploy from a branch`
-   - **Branch:** Select `main` (or `master`) and keep folder `/ (root)`.
+   - **Branch:** Select `main` (or `master`) and keep folder as `/ (root)`.
    - Click **Save**.
-3. Your live link will be ready in under 1 minute:
+4. Wait 30–60 seconds and refresh the page. You will receive your official live website URL:
    👉 **`https://<your-username>.github.io/<repo-name>/`**
 
 ---

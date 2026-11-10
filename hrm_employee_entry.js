@@ -479,7 +479,7 @@
 
     var html = holdEmployees.map(function (e) {
       var cleanHoldId = String(e.staff_id || '—').replace(/^[#\s]+/, '');
-      return '<button type="button" onclick="window.HRMEmployeeEntry.selectReplacedEmployee(' + e.sl_no + ')" ' +
+      return '<button type="button" onclick="window.HRMEmployeeEntry.selectReplacedEmployee(\'' + cleanHoldId + '\', ' + e.sl_no + ')" ' +
              'class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-500/40 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-left transition-all shadow-2xs cursor-pointer flex items-center gap-2 group/h" ' +
              'title="Click to select this Hold staff for replacement">' +
              '  <span class="font-mono font-black text-xs text-amber-700 dark:text-amber-300 group-hover/h:scale-105 transition-transform">' + cleanHoldId + '</span>' +
@@ -538,7 +538,7 @@
 
         var holdListHtml = holdEmployees.map(function (e) {
           var cleanHoldEmpId = String(e.staff_id || '—').replace(/^[#\s]+/, '');
-          return '<div onclick="window.HRMEmployeeEntry.selectReplacedEmployee(' + e.sl_no + ')" ' +
+          return '<div onclick="window.HRMEmployeeEntry.selectReplacedEmployee(\'' + cleanHoldEmpId + '\', ' + e.sl_no + ')" ' +
                  'class="p-2.5 hover:bg-amber-500/10 dark:hover:bg-amber-900/30 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors">' +
                  '  <div class="flex items-center gap-2.5 min-w-0">' +
                  '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">' + cleanHoldEmpId + '</span>' +
@@ -633,7 +633,7 @@
     var html = sliced.map(function (e) {
       var cleanItemStaffId = String(e.staff_id || '—').replace(/^[#\s]+/, '');
 
-      return '<div onclick="window.HRMEmployeeEntry.selectReplacedEmployee(' + e.sl_no + ')" ' +
+      return '<div onclick="window.HRMEmployeeEntry.selectReplacedEmployee(\'' + cleanItemStaffId + '\', ' + e.sl_no + ')" ' +
              'class="p-2.5 hover:bg-amber-500/10 dark:hover:bg-amber-900/30 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors">' +
              '  <div class="flex items-center gap-2.5 min-w-0">' +
              '    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">' + cleanItemStaffId + '</span>' +
@@ -676,7 +676,6 @@
         return;
       }
 
-      // Check if matches an inactive employee
       // Check if matches a non-hold employee (active or inactive)
       var nonHoldCheck = all.find(function(e) {
         var st = String(e.status || '').toLowerCase();
@@ -709,7 +708,8 @@
       });
 
       if (matched) {
-        selectReplacedEmployee(matched.sl_no);
+        var cleanMatchedStaffId = String(matched.staff_id || '').replace(/^[#\s]+/, '');
+        selectReplacedEmployee(cleanMatchedStaffId, matched.sl_no);
       } else {
         // Did not match any eligible staff: do NOT set partial or bogus replace_id!
         clearReplacedEmployee();
@@ -722,9 +722,30 @@
     }, 250);
   }
 
-  function selectReplacedEmployee(slNo) {
+  function selectReplacedEmployee(staffIdOrSlNo, explicitSlNo) {
     var all = getAllEmployees();
-    var emp = all.find(function (e) { return e.sl_no === slNo || String(e.staff_id) === String(slNo); });
+    if (!staffIdOrSlNo && !explicitSlNo) return;
+
+    var cleanId = String(staffIdOrSlNo || '').replace(/^[#\s]+/, '').trim();
+    // 1. Primary lookup by exact staff_id (staff_id is the unique corporate employee code, e.g. "17278" or "936")
+    var emp = null;
+    if (cleanId) {
+      emp = all.find(function (e) {
+        return String(e.staff_id || '').replace(/^[#\s]+/, '').trim() === cleanId;
+      });
+    }
+    // 2. Secondary lookup by explicitSlNo if provided and not yet matched
+    if (!emp && explicitSlNo !== undefined && explicitSlNo !== null) {
+      emp = all.find(function (e) {
+        return Number(e.sl_no) === Number(explicitSlNo);
+      });
+    }
+    // 3. Fallback: if single numeric argument was passed and did not match any staff_id, try sl_no
+    if (!emp && cleanId && !isNaN(cleanId)) {
+      emp = all.find(function (e) {
+        return Number(e.sl_no) === Number(cleanId);
+      });
+    }
     if (!emp) return;
 
     // Strict validation: Only Hold employees can be selected for replacement!

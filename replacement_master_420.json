@@ -416,20 +416,20 @@
     "_fb_key": "rep_26"
   },
   {
+    "_fb_key": "rep_27",
     "new_designation": "Helper",
-    "new_doj": "19-Aug-26",
+    "new_doj": "19-Aug-2026",
     "new_id": "18835",
     "new_name": "Tanzila Akter",
     "new_section": "Fan Sada Shapla",
     "new_sl": "27",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "7-Jul-26",
+    "replace_doj": "19-Aug-2026",
     "replace_id": "18443",
     "replace_name": "Asia Akter",
     "replace_section": "Fan Sada Shapla",
-    "sl": 27,
-    "_fb_key": "rep_27"
+    "sl": 27
   },
   {
     "new_designation": "Helper",
@@ -784,20 +784,20 @@
     "_fb_key": "rep_49"
   },
   {
+    "_fb_key": "rep_50",
     "new_designation": "Helper",
-    "new_doj": "1-Aug-26",
+    "new_doj": "01-Aug-2026",
     "new_id": "18655",
     "new_name": "Tumpa Akter",
-    "new_section": "Fan Lathe",
+    "new_section": "Fan Sada Shapla",
     "new_sl": "50",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "20-Apr-26",
+    "replace_doj": "01-Aug-2026",
     "replace_id": "17970",
     "replace_name": "Arifa",
-    "replace_section": "Fan Lathe",
-    "sl": 50,
-    "_fb_key": "rep_50"
+    "replace_section": "Fan Sada Shapla",
+    "sl": 50
   },
   {
     "new_designation": "Delivery Assistant",
@@ -992,36 +992,20 @@
     "_fb_key": "rep_62"
   },
   {
+    "_fb_key": "rep_63",
     "new_designation": "Helper",
-    "new_doj": "19-Jul-26",
-    "new_id": "18548",
-    "new_name": "Bilkes Begum",
-    "new_section": "Fan Assemble Line",
+    "new_doj": "15-Jul-2026",
+    "new_id": "18511",
+    "new_name": "Lamiya",
+    "new_section": "Fan Lathe",
     "new_sl": "63",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "26-Jun-26",
+    "replace_doj": "15-Jul-2026",
     "replace_id": "18332",
     "replace_name": "Khadija",
-    "replace_section": "Fan Assemble Line",
-    "sl": 63,
-    "_fb_key": "rep_63"
-  },
-  {
-    "new_designation": "Helper",
-    "new_doj": "15-Jul-26",
-    "new_id": "18511",
-    "new_name": "Lamiya",
-    "new_section": "Fan Assemble Line",
-    "new_sl": "64",
-    "remarks": "",
-    "replace_designation": "Helper",
-    "replace_doj": "26-Jun-26",
-    "replace_id": "18332",
-    "replace_name": "Khadija",
-    "replace_section": "Fan Assemble Line",
-    "sl": 64,
-    "_fb_key": "rep_64"
+    "replace_section": "Fan Lathe",
+    "sl": 63
   },
   {
     "new_designation": "Helper",
@@ -1056,20 +1040,20 @@
     "_fb_key": "rep_66"
   },
   {
+    "_fb_key": "rep_67",
     "new_designation": "Helper",
-    "new_doj": "12-Jul-26",
+    "new_doj": "12-Jul-2026",
     "new_id": "18494",
     "new_name": "Tanju Begum",
     "new_section": "Fan Armature Winding",
     "new_sl": "67",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "21-Aug-16",
+    "replace_doj": "12-Jul-2026",
     "replace_id": "1116",
     "replace_name": "Ity Begum",
     "replace_section": "Fan Armature Winding",
-    "sl": 67,
-    "_fb_key": "rep_67"
+    "sl": 67
   },
   {
     "new_designation": "Helper",
@@ -1360,20 +1344,20 @@
     "_fb_key": "rep_85"
   },
   {
+    "_fb_key": "rep_86",
     "new_designation": "Helper",
-    "new_doj": "26-Jun-26",
+    "new_doj": "26-Jun-2026",
     "new_id": "18331",
     "new_name": "Ali Hassan",
     "new_section": "Fan Replace",
     "new_sl": "86",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "5-May-26",
-    "replace_id": "18045",
+    "replace_doj": "26-Jun-2026",
+    "replace_id": "NEW",
     "replace_name": "Bayzid Hasan",
-    "replace_section": "Fan Replacment",
-    "sl": 86,
-    "_fb_key": "rep_86"
+    "replace_section": "Fan Replace",
+    "sl": 86
   },
   {
     "new_designation": "Helper",
@@ -1520,20 +1504,20 @@
     "_fb_key": "rep_95"
   },
   {
+    "_fb_key": "rep_96",
     "new_designation": "Helper",
-    "new_doj": "21-Jun-26",
+    "new_doj": "21-Jun-2026",
     "new_id": "18291",
     "new_name": "Nure Jannat",
     "new_section": "Fan Blade & Dimmer",
     "new_sl": "96",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "10-Jun-26",
+    "replace_doj": "21-Jun-2026",
     "replace_id": "18181",
     "replace_name": "Tanzila Akter",
     "replace_section": "Fan Blade & Dimmer",
-    "sl": 96,
-    "_fb_key": "rep_96"
+    "sl": 96
   },
   {
     "new_designation": "Helper",
@@ -2000,20 +1984,20 @@
     "_fb_key": "rep_125"
   },
   {
+    "_fb_key": "rep_126",
     "new_designation": "Helper",
-    "new_doj": "7-Jun-26",
+    "new_doj": "07-Jun-2026",
     "new_id": "18140",
     "new_name": "Mim Akter",
     "new_section": "Fan Assemble Line",
     "new_sl": "126",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "5-May-26",
+    "replace_doj": "07-Jun-2026",
     "replace_id": "18046",
     "replace_name": "Jannatul Ferdous",
     "replace_section": "Fan Assemble Line",
-    "sl": 126,
-    "_fb_key": "rep_126"
+    "sl": 126
   },
   {
     "new_designation": "Helper",
@@ -2464,20 +2448,20 @@
     "_fb_key": "rep_154"
   },
   {
+    "_fb_key": "rep_155",
     "new_designation": "Helper",
-    "new_doj": "20-Apr-26",
+    "new_doj": "20-Apr-2026",
     "new_id": "17971",
     "new_name": "Lamiya",
     "new_section": "Fan Armature Winding",
     "new_sl": "155",
     "remarks": "",
     "replace_designation": "Helper",
-    "replace_doj": "12-Apr-26",
+    "replace_doj": "20-Apr-2026",
     "replace_id": "17932",
     "replace_name": "Sukhi Akter",
     "replace_section": "Fan Armature Winding",
-    "sl": 155,
-    "_fb_key": "rep_155"
+    "sl": 155
   },
   {
     "new_designation": "Helper",
@@ -3754,12 +3738,13 @@
     "remarks": "Resigned / ইস্তফা",
     "replace_designation": "Helper",
     "replace_doj": "07-Oct-2026",
-    "replace_id": "18213",
-    "replace_name": "Fatema Akter",
+    "replace_id": "19189",
+    "replace_name": "Shetu Moni",
     "replace_section": "Fan Assemble Line",
     "sl": 235
   },
   {
+    "_fb_key": "rep_236",
     "new_designation": "Helper",
     "new_doj": "07-Oct-2026",
     "new_id": "19135",
@@ -3772,8 +3757,7 @@
     "replace_id": "14391",
     "replace_name": "Roksana",
     "replace_section": "Fan Sada Shapla",
-    "sl": 236,
-    "_fb_key": "rep_236"
+    "sl": 236
   },
   {
     "_fb_key": "rep_237",
@@ -3825,33 +3809,49 @@
   },
   {
     "new_designation": "Helper",
-    "new_doj": "10-Oct-2026",
-    "new_id": "19152",
-    "new_name": "Karima",
-    "new_section": "Fan Lathe",
+    "new_doj": "07-Nov-2026",
+    "new_id": "19318",
+    "new_name": "Ibrahim Islam",
+    "new_section": "Fan Power Press & Stamping",
     "new_sl": "241",
-    "remarks": "Replacement Appointed",
+    "remarks": "Left without Notice",
     "replace_designation": "Helper",
-    "replace_doj": "04-Sep-2023",
-    "replace_id": "14535",
-    "replace_name": "Shilpy Rany Das",
-    "replace_section": "Fan Sada Shapla",
+    "replace_doj": "05-Nov-2026",
+    "replace_id": "19093",
+    "replace_name": "Niamul Islam",
+    "replace_section": "Fan Power Press & Stamping",
     "sl": 241,
     "_fb_key": "rep_241"
   },
   {
-    "sl": 241,
-    "replace_id": "18806",
-    "replace_name": "Lucky Begum",
-    "replace_designation": "Helper",
-    "replace_section": "Fan Lathe",
-    "replace_doj": "18-Aug-2026",
-    "new_sl": "241",
-    "new_id": "19154",
-    "new_name": "Summon Hossen",
     "new_designation": "Helper",
-    "new_section": "Fan Lathe",
-    "new_doj": "03-Oct-2026",
+    "new_doj": "27-Oct-2026",
+    "new_id": "19224",
+    "new_name": "Jahid Hasan",
+    "new_section": "Fan Replace",
+    "new_sl": "242",
+    "remarks": "Replacement Appointed",
+    "replace_designation": "Helper",
+    "replace_doj": "26-Jun-2026",
+    "replace_id": "18331",
+    "replace_name": "Ali Hassan",
+    "replace_section": "Fan Replace",
+    "sl": 242,
+    "_fb_key": "rep_242"
+  },
+  {
+    "sl": 241,
+    "replace_id": "18140",
+    "replace_name": "Mim Akter",
+    "replace_designation": "Helper",
+    "replace_section": "Fan Assemble Line",
+    "replace_doj": "07-Jun-2026",
+    "new_sl": "241",
+    "new_id": "19319",
+    "new_name": "Moyna Begum",
+    "new_designation": "Helper",
+    "new_section": "Fan Assemble Line",
+    "new_doj": "07-Nov-2026",
     "remarks": "Replacement Appointed"
   }
 ]
